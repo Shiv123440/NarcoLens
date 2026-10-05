@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, CheckCircle2, ChevronRight, Clock3, FileCheck2, LockKeyhole, ScanLine } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, ChevronRight, Clock3, FileCheck2, LockKeyhole, ScanLine, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell, SectionIcon } from "@/components/app-shell";
 import { formatRecordTime, SUBSTANCES, type AuditRecord } from "@/lib/app-data";
@@ -39,7 +39,40 @@ function Dashboard() {
   <div className="app-section-head"><h2 className="app-title">Testing for</h2><span className="app-kicker">NCB reference kit</span></div>
   <section className="app-grid-substances" aria-label="Substance reference library">{SUBSTANCES.map((substance) => <Link key={substance.id} to="/scan" search={{ substance: substance.id }} className="app-card app-substance"><span className="app-substance-icon"><SectionIcon type={substance.icon} /></span><h3>{substance.name}</h3>{substance.id === "methaqualone" ? <span className="app-pending">Kit mapping pending</span> : <p>{substance.note}</p>}</Link>)}</section>
   <div className="app-section-head"><h2 className="app-title">Evidence overview</h2><Link to="/audit" className="app-link">View all records <ArrowUpRight size={15} className="inline" /></Link></div>
-  <section className="app-stats"><div className="app-card app-stat"><span className="app-stat-label">Sealed records</span><strong className="app-stat-value">{sealed}</strong><span className="app-stat-note"><LockKeyhole size={13} className="inline" /> SHA-256 verified</span></div><div className="app-card app-stat"><span className="app-stat-label">Tests today</span><strong className="app-stat-value">{today}</strong><span className="app-stat-note">IST field activity</span></div><div className="app-card app-stat"><span className="app-stat-label">Detected</span><strong className="app-stat-value">{detected}</strong><span className="app-stat-note">Presumptive positive</span></div><div className="app-card app-stat"><span className="app-stat-label">To confirm</span><strong className="app-stat-value">{toConfirm}</strong><span className="app-stat-note">Needs lab confirmation</span></div></section>
+  <section className="app-stats">
+    <div className="app-card app-stat">
+      <div className="app-stat-top">
+        <span className="app-stat-label">Sealed records</span>
+        <span className="app-stat-icon app-stat-icon-blue"><LockKeyhole size={17} /></span>
+      </div>
+      <strong className="app-stat-value">{sealed}</strong>
+      <span className="app-stat-note">SHA-256 verified</span>
+    </div>
+    <div className="app-card app-stat">
+      <div className="app-stat-top">
+        <span className="app-stat-label">Tests today</span>
+        <span className="app-stat-icon app-stat-icon-amber"><Clock3 size={17} /></span>
+      </div>
+      <strong className="app-stat-value">{today}</strong>
+      <span className="app-stat-note">IST field activity</span>
+    </div>
+    <div className="app-card app-stat">
+      <div className="app-stat-top">
+        <span className="app-stat-label">Detected</span>
+        <span className="app-stat-icon app-stat-icon-red"><AlertCircle size={17} /></span>
+      </div>
+      <strong className="app-stat-value">{detected}</strong>
+      <span className="app-stat-note">Presumptive positive</span>
+    </div>
+    <div className="app-card app-stat">
+      <div className="app-stat-top">
+        <span className="app-stat-label">To confirm</span>
+        <span className="app-stat-icon app-stat-icon-cyan"><FileCheck2 size={17} /></span>
+      </div>
+      <strong className="app-stat-value">{toConfirm}</strong>
+      <span className="app-stat-note">Needs lab confirmation</span>
+    </div>
+  </section>
   <div className="app-section-head"><h2 className="app-title">Recent field tests</h2><span className="app-kicker">Shared ledger</span></div>
   <section className="app-card app-recent">{!officer.signedIn && officer.ready && <div className="p-4 text-sm text-muted-foreground">Sign in as an officer to view the shared evidence history. <Link to="/auth" search={{ mode: "login", next: "/" }} className="app-link">Login / Signup</Link></div>}{officer.signedIn && recordsQ.isLoading && <p className="p-4 text-sm text-muted-foreground">Loading shared evidence ledger…</p>}{officer.signedIn && recordsQ.isError && <p className="p-4 text-sm text-destructive" role="alert">Could not load records: {recordsQ.error.message}</p>}{officer.signedIn && recordsQ.isSuccess && records.length === 0 && <p className="p-4 text-sm text-muted-foreground">No evidence sealed yet. Start a field test to create the first record.</p>}{records.slice(0, 5).map((record) => <Link key={record.id} to="/audit/$recordId" params={{ recordId: record.id }} className="app-row"><span className="app-row-main"><strong>{record.substance}</strong><span>{record.caseNumber} · {record.location}</span></span><span className="app-row-meta">{formatRecordTime(record.timestamp)}</span>{statusFor(record)}<ChevronRight size={18} className="text-muted-foreground" /></Link>)}</section>
   </AppShell>;
