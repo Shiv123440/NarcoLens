@@ -92,67 +92,320 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 10px 28px color-mix(in oklab, var(--ink) 5%, transparent); }
 .app-kicker { color: var(--amber); font-family: "IBM Plex Mono", monospace; font-size: .66rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .app-title { font-family: "Space Grotesk", ui-sans-serif, sans-serif; letter-spacing: -.025em; }
+/* ==========================================================================
+   Hero Banner Section (Cinematic Dark Forensic Field-Testing Banner)
+   ========================================================================== */
 .app-hero {
   position: relative;
   width: 100%;
-  background: #14171A;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-lg, 1rem);
-  box-shadow: 0 10px 28px color-mix(in oklab, var(--ink) 6%, transparent);
+  background: #101112;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.7);
   overflow: hidden;
-  margin-bottom: 2rem;
-  padding: 0;
-  display: block;
+  margin-bottom: 2.25rem;
+  display: flex;
+  align-items: stretch;
+  min-height: 380px;
 }
-.app-hero-media {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 948 / 279;
-  display: block;
+
+@media (min-width: 1024px) {
+  .app-hero {
+    aspect-ratio: 3.15 / 1;
+    min-height: 375px;
+  }
+}
+
+/* Right Section: Photographic Forensic Laboratory Scene */
+.app-hero-visual {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 52%;
+  pointer-events: none;
   overflow: hidden;
-  background: #14171A;
+  z-index: 1;
 }
-.app-hero-banner-img {
+
+.app-hero-visual-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: right center;
   display: block;
   user-select: none;
   -webkit-user-drag: none;
-  pointer-events: none;
 }
-.app-hero-cta-hitbox {
+
+.app-hero-visual-gradient {
   position: absolute;
-  left: 5.27%;
-  top: 73.12%;
-  width: 21.84%;
-  height: 15.05%;
-  border-radius: 8px;
-  cursor: pointer;
-  z-index: 10;
-  background: transparent;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  outline: none;
-  display: block;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    #101112 0%,
+    rgba(16, 17, 18, 0.96) 8%,
+    rgba(16, 17, 18, 0.65) 25%,
+    rgba(16, 17, 18, 0.18) 48%,
+    transparent 72%
+  );
 }
-.app-hero-cta-hitbox::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
+
+/* Left Section: Real Vector Typography and Actions */
+.app-hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 58%;
+  padding: 2.25rem 2.6rem;
+  box-sizing: border-box;
+}
+
+.app-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #FF8A1D;
+  font-family: "Space Grotesk", "Inter", -apple-system, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 0.95rem;
+  user-select: none;
+}
+
+.app-hero-eyebrow-sep {
+  opacity: 0.65;
+}
+
+.app-hero-headline {
+  margin: 0 0 0.85rem;
+  font-family: "Space Grotesk", "Inter", -apple-system, sans-serif;
+  font-size: clamp(2.25rem, 3.8vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  color: #FFFFFF;
+}
+
+@media (min-width: 1024px) {
+  .app-hero-headline {
+    white-space: nowrap;
+  }
+}
+
+.app-hero-headline-accent {
+  color: #FF8A1D;
+}
+
+.app-hero-desc {
+  margin: 0 0 1.5rem;
+  color: #B5BAC2;
+  font-size: clamp(0.92rem, 1.12vw, 1.04rem);
+  line-height: 1.54;
+  max-width: 530px;
+}
+
+/* Workflow Indicator Pills */
+.app-hero-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.app-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
+  padding: 0.45rem 0.85rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  user-select: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
-.app-hero-cta-hitbox:hover {
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 20px rgba(232, 93, 4, 0.55), inset 0 0 10px rgba(255, 255, 255, 0.2);
+
+.app-hero-pill:hover {
+  border-color: rgba(255, 138, 29, 0.4);
+  background: rgba(255, 255, 255, 0.07);
 }
-.app-hero-cta-hitbox:active {
-  transform: scale(0.98);
+
+.app-hero-pill-icon {
+  width: 15px;
+  height: 15px;
+  color: #FF8A1D;
+  flex-shrink: 0;
 }
-.app-hero-cta-hitbox:focus-visible {
-  outline: 2px solid var(--amber, #E85D04);
+
+.app-hero-pill-icon-folder {
+  fill: #FF8A1D;
+}
+
+.app-hero-pill-icon-camera {
+  fill: rgba(255, 138, 29, 0.2);
+}
+
+.app-hero-pill-icon-chart {
+  fill: #FF8A1D;
+}
+
+.app-hero-pill-step {
+  color: #FF8A1D;
+  font-family: "Space Grotesk", "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.app-hero-pill-label {
+  color: #F3F4F6;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Primary Call To Action Button */
+.app-hero-action {
+  display: flex;
+  align-items: center;
+}
+
+.app-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 58px;
+  min-height: 58px;
+  padding: 0 1.75rem;
+  background: #FF8A1D;
+  color: #0A0B0D;
+  font-family: "Space Grotesk", "Inter", -apple-system, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 750;
+  text-decoration: none;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(255, 138, 29, 0.35);
+  transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.app-hero-cta:hover {
+  background: #FF962E;
+  color: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(255, 138, 29, 0.5);
+}
+
+.app-hero-cta:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 14px rgba(255, 138, 29, 0.4);
+}
+
+.app-hero-cta:focus-visible {
+  outline: 2px solid #FFFFFF;
   outline-offset: 3px;
-  box-shadow: 0 0 12px rgba(232, 93, 4, 0.6);
+  box-shadow: 0 0 20px rgba(255, 138, 29, 0.7);
+}
+
+.app-hero-cta-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.2;
+}
+
+.app-hero-cta-text {
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.app-hero-cta-arrow {
+  width: 19px;
+  height: 19px;
+  stroke-width: 2.4;
+  transition: transform 0.2s ease;
+}
+
+.app-hero-cta:hover .app-hero-cta-arrow {
+  transform: translateX(3px);
+}
+
+@media (max-width: 1023px) {
+  .app-hero {
+    min-height: auto;
+  }
+  .app-hero-content {
+    max-width: 62%;
+    padding: 2rem 1.85rem;
+  }
+  .app-hero-headline {
+    white-space: normal;
+    font-size: clamp(1.85rem, 3.2vw, 2.5rem);
+  }
+  .app-hero-visual {
+    width: 48%;
+  }
+  .app-hero-pills {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-hero {
+    flex-direction: column-reverse;
+    border-radius: 14px;
+    margin-bottom: 1.75rem;
+  }
+  .app-hero-visual {
+    position: relative;
+    width: 100%;
+    height: 220px;
+  }
+  .app-hero-visual-img {
+    object-position: center 35%;
+  }
+  .app-hero-visual-gradient {
+    background: linear-gradient(
+      to top,
+      #101112 0%,
+      rgba(16, 17, 18, 0.7) 35%,
+      transparent 75%
+    );
+  }
+  .app-hero-content {
+    max-width: 100%;
+    padding: 1.5rem 1.25rem 1.75rem;
+  }
+  .app-hero-headline {
+    white-space: normal;
+    font-size: 2rem;
+    line-height: 1.12;
+  }
+  .app-hero-desc {
+    font-size: 0.92rem;
+    margin-bottom: 1.25rem;
+  }
+  .app-hero-pills {
+    gap: 0.45rem;
+    margin-bottom: 1.4rem;
+  }
+  .app-hero-pill {
+    padding: 0.38rem 0.68rem;
+  }
+  .app-hero-cta {
+    width: 100%;
+    height: 54px;
+    min-height: 54px;
+    font-size: 1rem;
+  }
 }
 .app-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 2.1rem 0 .85rem; }
 .app-section-head h2 { font-size: 1.18rem; margin: 0; }
@@ -730,7 +983,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .app-sync-dot { width: 8px; height: 8px; }
   .app-profile-copy { display: none; }
   .app-header-actions .app-login-button { padding-inline: .65rem; font-size: .7rem; }
-  .app-hero-cta-hitbox::after { inset: -10px -6px; }
   .app-grid-substances { grid-template-columns: repeat(2, 1fr); }
   .app-stats { grid-template-columns: repeat(2, 1fr); }
   .app-footer { display: block; }

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, CheckCircle2, ChevronRight, Clock3, FileCheck2, LockKeyhole, ScanLine } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BarChart3, Camera, CheckCircle2, ChevronRight, Clock3, FlaskConical, Folder, LockKeyhole, Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell, SectionIcon } from "@/components/app-shell";
 import { formatRecordTime, SUBSTANCES, type AuditRecord } from "@/lib/app-data";
@@ -34,25 +34,67 @@ function Dashboard() {
   const toConfirm = records.filter((record) => record.verdict !== "NEGATIVE").length;
   return <AppShell>
     <section className="app-hero" aria-label="Start a new test">
-      <div className="app-hero-media">
+      <div className="app-hero-content">
+        <div className="app-hero-eyebrow">
+          <span>NEW TEST</span>
+          <span className="app-hero-eyebrow-sep" aria-hidden="true">·</span>
+          <span>FIELD READY</span>
+        </div>
+
+        <h1 className="app-hero-headline">
+          Start a new <span className="app-hero-headline-accent">test.</span>
+        </h1>
+
+        <p className="app-hero-desc">
+          Capture a presumptive colour response, seal the original evidence, and keep the chain of custody intact — even when you are offline.
+        </p>
+
+        <div className="app-hero-pills" role="list" aria-label="Field test steps">
+          <div className="app-hero-pill" role="listitem">
+            <Folder className="app-hero-pill-icon app-hero-pill-icon-folder" aria-hidden="true" />
+            <span className="app-hero-pill-step">01</span>
+            <span className="app-hero-pill-label">Case</span>
+          </div>
+          <div className="app-hero-pill" role="listitem">
+            <FlaskConical className="app-hero-pill-icon" aria-hidden="true" />
+            <span className="app-hero-pill-step">02</span>
+            <span className="app-hero-pill-label">Reagents</span>
+          </div>
+          <div className="app-hero-pill" role="listitem">
+            <Camera className="app-hero-pill-icon app-hero-pill-icon-camera" aria-hidden="true" />
+            <span className="app-hero-pill-step">03</span>
+            <span className="app-hero-pill-label">Photo</span>
+          </div>
+          <div className="app-hero-pill" role="listitem">
+            <BarChart3 className="app-hero-pill-icon app-hero-pill-icon-chart" aria-hidden="true" />
+            <span className="app-hero-pill-step">04</span>
+            <span className="app-hero-pill-label">Result</span>
+          </div>
+        </div>
+
+        <div className="app-hero-action">
+          <Link
+            to="/scan"
+            search={{ substance: undefined }}
+            className="app-hero-cta"
+            aria-label="Start field test"
+          >
+            <Scan className="app-hero-cta-icon" aria-hidden="true" />
+            <span className="app-hero-cta-text">Start field test</span>
+            <ArrowRight className="app-hero-cta-arrow" aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+
+      <div className="app-hero-visual" aria-hidden="true">
         <img
-          src="/hero-banner@2x.png"
-          srcSet="/hero-banner.png 948w, /hero-banner@2x.png 1896w"
-          sizes="(max-width: 1200px) 100vw, 1180px"
-          alt="Start a new test · Field ready. Capture a presumptive colour response, seal original evidence, and keep chain of custody intact."
-          className="app-hero-banner-img"
+          src="/forensic-hero-lab.jpg"
+          alt=""
+          className="app-hero-visual-img"
           loading="eager"
           decoding="async"
         />
-        <Link
-          to="/scan"
-          search={{ substance: undefined }}
-          className="app-hero-cta-hitbox"
-          aria-label="Start field test"
-          title="Start field test"
-        >
-          <span className="sr-only">Start field test</span>
-        </Link>
+        <div className="app-hero-visual-gradient" />
       </div>
     </section>
   <div className="app-section-head"><h2 className="app-title">Testing for</h2><span className="app-kicker">NCB reference kit</span></div>
