@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, ShieldCheck, CheckCircle2, Lock, Scale, Sparkles } from "lucide-react";
+import { ArrowRight, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signUpOfficer, signInOfficer, getActiveOfficer } from "@/lib/auth-service";
 
@@ -20,6 +20,165 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+interface ReagentItem {
+  id: string;
+  name: string;
+  badge: string;
+  target: string;
+  colorHex: string;
+  colorLabel: string;
+  wavelength: string;
+  deltaE: string;
+  confidence: string;
+  spec: string;
+}
+
+const REAGENTS: ReagentItem[] = [
+  {
+    id: "marquis",
+    name: "Marquis",
+    badge: "Opiates",
+    target: "Heroin / Morphine / Codeine",
+    colorHex: "#581c87",
+    colorLabel: "Deep Violet / Purple",
+    wavelength: "415 nm",
+    deltaE: "1.12",
+    confidence: "99.4%",
+    spec: "NDPS Sch. I / UNODC ST/NAR/1",
+  },
+  {
+    id: "scott",
+    name: "Scott",
+    badge: "Cocaine",
+    target: "Cocaine HCl & Crack Cocaine",
+    colorHex: "#0284c7",
+    colorLabel: "Cobalt Blue Precipitate",
+    wavelength: "590 nm",
+    deltaE: "0.86",
+    confidence: "99.8%",
+    spec: "Modified Cobalt Thiocyanate",
+  },
+  {
+    id: "duquenois",
+    name: "Duquenois",
+    badge: "Cannabinoids",
+    target: "Charas / Ganja / Hashish Oil",
+    colorHex: "#7e22ce",
+    colorLabel: "Biphasic Violet Organic Layer",
+    wavelength: "540 nm",
+    deltaE: "1.34",
+    confidence: "98.9%",
+    spec: "Rapid Chloroform Extraction",
+  },
+  {
+    id: "ehrlich",
+    name: "Ehrlich",
+    badge: "Indoles",
+    target: "LSD / Synthetic Tryptamines",
+    colorHex: "#db2777",
+    colorLabel: "Deep Magenta / Blue-Violet",
+    wavelength: "460 nm",
+    deltaE: "1.04",
+    confidence: "99.1%",
+    spec: "p-DMAB Spectral Assay",
+  },
+];
+
+function InteractiveReagentLab() {
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [isScanning, setIsScanning] = useState(false);
+
+  const active = REAGENTS[selectedIdx] ?? REAGENTS[0]!;
+
+  const handleScan = () => {
+    setIsScanning(true);
+    setTimeout(() => {
+      setIsScanning(false);
+    }, 850);
+  };
+
+  return (
+    <div className="auth-interactive-card">
+      <div className="flex items-center justify-between border-b border-border/30 pb-2.5">
+        <span className="font-mono text-[11px] font-bold tracking-wider text-amber-500 uppercase">
+          Presumptive Spot Simulation
+        </span>
+        <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          Sensor Calibrated
+        </span>
+      </div>
+
+      {/* Interactive Reagent Selection Pills */}
+      <div className="auth-reagent-tabs">
+        {REAGENTS.map((reagent, idx) => (
+          <button
+            key={reagent.id}
+            type="button"
+            className="auth-reagent-tab"
+            data-active={idx === selectedIdx}
+            onClick={() => setSelectedIdx(idx)}
+          >
+            <span>{reagent.name}</span>
+            <span className="block text-[9px] opacity-75 font-normal">{reagent.badge}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Simulated Reaction Chamber */}
+      <div className="auth-reaction-well">
+        {isScanning && <div className="auth-laser-beam" />}
+        <div
+          className="auth-swatch-glow"
+          style={{
+            backgroundColor: active.colorHex,
+            boxShadow: `0 0 25px 6px ${active.colorHex}66`,
+          }}
+        />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="m-0 text-sm font-bold text-foreground truncate">
+              {active.target}
+            </h4>
+            <span className="font-mono text-[10px] font-semibold text-amber-400 shrink-0">
+              {active.confidence}
+            </span>
+          </div>
+          <p className="m-0 mt-0.5 text-xs text-muted-foreground truncate">
+            {active.colorLabel} · {active.wavelength}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] font-mono text-foreground/75">
+            <span className="rounded bg-background/70 px-1.5 py-0.5 border border-border/50">
+              CIEDE2000 ΔE₀₀: {active.deltaE}
+            </span>
+            <span className="rounded bg-background/70 px-1.5 py-0.5 border border-border/50 truncate">
+              {active.spec}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Interactive Trigger Button */}
+      <button
+        type="button"
+        onClick={handleScan}
+        disabled={isScanning}
+        className="auth-scan-btn"
+      >
+        <Zap size={14} className={isScanning ? "animate-spin text-amber-400" : "text-amber-500"} />
+        <span>{isScanning ? "Simulating Optical Spectrometer Scan…" : "Test Optical Spot Reaction"}</span>
+      </button>
+
+      {/* Telemetry Footer */}
+      <div className="auth-telemetry-row">
+        <span>Sarvam 105B Indic AI</span>
+        <span>SHA-256 Ledger Locked</span>
+        <span>BSA 2023 § 63 Ready</span>
+      </div>
+    </div>
+  );
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
@@ -30,6 +189,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [station, setStation] = useState("Delhi Zonal Unit");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
 
   const next = (["/", "/scan", "/audit"].includes(search.next) ? search.next : "/") as "/" | "/scan" | "/audit";
@@ -45,13 +205,15 @@ function AuthPage() {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError("");
+    setNotice("");
 
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
       setError("Enter a valid official email address.");
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    // Allow simple passwords or numbers (e.g. 1234 or simple PIN)
+    if (password.length < 4) {
+      setError("Password must be at least 4 characters or numbers.");
       return;
     }
 
@@ -83,13 +245,16 @@ function AuthPage() {
           station,
           email,
           password,
+          autoSignIn: false,
         });
         if (!res.success) {
           setError(res.error || "Could not register officer account.");
           return;
         }
-        // Direct seamless access - no email verification blocker!
-        void navigate({ to: next, replace: true });
+        // Switch to login tab and ask officer to sign in with password
+        setNotice("Officer account created successfully! Please enter your password to sign in.");
+        setMode("login");
+        setPassword("");
       }
     } catch (err: unknown) {
       setError((err as Error)?.message || "Authentication error. Please try again.");
@@ -101,7 +266,7 @@ function AuthPage() {
   return (
     <main className="auth-page">
       <div className="auth-layout">
-        {/* Left Section - Clean NCB Forensic Branding (No Lamp) */}
+        {/* Left Section - Interactive NCB Forensic Lab Console */}
         <section className="auth-copy">
           <Link to="/" className="app-brand">
             <span className="app-brand-mark">
@@ -122,24 +287,8 @@ function AuthPage() {
             A focused workspace for presumptive testing, evidence sealing, and chain-of-custody records in the field.
           </p>
 
-          <div className="mt-8 flex flex-col gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2.5 text-foreground/80">
-              <Scale size={16} className="text-primary flex-shrink-0" />
-              <span>Section 63 BSA 2023 / Section 52A NDPS digital evidence certificate</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-foreground/80">
-              <CheckCircle2 size={16} className="text-primary flex-shrink-0" />
-              <span>ISO/CIE 11664-6:2014 CIEDE2000 (ΔE*00) spectral spot calibration</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-foreground/80">
-              <Sparkles size={16} className="text-primary flex-shrink-0" />
-              <span>Sarvam 105B multilingual Indic forensic copilot (8 languages)</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-foreground/80">
-              <Lock size={16} className="text-primary flex-shrink-0" />
-              <span>SHA-256 hashed tamper-evident ledger with offline local persistence</span>
-            </div>
-          </div>
+          {/* Interactive Reagent Simulator Component */}
+          <InteractiveReagentLab />
         </section>
 
         {/* Right Section - Sleek Officer Access Card */}
@@ -148,17 +297,38 @@ function AuthPage() {
           <p>
             {mode === "login"
               ? "Continue to your field unit workspace."
-              : "Register your officer credentials for immediate field access."}
+              : "Register your officer credentials for field access."}
           </p>
 
           <div className="auth-tabs">
-            <button type="button" data-active={mode === "login"} onClick={() => setMode("login")}>
+            <button
+              type="button"
+              data-active={mode === "login"}
+              onClick={() => {
+                setMode("login");
+                setError("");
+              }}
+            >
               Login
             </button>
-            <button type="button" data-active={mode === "signup"} onClick={() => setMode("signup")}>
+            <button
+              type="button"
+              data-active={mode === "signup"}
+              onClick={() => {
+                setMode("signup");
+                setError("");
+                setNotice("");
+              }}
+            >
               Signup
             </button>
           </div>
+
+          {notice && (
+            <div className="mb-4 rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-400" role="status">
+              {notice}
+            </div>
+          )}
 
           <form onSubmit={(e) => void submit(e)}>
             {mode === "signup" && (
@@ -222,7 +392,7 @@ function AuthPage() {
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Minimum 6 characters"
+                placeholder="Enter password or PIN (min. 4 characters)"
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
                 required
               />

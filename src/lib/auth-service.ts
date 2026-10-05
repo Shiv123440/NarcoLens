@@ -69,12 +69,14 @@ export async function signUpOfficer({
   station,
   email,
   password,
+  autoSignIn = false,
 }: {
   fullName: string;
   officerId: string;
   station: string;
   email: string;
   password: string;
+  autoSignIn?: boolean;
 }): Promise<{ success: boolean; error?: string; officer?: OfficerUser }> {
   const cleanEmail = email.trim().toLowerCase();
   const cleanName = fullName.trim();
@@ -124,8 +126,10 @@ export async function signUpOfficer({
     // If Supabase has network issues or errors, local registration still proceeds
   }
 
-  // 4. Log in immediately
-  setActiveOfficer(officerUser);
+  // 4. Log in immediately only if explicitly requested
+  if (autoSignIn) {
+    setActiveOfficer(officerUser);
+  }
   return { success: true, officer: officerUser };
 }
 

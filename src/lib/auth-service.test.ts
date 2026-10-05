@@ -12,13 +12,14 @@ describe('Officer Authentication Service', () => {
     localStorage.clear();
   });
 
-  it('allows an officer to sign up and immediately establishes active session without email verification', async () => {
+  it('allows an officer to register without email verification and sign in with simple password/PIN', async () => {
     const res = await signUpOfficer({
       fullName: 'Insp. Rajesh Kumar',
       officerId: 'NCB-DEL-0142',
       station: 'Delhi Zonal Unit',
       email: 'rajesh.kumar@ncb.gov.in',
-      password: 'securepassword123',
+      password: '1234',
+      autoSignIn: false,
     });
 
     expect(res.success).toBe(true);
@@ -26,15 +27,22 @@ describe('Officer Authentication Service', () => {
     expect(res.officer?.email).toBe('rajesh.kumar@ncb.gov.in');
     expect(res.officer?.full_name).toBe('Insp. Rajesh Kumar');
 
-    // Verify active officer session is established immediately
-    const active = getActiveOfficer();
-    expect(active).not.toBeNull();
-    expect(active?.email).toBe('rajesh.kumar@ncb.gov.in');
+    // Active session is NOT set yet (officer must enter login credentials first)
+    const activeBeforeLogin = getActiveOfficer();
+    expect(activeBeforeLogin).toBeNull();
 
     // Verify saved in registered officers
     const registered = getRegisteredOfficers();
     expect(registered).toHaveLength(1);
     expect(registered[0]?.officer_id).toBe('NCB-DEL-0142');
+
+    // Officer signs in with credentials
+    const loginRes = await signInOfficer({
+      email: 'rajesh.kumar@ncb.gov.in',
+      password: '1234',
+    });
+    expect(loginRes.success).toBe(true);
+    expect(getActiveOfficer()?.email).toBe('rajesh.kumar@ncb.gov.in');
   });
 
   it('allows registered officer to sign in with valid credentials', async () => {
