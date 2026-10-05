@@ -75,7 +75,7 @@ export async function createEvidenceRecord(r: NewEvidence) {
     fir_number: r.firNumber || null,
     kit_batch: r.kitBatch || null,
     notes: r.notes || null,
-    custody: (r.custody ?? []) as unknown as Database["public"]["Tables"]["evidence_records"]["Insert"]["custody"],
+    custody: (r.custody ?? []) as unknown as NonNullable<Database["public"]["Tables"]["evidence_records"]["Insert"]["custody"]>,
   });
   if (error) throw new Error(error.message);
 }
