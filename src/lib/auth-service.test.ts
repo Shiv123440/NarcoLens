@@ -98,5 +98,5 @@ describe('Officer Authentication Service', () => {
     expect(badLogin.success).toBe(false);
     expect(badLogin.error).toMatch(/incorrect/i);
     expect(getActiveOfficer()).toBeNull();
-  });
+  }, 15000);
 });

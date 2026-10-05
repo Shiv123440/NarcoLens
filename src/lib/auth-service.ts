@@ -34,6 +34,54 @@ function hashPassword(pw: string): string {
   return btoa(unescape(encodeURIComponent(pw)));
 }
 
+export function unhashPassword(encoded: string): string {
+  try {
+    return decodeURIComponent(escape(atob(encoded)));
+  } catch {
+    return "";
+  }
+}
+
+export interface SavedCredential {
+  email: string;
+  username: string;
+  password?: string;
+  lastUsed: string;
+}
+
+const SAVED_CREDENTIALS_KEY = "narcolens_saved_credentials";
+
+export function getSavedCredentials(): SavedCredential[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(SAVED_CREDENTIALS_KEY);
+    return raw ? (JSON.parse(raw) as SavedCredential[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveCredentialForSuggestion(email: string, username?: string, rawPassword?: string): void {
+  if (typeof window === "undefined" || !email) return;
+  const list = getSavedCredentials();
+  const cleanEmail = email.trim();
+  const existingIdx = list.findIndex((c) => c.email.toLowerCase() === cleanEmail.toLowerCase());
+
+  const entry: SavedCredential = {
+    email: cleanEmail,
+    username: username || cleanEmail.split("@")[0] || "Officer",
+    password: rawPassword ? hashPassword(rawPassword) : (existingIdx >= 0 ? list[existingIdx].password : undefined),
+    lastUsed: new Date().toISOString(),
+  };
+
+  if (existingIdx >= 0) {
+    list[existingIdx] = entry;
+  } else {
+    list.unshift(entry);
+  }
+  localStorage.setItem(SAVED_CREDENTIALS_KEY, JSON.stringify(list.slice(0, 5)));
+}
+
 export function getActiveOfficer(): OfficerUser | null {
   if (typeof window === "undefined") return null;
   try {
@@ -221,6 +269,7 @@ export async function signInOfficer({
         ...officerUser,
         passwordHash: hashPassword(password),
       });
+      saveCredentialForSuggestion(cleanEmail, officerUser.full_name, password);
 
       return { success: true, officer: officerUser };
     }
@@ -245,10 +294,35 @@ export async function signInOfficer({
       created_at: matched.created_at,
     };
     setActiveOfficer(officerUser);
+    saveCredentialForSuggestion(officerUser.email, officerUser.full_name, password);
     return { success: true, officer: officerUser };
   }
 
   return { success: false, error: "Username/Email or password is incorrect." };
+}
+
+export async function signInWithGoogle(redirectTo?: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const redirectUrl = redirectTo ? `${origin}${redirectTo}` : `${origin}/`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: unknown) {
+    return { success: false, error: (err as Error)?.message || "Failed to initialize Google Sign In" };
+  }
 }
 
 export async function signOutOfficer(): Promise<void> {

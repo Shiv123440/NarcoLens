@@ -1627,6 +1627,166 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: #E85D04;
 }
 
+/* Google Sign-In & Social Login UI */
+.auth-social-wrap {
+  width: 100%;
+  max-width: 310px;
+}
+
+.auth-google-btn {
+  width: 100%;
+  height: 40px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #F8FAFC;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-google-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.auth-google-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0 0.25rem;
+}
+
+.auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-divider-text {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  color: #717D90;
+  font-weight: 600;
+}
+
+/* Account Suggestions Dropdown (suggests Gmail and auto-links password) */
+.auth-suggestions-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: rgba(18, 22, 34, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(232, 93, 4, 0.35);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+  z-index: 50;
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.auth-suggestions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.64rem;
+  font-family: "IBM Plex Mono", monospace;
+  color: #E85D04;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(232, 93, 4, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auth-suggestion-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #F8FAFC;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.18s ease;
+}
+
+.auth-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.auth-suggestion-item:hover {
+  background: rgba(232, 93, 4, 0.14);
+}
+
+.auth-suggestion-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #FCE8D5;
+  color: #7C2D12;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.auth-suggestion-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.auth-suggestion-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #F8FAFC;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auth-suggestion-email {
+  font-size: 0.66rem;
+  color: #94A3B8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auth-suggestion-badge {
+  font-size: 0.58rem;
+  font-family: "IBM Plex Mono", monospace;
+  color: #34D399;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 0.15rem 0.35rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 /* Primary CTA Button (#E85D04 with restrained shadow) */
 .auth-cta-btn {
   width: 100%;
