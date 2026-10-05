@@ -21,6 +21,10 @@ import {
   UserCog,
   History,
   CheckCircle2,
+  Bell,
+  LayoutDashboard,
+  FileText,
+  ScanLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +49,12 @@ import {
 
 function ShieldMark() {
   return <span className="app-brand-mark" aria-hidden="true"><ShieldCheck size={20} strokeWidth={2.4} /></span>;
+}
+
+export function openPrahariAI() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("open-prahari"));
+  }
 }
 
 export function AppHeader() {
@@ -82,9 +92,18 @@ export function AppHeader() {
           </span>
         </Link>
         <nav className="app-nav" aria-label="Primary navigation">
-          <Link to="/" data-status={active === "dashboard" ? "active" : undefined}>Dashboard</Link>
-          <Link to="/scan" search={{ substance: undefined }} data-status={active === "scan" ? "active" : undefined}>Scan</Link>
-          <Link to="/audit" data-status={active === "audit" ? "active" : undefined}>Audit logs</Link>
+          <Link to="/" className="app-nav-pill" data-status={active === "dashboard" ? "active" : undefined}>
+            <LayoutDashboard size={14} className="shrink-0" />
+            <span>Dashboard</span>
+          </Link>
+          <Link to="/scan" search={{ substance: undefined }} className="app-nav-pill" data-status={active === "scan" ? "active" : undefined}>
+            <ScanLine size={14} className="shrink-0" />
+            <span>Scan</span>
+          </Link>
+          <Link to="/audit" className="app-nav-pill" data-status={active === "audit" ? "active" : undefined}>
+            <FileText size={14} className="shrink-0" />
+            <span>Audit logs</span>
+          </Link>
         </nav>
         <div className="app-header-spacer" />
         <div className="app-header-actions">
@@ -113,10 +132,9 @@ export function AppHeader() {
                       )}
                     </span>
                     <span className="app-profile-copy">
-                      <strong>{officer.displayName}</strong>
+                      <strong>{officer.displayName.toLowerCase()}</strong>
                       <span>
-                        {officer.profile?.officer_id || "Officer"}
-                        {officer.profile?.station ? ` · ${officer.profile.station}` : ""}
+                        {officer.profile?.officer_id || "7864555"} · {officer.profile?.station || "Delhi Zonal Unit"}
                       </span>
                     </span>
                     <ChevronDown size={13} className="app-profile-chevron" />
@@ -190,15 +208,45 @@ export function AppHeader() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button
+              {/* Notification Bell with Badge */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="app-header-icon-btn"
+                    aria-label="1 unread notification"
+                    title="Notifications"
+                  >
+                    <Bell size={15} />
+                    <span className="app-header-badge">1</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-72 p-3 bg-white text-slate-800 border border-slate-200 shadow-xl rounded-xl z-50"
+                >
+                  <div className="font-bold text-xs text-slate-900 mb-2 flex items-center justify-between">
+                    <span>Notifications</span>
+                    <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold">1 new</span>
+                  </div>
+                  <div className="p-2.5 bg-orange-50/70 border border-orange-100 rounded-lg text-xs leading-relaxed text-slate-700">
+                    <div className="font-semibold text-slate-800 text-[11px] mb-0.5">NCB Kit Calibration Notice</div>
+                    Standard reference batch calibrated for Marquis, Scott, and Duquenois-Levine field tests.
+                    <div className="text-[10px] text-slate-400 mt-1">10m ago · Delhi Zonal Unit</div>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Logout Button */}
+              <button
                 type="button"
-                size="sm"
-                variant="outline"
                 onClick={() => void signOut()}
+                className="app-header-logout-btn"
                 aria-label="Log out"
               >
-                <LogOut />Logout
-              </Button>
+                <LogOut size={13} />
+                <span>Logout</span>
+              </button>
             </>
           ) : officer.ready ? (
             <Button asChild size="sm" className="app-login-button">
@@ -212,7 +260,25 @@ export function AppHeader() {
 }
 
 export function AppFooter() {
-  return <footer className="app-footer"><span>Government of India · NCB · Field Forensic Unit</span><span className="app-disclaimer">Presumptive field test. Not a substitute for laboratory confirmation.</span></footer>;
+  return (
+    <footer className="app-footer-modern">
+      <div className="app-footer-role">
+        Role - NCB - Field Forensic Unit
+      </div>
+      <div className="app-footer-disclaimer">
+        Presumptive field test. Not a substitute for laboratory confirmation.
+      </div>
+      <button
+        type="button"
+        onClick={() => openPrahariAI()}
+        className="app-footer-prahari-btn"
+        aria-label="Launch Prahari AI"
+      >
+        <ShieldCheck size={14} className="text-white fill-[#E85D04]" />
+        <span>Prahari AI</span>
+      </button>
+    </footer>
+  );
 }
 
 type SpeechRec = { lang: string; interimResults: boolean; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onerror: (() => void) | null; onend: (() => void) | null; start: () => void; stop: () => void };
@@ -220,6 +286,12 @@ type SpeechRec = { lang: string; interimResults: boolean; onresult: ((e: { resul
 export function PrahariWidget() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-prahari", handler);
+    return () => window.removeEventListener("open-prahari", handler);
+  }, []);
   const [lang, setLang] = useState<IndicLanguageCode>("en-IN");
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
