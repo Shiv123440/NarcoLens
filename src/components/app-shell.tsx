@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { matchCommand } from "@/lib/forensics";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LogOut, Bot, ChevronRight, CircleHelp, FlaskConical, Mic, MicOff, Send, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
+import { LogOut, Bot, ChevronRight, CircleHelp, FlaskConical, Mic, MicOff, Send, ShieldCheck, Volume2, VolumeX, X, Loader2, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { initials, useOfficer } from "@/hooks/use-auth";
+import {
+  chatWithPrahari,
+  synthesizeSpeechWithSarvam,
+  SUPPORTED_LANGUAGES,
+  type IndicLanguageCode,
+  type ChatMessage,
+} from "@/lib/sarvam";
 
 function ShieldMark() {
   return <span className="app-brand-mark" aria-hidden="true"><ShieldCheck size={20} strokeWidth={2.4} /></span>;
@@ -48,72 +55,282 @@ export function AppFooter() {
 
 type SpeechRec = { lang: string; interimResults: boolean; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onerror: (() => void) | null; onend: (() => void) | null; start: () => void; stop: () => void };
 
-function localReply(text: string): string {
-  const t = text.toLowerCase();
-  if (/sop|procedure|steps|how/.test(t)) return "Field sequence: Case → Reagents → Photo → Result. Keep the reference card in frame and seal the original image before analysis.";
-  if (/result|positive|negative|unclear|mean/.test(t)) return "A presumptive result is a screening signal only. Preserve the evidence and send it for laboratory confirmation. I cannot give legal conclusions.";
-  if (/light|glare|dark/.test(t)) return "Use even, diffuse light. Avoid direct sunlight or flash glare on the wells; retake if the colours look washed out.";
-  if (/hash|seal|tamper|custody/.test(t)) return "Every new record hashes the original photo bytes (SHA-256) and links custody events. Open a record and press Verify custody chain to check for tampering.";
-  return "I'm running in offline guidance mode. Try: \"What is the SOP?\", \"go to audit\", \"new test\", \"capture\", or \"next\".";
-}
-
 export function PrahariWidget() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [lang, setLang] = useState<"en-IN" | "hi-IN">("en-IN");
+  const [lang, setLang] = useState<IndicLanguageCode>("en-IN");
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
   const [speak, setSpeak] = useState(false);
-  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([{ role: "assistant", text: "Hello, Officer. Ask about the SOP or say a command like \"new test\" or \"capture\"." }]);
+  const [loading, setLoading] = useState(false);
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const [apiKey, setApiKey] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("sarvam_api_key") || "" : ""));
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: "assistant", content: "Jai Hind, Officer. I am Prahari AI, powered by Sarvam AI. Ask about the NDPS SOP, reagent validation, or speak a voice command like \"new test\" or \"capture\"." },
+  ]);
   const recRef = useRef<SpeechRec | null>(null);
-  const reply = (text: string) => {
-    setMessages((m) => [...m, { role: "assistant", text }]);
-    if (speak && "speechSynthesis" in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = lang; window.speechSynthesis.speak(u); }
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const saveApiKey = (key: string) => {
+    setApiKey(key);
+    if (typeof window !== "undefined") {
+      if (key.trim()) {
+        localStorage.setItem("sarvam_api_key", key.trim());
+      } else {
+        localStorage.removeItem("sarvam_api_key");
+      }
+    }
   };
-  const handle = (raw: string) => {
+
+  const playVoiceResponse = async (text: string) => {
+    if (!speak) return;
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      const audioUrl = await synthesizeSpeechWithSarvam(text, lang, apiKey);
+      if (audioUrl) {
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+        await audio.play();
+        return;
+      }
+    } catch {
+      // Fallback to browser SpeechSynthesis
+    }
+
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang;
+      window.speechSynthesis.speak(u);
+    }
+  };
+
+  const reply = (text: string) => {
+    setMessages((m) => [...m, { role: "assistant", content: text }]);
+    void playVoiceResponse(text);
+  };
+
+  const handle = async (raw: string) => {
     const text = raw.trim().slice(0, 500);
     if (!text) return;
-    setMessages((m) => [...m, { role: "user", text }]);
+
+    const userMsg: ChatMessage = { role: "user", content: text };
+    setMessages((m) => [...m, userMsg]);
+
     const cmd = matchCommand(text);
     if (cmd?.type === "NAVIGATE") {
-      if (cmd.to === "audit") void navigate({ to: "/audit" }); else if (cmd.to === "scan") void navigate({ to: "/scan", search: { substance: undefined } }); else void navigate({ to: "/" });
+      if (cmd.to === "audit") void navigate({ to: "/audit" });
+      else if (cmd.to === "scan") void navigate({ to: "/scan", search: { substance: undefined } });
+      else void navigate({ to: "/" });
       reply(`Opening ${cmd.to === "home" ? "the dashboard" : cmd.to === "scan" ? "a new field test" : "audit logs"}.`);
+      return;
     } else if (cmd && cmd.type !== "READ_RESULT") {
       window.dispatchEvent(new CustomEvent("prahari-command", { detail: cmd.type }));
-      reply(cmd.type === "CAPTURE" ? "Capturing — the camera must be live on the Photo step." : cmd.type === "NEXT_STEP" ? "Moving to the next step." : "Going back a step.");
-    } else reply(localReply(text));
+      reply(cmd.type === "CAPTURE" ? "Capturing evidence photo — camera active on Step 3." : cmd.type === "NEXT_STEP" ? "Advancing to the next step." : "Returning to previous step.");
+      return;
+    }
+
+    // Call Sarvam AI chatbot with prompt engineering and offline fallback
+    setLoading(true);
+    try {
+      const response = await chatWithPrahari(text, lang, messages, apiKey);
+      reply(response);
+    } catch (err) {
+      reply("Officer, I am currently relying on offline forensic instructions. Case sequence: Case ID → Reagents → Photo → CIEDE2000 verification.");
+    } finally {
+      setLoading(false);
+    }
   };
+
   const toggleMic = () => {
-    if (listening) { recRef.current?.stop(); return; }
+    if (listening) {
+      recRef.current?.stop();
+      return;
+    }
     const W = window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec };
     const Ctor = W.SpeechRecognition ?? W.webkitSpeechRecognition;
-    if (!Ctor) { reply("Voice input isn't available in this browser. Please type instead."); return; }
-    const rec = new Ctor(); rec.lang = lang; rec.interimResults = false;
-    rec.onresult = (e) => { const t = e.results[0]?.[0]?.transcript ?? ""; handle(t); };
-    rec.onerror = () => { setListening(false); reply("Microphone unavailable — please type your question."); };
+    if (!Ctor) {
+      reply("Voice input isn't available in this browser. Please type your query.");
+      return;
+    }
+    const rec = new Ctor();
+    rec.lang = lang;
+    rec.interimResults = false;
+    rec.onresult = (e) => {
+      const t = e.results[0]?.[0]?.transcript ?? "";
+      if (t) void handle(t);
+    };
+    rec.onerror = () => {
+      setListening(false);
+      reply("Microphone input timed out — please type your question.");
+    };
     rec.onend = () => setListening(false);
-    recRef.current = rec; setListening(true); rec.start();
+    recRef.current = rec;
+    setListening(true);
+    rec.start();
   };
-  useEffect(() => () => { recRef.current?.stop(); if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel(); }, []);
-  return <div className="app-floating print:hidden">
-    {open && <section className="app-card app-ai-panel" aria-label="Prahari AI assistant">
-      <div className="app-ai-head"><div><strong>Prahari AI</strong><span> · Field guidance</span></div><Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setOpen(false)} aria-label="Close Prahari AI"><X /></Button></div>
-      <div className="app-ai-body">
-        <div className="flex max-h-56 flex-col gap-2 overflow-y-auto" aria-live="polite">{messages.slice(-8).map((m, i) => <div key={i} className={m.role === "assistant" ? "app-ai-message" : "self-end rounded-lg bg-muted px-3 py-2 text-xs"}>{m.text}</div>)}</div>
-        <div className="app-ai-actions">{["What is the SOP?", "Explain a result", "Go to audit"].map((q) => <button key={q} type="button" onClick={() => handle(q)}>{q}</button>)}</div>
-        <form className="mt-2 flex gap-1" onSubmit={(e) => { e.preventDefault(); handle(input); setInput(""); }}>
-          <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={lang === "hi-IN" ? "सवाल लिखें…" : "Ask or give a command…"} aria-label="Message Prahari" className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs" maxLength={500} />
-          <Button type="button" size="icon" variant={listening ? "default" : "outline"} onClick={toggleMic} aria-label={listening ? "Stop listening" : "Speak"}>{listening ? <MicOff /> : <Mic />}</Button>
-          <Button type="submit" size="icon" aria-label="Send"><Send /></Button>
-        </form>
-        <div className="mt-2 flex items-center justify-between text-[.65rem] text-muted-foreground">
-          <button type="button" onClick={() => setLang((l) => (l === "en-IN" ? "hi-IN" : "en-IN"))}>Language: {lang === "en-IN" ? "English" : "हिन्दी"}</button>
-          <button type="button" onClick={() => setSpeak((s) => !s)} className="inline-flex items-center gap-1">{speak ? <Volume2 size={12} /> : <VolumeX size={12} />}Read aloud</button>
-        </div>
-      </div>
-    </section>}
-    <Button type="button" size="lg" className="rounded-full shadow-lg" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Open Prahari AI"><Bot />{open ? "Close" : "Prahari AI"}</Button>
-  </div>;
+
+  useEffect(() => () => {
+    recRef.current?.stop();
+    if (audioRef.current) audioRef.current.pause();
+    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
+  }, []);
+
+  return (
+    <div className="app-floating print:hidden">
+      {open && (
+        <section className="app-card app-ai-panel shadow-2xl" aria-label="Prahari AI assistant">
+          <div className="app-ai-head flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bot size={18} className="text-primary-foreground" />
+              <div>
+                <strong>Prahari AI</strong>
+                <span className="text-xs opacity-80"> · Sarvam 105B Forensics</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+                onClick={() => setShowKeyInput((v) => !v)}
+                title="Configure Sarvam AI API Key"
+              >
+                <KeyRound size={14} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+                onClick={() => setOpen(false)}
+                aria-label="Close Prahari AI"
+              >
+                <X size={16} />
+              </Button>
+            </div>
+          </div>
+
+          {showKeyInput && (
+            <div className="p-2.5 bg-muted/60 border-b border-border text-xs flex flex-col gap-1.5">
+              <label htmlFor="sarvam-key-input" className="font-semibold text-[.7rem] text-muted-foreground">
+                Sarvam AI API Key (Optional / Direct access):
+              </label>
+              <div className="flex gap-1.5">
+                <input
+                  id="sarvam-key-input"
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => saveApiKey(e.target.value)}
+                  placeholder="Enter Sarvam API key or leave blank for server/offline fallback"
+                  className="flex-1 rounded border border-input bg-background px-2 py-1 text-[.7rem]"
+                />
+                <Button size="sm" variant="secondary" onClick={() => setShowKeyInput(false)} className="text-[.7rem] h-7 px-2">
+                  Done
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="app-ai-body">
+            <div className="flex max-h-56 flex-col gap-2 overflow-y-auto" aria-live="polite">
+              {messages.slice(-8).map((m, i) => (
+                <div
+                  key={i}
+                  className={m.role === "assistant" ? "app-ai-message" : "self-end rounded-lg bg-muted px-3 py-2 text-xs"}
+                >
+                  {m.content}
+                </div>
+              ))}
+              {loading && (
+                <div className="app-ai-message flex items-center gap-2 text-muted-foreground text-xs">
+                  <Loader2 size={12} className="animate-spin" />
+                  <span>Prahari is consulting Sarvam 105B…</span>
+                </div>
+              )}
+            </div>
+
+            <div className="app-ai-actions">
+              {["What is the NDPS SOP?", "Section 63 BSA compliance", "Explain ΔE*00 reading", "New test"].map((q) => (
+                <button key={q} type="button" onClick={() => void handle(q)}>
+                  {q}
+                </button>
+              ))}
+            </div>
+
+            <form
+              className="mt-2 flex gap-1"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void handle(input);
+                setInput("");
+              }}
+            >
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={lang === "hi-IN" ? "एनडीपीएस सवाल या आदेश लिखें…" : "Ask NDPS question or speak command…"}
+                aria-label="Message Prahari"
+                className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs"
+                maxLength={500}
+                disabled={loading}
+              />
+              <Button
+                type="button"
+                size="icon"
+                variant={listening ? "default" : "outline"}
+                onClick={toggleMic}
+                aria-label={listening ? "Stop listening" : "Speak"}
+              >
+                {listening ? <MicOff /> : <Mic />}
+              </Button>
+              <Button type="submit" size="icon" aria-label="Send" disabled={loading || !input.trim()}>
+                <Send />
+              </Button>
+            </form>
+
+            <div className="mt-2 flex items-center justify-between text-[.65rem] text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <span>Lang:</span>
+                <select
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value as IndicLanguageCode)}
+                  className="rounded border border-input bg-background px-1 py-0.5 text-[.65rem]"
+                >
+                  {SUPPORTED_LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSpeak((s) => !s)}
+                className="inline-flex items-center gap-1 hover:text-foreground"
+              >
+                {speak ? <Volume2 size={12} className="text-primary" /> : <VolumeX size={12} />}
+                Bulbul TTS: {speak ? "ON" : "OFF"}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+      <Button
+        type="button"
+        size="lg"
+        className="rounded-full shadow-lg"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-label="Open Prahari AI"
+      >
+        <Bot />
+        {open ? "Close" : "Prahari AI"}
+      </Button>
+    </div>
+  );
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {

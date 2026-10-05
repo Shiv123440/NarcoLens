@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { recordQuery } from "@/lib/evidence";
-import { CheckCircle2, Clock3, Hash, LockKeyhole, MapPin, ShieldCheck, User } from "lucide-react";
+import { CheckCircle2, Clock3, Hash, LockKeyhole, MapPin, ShieldCheck, User, FileText, Scale } from "lucide-react";
 import { verifyChain } from "@/lib/forensics";
 import { Button } from "@/components/ui/button";
 import { AppShell, PageBack } from "@/components/app-shell";
 import { formatRecordTime, type AuditRecord } from "@/lib/app-data";
+import { LegalCertificate } from "@/components/legal-certificate";
 
 export const Route = createFileRoute("/_authenticated/audit/$recordId")({
   head: () => ({ meta: [
@@ -22,6 +23,7 @@ function RecordPage() {
   const { recordId } = Route.useParams();
   const q = useQuery(recordQuery(recordId));
   const record = q.data;
+  const [showCert, setShowCert] = useState(false);
 
   if (q.isLoading) return <AppShell><p className="text-sm text-muted-foreground">Loading evidence record…</p></AppShell>;
 
@@ -54,8 +56,22 @@ function RecordPage() {
         <h1 className="app-title">{record.id}</h1>
         <p>{record.caseNumber} · {formatRecordTime(record.timestamp)}</p>
       </div>
-      {verdictPill}
+      <div className="flex flex-wrap items-center gap-2">
+        <Button type="button" size="sm" onClick={() => setShowCert(true)}>
+          <FileText size={14} className="mr-1.5" />
+          Section 63 BSA Certificate
+        </Button>
+        {verdictPill}
+      </div>
     </div>
+
+    {showCert && (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm p-4 md:p-8 flex justify-center">
+        <div className="w-full max-w-4xl">
+          <LegalCertificate record={record} onClose={() => setShowCert(false)} />
+        </div>
+      </div>
+    )}
 
     <div className="app-result-grid">
       <section className="app-card app-form-card">
