@@ -40,9 +40,16 @@ describe('Sarvam AI Client & Forensic Knowledge Base', () => {
   });
 
   it('gracefully provides simulated reply when API is unreachable', async () => {
-    const res = await chatWithPrahari('What are NDPS commercial quantity thresholds?', [], 'en-IN');
+    // Pass invalid key to test offline simulated fallback
+    const res = await chatWithPrahari('What are NDPS commercial quantity thresholds?', [], 'en-IN', 'invalid_key_offline');
     expect(res.reply).toBeDefined();
     expect(res.reply).toMatch(/Heroin/);
     expect(res.isSimulated).toBe(true);
+  });
+
+  it('connects to live Sarvam 105B API with valid key', async () => {
+    const res = await chatWithPrahari('What is Section 50 NDPS Act?', [], 'en-IN');
+    expect(res.reply).toBeDefined();
+    expect(res.reply.length).toBeGreaterThan(10);
   });
 });

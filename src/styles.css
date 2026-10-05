@@ -214,43 +214,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-timeline-item strong { display: block; font-size: .72rem; }
 .app-timeline-item span { display: block; color: var(--muted-ink); font-size: .64rem; margin-top: .25rem; }
 .app-empty { padding: 2rem; text-align: center; color: var(--muted-ink); font-size: .8rem; }
-.auth-page { min-height: 100dvh; background: oklch(0.12 0.025 255); color: var(--surface); display: grid; place-items: center; padding: 1rem; overflow: hidden; }
-.auth-layout { width: min(100%, 1100px); display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
-.auth-copy { padding: 1rem; }
-.auth-copy .app-brand { color: var(--surface); margin-bottom: 2.5rem; }
-.auth-copy h1 { font-family: "Space Grotesk", sans-serif; font-size: clamp(2.3rem, 5vw, 4.8rem); line-height: .96; letter-spacing: -.045em; margin: 0 0 1rem; }
-.auth-copy p { color: oklch(0.72 0.02 255); max-width: 370px; line-height: 1.65; font-size: .85rem; }
-.auth-lamp-wrap { display: grid; place-items: center; min-height: 430px; }
-.auth-lamp { width: min(100%, 330px); overflow: visible; filter: drop-shadow(0 24px 28px oklch(0 0 0 / .35)); }
-.auth-lamp .lamp-shade, .auth-lamp .lamp-inner, .auth-lamp .lamp-cone, .auth-lamp .lamp-face-awake, .auth-lamp .lamp-face-sleep { transition: all .45s ease; }
-.auth-lamp[data-state="1"] .lamp-shade { fill: oklch(.56 .09 150); }
-.auth-lamp[data-state="1"] .lamp-inner { fill: oklch(.96 .06 150); }
-.auth-lamp[data-state="1"] .lamp-cone, .auth-lamp[data-state="1"] .lamp-face-awake { opacity: 1; }
-.auth-lamp[data-state="1"] .lamp-face-sleep { opacity: 0; }
-.auth-lamp[data-state="2"] .lamp-shade { fill: oklch(.55 .13 210); }
-.auth-lamp[data-state="2"] .lamp-inner { fill: oklch(.93 .07 210); }
-.auth-lamp[data-state="2"] .lamp-cone, .auth-lamp[data-state="2"] .lamp-face-awake { opacity: 1; }
-.auth-lamp[data-state="2"] .lamp-face-sleep { opacity: 0; }
-.auth-lamp[data-state="3"] .lamp-shade { fill: oklch(.58 .15 55); }
-.auth-lamp[data-state="3"] .lamp-inner { fill: oklch(.96 .06 55); }
-.auth-lamp[data-state="3"] .lamp-cone, .auth-lamp[data-state="3"] .lamp-face-awake { opacity: 1; }
-.auth-lamp[data-state="3"] .lamp-face-sleep { opacity: 0; }
-.auth-lamp[data-state="0"] .lamp-cone, .auth-lamp[data-state="0"] .lamp-face-awake { opacity: 0; }
-.auth-lamp[data-state="0"] .lamp-face-sleep { opacity: 1; }
-.auth-card { background: oklch(.16 .025 255 / .8); border: 1px solid oklch(.35 .025 255); border-radius: 1rem; padding: clamp(1.2rem, 4vw, 2.4rem); box-shadow: 0 25px 80px oklch(0 0 0 / .2); }
-.auth-card h2 { font-family: "Space Grotesk", sans-serif; font-size: 1.8rem; margin: 0 0 .35rem; }
-.auth-card > p { color: oklch(.68 .02 255); font-size: .75rem; margin: 0 0 1.4rem; }
-.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem; background: oklch(.11 .02 255); padding: .25rem; border-radius: .5rem; margin-bottom: 1.3rem; }
-.auth-tabs button { border: 0; background: transparent; color: oklch(.65 .02 255); padding: .6rem; border-radius: .35rem; cursor: pointer; font-size: .72rem; font-weight: 700; }
+.auth-page { min-height: 100dvh; background: oklch(0.12 0.025 255); color: var(--surface); display: grid; place-items: center; padding: 2rem 1rem; overflow-y: auto; }
+.auth-layout { width: min(100%, 1050px); display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 3.5rem; align-items: center; }
+.auth-copy { padding: 1rem 0; }
+.auth-copy .app-brand { color: var(--surface); margin-bottom: 2rem; display: inline-flex; }
+.auth-copy h1 { font-family: "Space Grotesk", sans-serif; font-size: clamp(2.2rem, 4.5vw, 4.2rem); line-height: 1.05; letter-spacing: -.035em; margin: 0 0 1rem; }
+.auth-copy p { color: oklch(0.72 0.02 255); max-width: 440px; line-height: 1.65; font-size: .88rem; }
+.auth-card { background: oklch(.16 .025 255 / .85); border: 1px solid oklch(.32 .025 255); border-radius: 1rem; padding: clamp(1.2rem, 3.5vw, 2.2rem); box-shadow: 0 25px 80px oklch(0 0 0 / .35); backdrop-filter: blur(12px); }
+.auth-card h2 { font-family: "Space Grotesk", sans-serif; font-size: 1.65rem; margin: 0 0 .35rem; }
+.auth-card > p { color: oklch(.68 .02 255); font-size: .75rem; margin: 0 0 1.25rem; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem; background: oklch(.11 .02 255); padding: .25rem; border-radius: .5rem; margin-bottom: 1.25rem; }
+.auth-tabs button { border: 0; background: transparent; color: oklch(.65 .02 255); padding: .6rem; border-radius: .35rem; cursor: pointer; font-size: .75rem; font-weight: 700; transition: all .15s ease; }
 .auth-tabs button[data-active="true"] { background: var(--amber); color: var(--amber-ink); }
-.auth-card .app-field label { color: oklch(.7 .02 255); }
-.auth-card .app-field input { background: oklch(.11 .02 255); border-color: oklch(.3 .025 255); color: var(--surface); }
-.auth-card .app-field { margin-bottom: .9rem; }
-.auth-card .app-form-actions { display: block; }
+.auth-card .app-field label { color: oklch(.72 .02 255); font-size: .65rem; }
+.auth-card .app-field input, .auth-card .app-field select { background: oklch(.11 .02 255); border-color: oklch(.3 .025 255); color: var(--surface); }
+.auth-card .app-field { margin-bottom: .85rem; }
+.auth-card .app-form-actions { display: block; margin-top: 1rem; }
 .auth-card .app-form-actions > * { width: 100%; }
-.auth-note { color: oklch(.55 .02 255); font-family: "IBM Plex Mono", monospace; font-size: .58rem; text-align: center; margin-top: 1rem; }
-.auth-pull { cursor: pointer; }
-.auth-state { color: var(--amber); font-family: "IBM Plex Mono", monospace; font-size: .61rem; text-align: center; margin-top: .5rem; letter-spacing: .1em; }
+.auth-note { color: oklch(.6 .02 255); font-family: "IBM Plex Mono", monospace; font-size: .62rem; text-align: center; margin-top: 1.1rem; }
 
 @media (min-width: 760px) { .app-profile-copy { display: block; } }
 @media (max-width: 860px) {

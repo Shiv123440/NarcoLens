@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { initials, useOfficer } from "@/hooks/use-auth";
+import { signOutOfficer } from "@/lib/auth-service";
 import {
   chatWithPrahari,
   synthesizeSpeechWithSarvam,
   SUPPORTED_LANGUAGES,
+  DEFAULT_SARVAM_KEY,
   type IndicLanguageCode,
   type ChatMessage,
 } from "@/lib/sarvam";
@@ -23,7 +25,7 @@ export function AppHeader() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const officer = useOfficer();
-  const signOut = async () => { await queryClient.cancelQueries(); queryClient.clear(); await supabase.auth.signOut(); void navigate({ to: "/auth", search: { mode: "login", next: "/" }, replace: true }); };
+  const signOut = async () => { await queryClient.cancelQueries(); queryClient.clear(); await signOutOfficer(); void navigate({ to: "/auth", search: { mode: "login", next: "/" }, replace: true }); };
   const active = location.pathname === "/" ? "dashboard" : location.pathname.startsWith("/scan") ? "scan" : location.pathname.startsWith("/audit") ? "audit" : "";
   return (
     <header className="app-header">
@@ -64,7 +66,7 @@ export function PrahariWidget() {
   const [speak, setSpeak] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showKeyInput, setShowKeyInput] = useState(false);
-  const [apiKey, setApiKey] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("sarvam_api_key") || "" : ""));
+  const [apiKey, setApiKey] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("sarvam_api_key") || DEFAULT_SARVAM_KEY : DEFAULT_SARVAM_KEY));
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: "Jai Hind, Officer. I am Prahari AI, powered by Sarvam AI. Ask about the NDPS SOP, reagent validation, or speak a voice command like \"new test\" or \"capture\"." },
   ]);
@@ -136,9 +138,10 @@ export function PrahariWidget() {
     // Call Sarvam AI chatbot with prompt engineering and offline fallback
     setLoading(true);
     try {
-      const response = await chatWithPrahari(text, lang, messages, apiKey);
-      reply(response);
-    } catch (err) {
+      const response = await chatWithPrahari(text, messages, lang, apiKey);
+      const replyText = typeof response === "string" ? response : response.reply;
+      reply(replyText);
+    } catch {
       reply("Officer, I am currently relying on offline forensic instructions. Case sequence: Case ID → Reagents → Photo → CIEDE2000 verification.");
     } finally {
       setLoading(false);

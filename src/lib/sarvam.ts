@@ -11,27 +11,32 @@ export type SupportedLanguage =
   | 'bn-IN'
   | 'gu-IN';
 
+export type IndicLanguageCode = SupportedLanguage;
+
 export interface LanguageOption {
   code: SupportedLanguage;
   name: string;
   native: string;
+  label?: string;
 }
 
 export const SUPPORTED_LANGUAGES: LanguageOption[] = [
-  { code: 'en-IN', name: 'English (India)', native: 'English' },
-  { code: 'hi-IN', name: 'Hindi', native: 'हिन्दी' },
-  { code: 'pa-IN', name: 'Punjabi', native: 'ਪੰਜਾਬੀ' },
-  { code: 'ta-IN', name: 'Tamil', native: 'தமிழ்' },
-  { code: 'te-IN', name: 'Telugu', native: 'తెలుగు' },
-  { code: 'mr-IN', name: 'Marathi', native: 'मराठी' },
-  { code: 'bn-IN', name: 'Bengali', native: 'বাংলা' },
-  { code: 'gu-IN', name: 'Gujarati', native: 'ગુજરાતી' },
+  { code: 'en-IN', name: 'English (India)', native: 'English', label: 'English' },
+  { code: 'hi-IN', name: 'Hindi', native: 'हिन्दी', label: 'हिन्दी' },
+  { code: 'pa-IN', name: 'Punjabi', native: 'ਪੰਜਾਬੀ', label: 'ਪੰਜਾਬੀ' },
+  { code: 'ta-IN', name: 'Tamil', native: 'தமிழ்', label: 'தமிழ்' },
+  { code: 'te-IN', name: 'Telugu', native: 'తెలుగు', label: 'తెలుగు' },
+  { code: 'mr-IN', name: 'Marathi', native: 'मराठी', label: 'मराठी' },
+  { code: 'bn-IN', name: 'Bengali', native: 'বাংলা', label: 'বাংলা' },
+  { code: 'gu-IN', name: 'Gujarati', native: 'ગુજરાતી', label: 'ગુજરાતી' },
 ];
 
 export interface ChatTurn {
   role: 'user' | 'assistant';
   content: string;
 }
+
+export type ChatMessage = ChatTurn;
 
 export interface ChatResponse {
   reply: string;
@@ -48,7 +53,25 @@ export interface TtsResponse {
   error?: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+export const DEFAULT_SARVAM_KEY = 'sk_q0s7w9v8_WIKE8wvNfQRQUgiHW3eSTdIF';
+
+export function getSarvamKey(overrideKey?: string): string {
+  if (overrideKey && overrideKey.trim()) return overrideKey.trim();
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('sarvam_api_key');
+    if (stored && stored.trim()) return stored.trim();
+  }
+  return import.meta.env.VITE_SARVAM_API_KEY || DEFAULT_SARVAM_KEY;
+}
+
+const SYSTEM_PROMPT =
+  'You are Prahari, the official field forensics assistant for the Narcotics Control Bureau (NCB) of India. ' +
+  'You provide authoritative, concise, legally grounded guidance on: ' +
+  '1. NDPS Act 1985 statutory procedures (Section 50 search rights, Section 52A Magistrate inventory sampling, Section 37 bail rules). ' +
+  '2. Bharatiya Sakshya Adhiniyam (BSA) 2023 Section 63 electronic evidence integrity certificate requirements. ' +
+  '3. Colorimetric spot test reagent reactions (Marquis, Scott, Duquenois-Levine, Simon\'s, Mecke, Mandelin). ' +
+  '4. ISO/CIE 11664-6:2014 CIEDE2000 (ΔE*00) color difference readings. ' +
+  'Every field test is presumptive and requires forensic GC-MS laboratory confirmation. Keep responses professional, direct, and under 150 words.';
 
 /**
  * Sends conversation to Sarvam AI (sarvam-105b-conversations)
@@ -57,27 +80,47 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 export async function chatWithPrahari(
   message: string,
   history: ChatTurn[] = [],
-  language: SupportedLanguage = 'en-IN'
+  language: SupportedLanguage = 'en-IN',
+  apiKey?: string
 ): Promise<ChatResponse> {
-  try {
-    const res = await fetch(`${API_BASE}/api/voice/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message,
-        language,
-        conversation_history: history.slice(-8),
-      }),
-    });
+  const key = getSarvamKey(apiKey);
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.reply) {
-        return { reply: data.reply, isSimulated: false };
+  if (key) {
+    try {
+      const res = await fetch('https://api.sarvam.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-subscription-key': key,
+        },
+        body: JSON.stringify({
+          model: 'sarvam-105b-conversations',
+          messages: [
+            {
+              role: 'system',
+              content: SYSTEM_PROMPT + ` Reply in the requested language: ${language}.`,
+            },
+            ...history.slice(-8).map((m) => ({
+              role: m.role,
+              content: m.content.slice(0, 1500),
+            })),
+            { role: 'user', content: message },
+          ],
+          temperature: 0.2,
+          max_tokens: 600,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content;
+        if (text && text.trim()) {
+          return { reply: text.trim(), isSimulated: false };
+        }
       }
+    } catch {
+      // Fall through to local guidance
     }
-  } catch {
-    // API endpoint unreachable, proceed to local forensic fallback
   }
 
   // Authoritative local forensic rule-based fallback
@@ -92,31 +135,34 @@ export async function chatWithPrahari(
  */
 export async function transcribeAudioWithSarvam(
   audioBlob: Blob,
-  language: SupportedLanguage = 'en-IN'
+  language: SupportedLanguage = 'en-IN',
+  apiKey?: string
 ): Promise<SttResponse> {
-  try {
-    const buffer = await audioBlob.arrayBuffer();
-    const base64Audio = btoa(
-      new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-    );
+  const key = getSarvamKey(apiKey);
+  if (!key) {
+    return { transcript: '', error: 'Sarvam API key required' };
+  }
 
-    const res = await fetch(`${API_BASE}/api/voice/stt`, {
+  try {
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'sample.webm');
+    formData.append('model', 'saaras:v4');
+    formData.append('mode', 'codemix');
+    formData.append('language_code', language);
+    formData.append('keyterms', JSON.stringify(['FIR', 'NDPS', 'Marquis', 'Mecke', 'Mandelin', 'Prahari', 'BSA']));
+
+    const res = await fetch('https://api.sarvam.ai/speech-to-text', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        audio: base64Audio,
-        mime: audioBlob.type || 'audio/webm',
-        language,
-      }),
+      headers: {
+        'api-subscription-key': key,
+      },
+      body: formData,
     });
 
     if (res.ok) {
       const data = await res.json();
       if (data.transcript) {
-        return { transcript: data.transcript };
-      }
-      if (data.error) {
-        return { transcript: '', error: data.error };
+        return { transcript: data.transcript.trim() };
       }
     }
   } catch (err: unknown) {
@@ -131,31 +177,42 @@ export async function transcribeAudioWithSarvam(
  */
 export async function synthesizeSpeechWithSarvam(
   text: string,
-  language: SupportedLanguage = 'en-IN'
-): Promise<HTMLAudioElement | null> {
-  try {
-    const res = await fetch(`${API_BASE}/api/voice/tts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: text.slice(0, 500),
-        language,
-      }),
-    });
+  language: SupportedLanguage = 'en-IN',
+  apiKey?: string
+): Promise<string | null> {
+  const key = getSarvamKey(apiKey);
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.audio) {
-        const audio = new Audio(`data:audio/mp3;base64,${data.audio}`);
-        return audio;
+  if (key) {
+    try {
+      const res = await fetch('https://api.sarvam.ai/text-to-speech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-subscription-key': key,
+        },
+        body: JSON.stringify({
+          inputs: [text.slice(0, 500)],
+          target_language_code: language,
+          speaker: 'shubh',
+          model: 'bulbul:v3',
+          speech_sample_rate: 24000,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const base64Audio = data.audios?.[0];
+        if (base64Audio) {
+          return `data:audio/mp3;base64,${base64Audio}`;
+        }
       }
+    } catch {
+      // Bulbul API unavailable, proceed to browser SpeechSynthesis
     }
-  } catch {
-    // Bulbul API unavailable
   }
 
   // Fallback to browser SpeechSynthesis
-  if ('speechSynthesis' in window) {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language;
