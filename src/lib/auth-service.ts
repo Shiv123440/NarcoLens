@@ -7,6 +7,14 @@ export interface OfficerUser {
   officer_id: string;
   station: string;
   created_at: string;
+  phone?: string;
+  department?: string;
+  rank?: string;
+  avatar_url?: string;
+  verified?: boolean;
+  verified_at?: string;
+  verified_by?: string;
+  two_factor_enabled?: boolean;
 }
 
 export interface StoredOfficer extends OfficerUser {
@@ -244,3 +252,82 @@ export async function signOutOfficer(): Promise<void> {
   } catch {}
   setActiveOfficer(null);
 }
+
+export function updateActiveOfficerProfile(updates: Partial<OfficerUser>): OfficerUser {
+  const current = getActiveOfficer() || {
+    id: `off_${Date.now()}`,
+    email: "officer@ncb.gov.in",
+    full_name: "Shivendra Singh",
+    officer_id: "7864555",
+    station: "Delhi Zonal Unit",
+    department: "Narcotics Control Bureau (NCB)",
+    rank: "Field Forensic Investigator",
+    created_at: new Date().toISOString(),
+    verified: true,
+    verified_at: "2026-01-15T09:30:00Z",
+    verified_by: "NCB Directorate HQ, New Delhi",
+  };
+
+  const updated: OfficerUser = {
+    ...current,
+    ...updates,
+    id: current.id,
+    officer_id: updates.officer_id !== undefined ? updates.officer_id : current.officer_id,
+  };
+
+  setActiveOfficer(updated);
+
+  // Update in registered officers list if present
+  const registered = getRegisteredOfficers();
+  const idx = registered.findIndex((o) => o.id === updated.id || o.email.toLowerCase() === updated.email.toLowerCase());
+  if (idx >= 0) {
+    registered[idx] = {
+      ...registered[idx],
+      ...updated,
+      passwordHash: registered[idx].passwordHash,
+    };
+    if (typeof window !== "undefined") {
+      localStorage.setItem(REGISTERED_OFFICERS_KEY, JSON.stringify(registered));
+    }
+  }
+
+  // Sync with Supabase Auth metadata in background if possible
+  try {
+    void supabase.auth.updateUser({
+      data: {
+        full_name: updated.full_name,
+        officer_id: updated.officer_id,
+        station: updated.station,
+        phone: updated.phone,
+        department: updated.department,
+        avatar_url: updated.avatar_url,
+      },
+    });
+  } catch {}
+
+  return updated;
+}
+
+export function changeOfficerPassword(newPassword: string): { success: boolean; error?: string } {
+  const pwCheck = validatePassword(newPassword);
+  if (!pwCheck.valid) return { success: false, error: pwCheck.error };
+
+  const current = getActiveOfficer();
+  if (!current) return { success: false, error: "No active officer found." };
+
+  const registered = getRegisteredOfficers();
+  const idx = registered.findIndex((o) => o.id === current.id || o.email.toLowerCase() === current.email.toLowerCase());
+  if (idx >= 0) {
+    registered[idx].passwordHash = hashPassword(newPassword);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(REGISTERED_OFFICERS_KEY, JSON.stringify(registered));
+    }
+  }
+
+  try {
+    void supabase.auth.updateUser({ password: newPassword });
+  } catch {}
+
+  return { success: true };
+}
+

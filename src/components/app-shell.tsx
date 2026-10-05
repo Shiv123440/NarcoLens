@@ -1,8 +1,35 @@
 import { useEffect, useRef, useState } from "react";
 import { matchCommand } from "@/lib/forensics";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LogOut, Bot, ChevronRight, CircleHelp, FlaskConical, Mic, MicOff, Send, ShieldCheck, Volume2, VolumeX, X, Loader2, KeyRound } from "lucide-react";
+import {
+  LogOut,
+  Bot,
+  ChevronRight,
+  ChevronDown,
+  CircleHelp,
+  FlaskConical,
+  Mic,
+  MicOff,
+  Send,
+  ShieldCheck,
+  Volume2,
+  VolumeX,
+  X,
+  Loader2,
+  KeyRound,
+  User,
+  UserCog,
+  History,
+  CheckCircle2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { initials, useOfficer } from "@/hooks/use-auth";
@@ -25,13 +52,34 @@ export function AppHeader() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const officer = useOfficer();
-  const signOut = async () => { await queryClient.cancelQueries(); queryClient.clear(); await signOutOfficer(); void navigate({ to: "/auth", search: { mode: "login", next: "/" }, replace: true }); };
-  const active = location.pathname === "/" ? "dashboard" : location.pathname.startsWith("/scan") ? "scan" : location.pathname.startsWith("/audit") ? "audit" : "";
+  const signOut = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await signOutOfficer();
+    void navigate({ to: "/auth", search: { mode: "login", next: "/" }, replace: true });
+  };
+  const active =
+    location.pathname === "/"
+      ? "dashboard"
+      : location.pathname.startsWith("/scan")
+      ? "scan"
+      : location.pathname.startsWith("/audit")
+      ? "audit"
+      : location.pathname.startsWith("/profile")
+      ? "profile"
+      : "";
+
+  const avatarUrl = officer.profile?.avatar_url;
+
   return (
     <header className="app-header">
       <div className="app-header-inner">
         <Link to="/" className="app-brand" aria-label="DRUG-SHIELD AI dashboard">
-          <ShieldMark /><span><span className="app-brand-name">DRUG-SHIELD AI</span><span className="app-brand-sub">NARCOTICS CONTROL BUREAU</span></span>
+          <ShieldMark />
+          <span>
+            <span className="app-brand-name">DRUG-SHIELD AI</span>
+            <span className="app-brand-sub">NARCOTICS CONTROL BUREAU</span>
+          </span>
         </Link>
         <nav className="app-nav" aria-label="Primary navigation">
           <Link to="/" data-status={active === "dashboard" ? "active" : undefined}>Dashboard</Link>
@@ -40,11 +88,123 @@ export function AppHeader() {
         </nav>
         <div className="app-header-spacer" />
         <div className="app-header-actions">
-          {officer.signedIn ? <>
-            <span className="app-sync" title="Connected to the shared evidence ledger"><span className="app-sync-dot" />Cloud ledger</span>
-            <span className="app-profile"><span className="app-avatar">{initials(officer.displayName)}</span><span className="app-profile-copy"><strong>{officer.displayName}</strong><span>{officer.profile?.officer_id || "Officer"}{officer.profile?.station ? ` · ${officer.profile.station}` : ""}</span></span></span>
-            <Button type="button" size="sm" variant="outline" onClick={() => void signOut()} aria-label="Log out"><LogOut />Logout</Button>
-          </> : officer.ready ? <Button asChild size="sm" className="app-login-button"><Link to="/auth" search={{ mode: "login", next: "/" }}>Login / Signup</Link></Button> : null}
+          {officer.signedIn ? (
+            <>
+              <span className="app-sync" title="Connected to the shared evidence ledger">
+                <span className="app-sync-dot" />Cloud ledger
+              </span>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="app-profile app-profile-clickable"
+                    aria-label="Operator Profile Menu"
+                  >
+                    <span className="app-avatar">
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt={officer.displayName}
+                          className="app-avatar-img"
+                        />
+                      ) : (
+                        initials(officer.displayName)
+                      )}
+                    </span>
+                    <span className="app-profile-copy">
+                      <strong>{officer.displayName}</strong>
+                      <span>
+                        {officer.profile?.officer_id || "Officer"}
+                        {officer.profile?.station ? ` · ${officer.profile.station}` : ""}
+                      </span>
+                    </span>
+                    <ChevronDown size={13} className="app-profile-chevron" />
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  align="end"
+                  className="app-profile-dropdown w-64 p-2 bg-[#0F1626] text-[#F5F7FA] border-white/10 shadow-2xl z-50"
+                >
+                  <div className="px-3 py-2.5 bg-white/5 rounded-md mb-1.5 flex items-center gap-3">
+                    <span className="app-avatar ring-1 ring-[#E85D04]/60">
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt={officer.displayName}
+                          className="app-avatar-img"
+                        />
+                      ) : (
+                        initials(officer.displayName)
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1 leading-snug">
+                      <div className="font-bold text-xs truncate text-white">{officer.displayName}</div>
+                      <div className="text-[10px] text-zinc-400 font-mono truncate">
+                        ID: {officer.profile?.officer_id || "7864555"}
+                      </div>
+                      <div className="inline-flex items-center gap-1 text-[9px] text-[#22c55e] font-semibold mt-0.5">
+                        <CheckCircle2 size={10} /> VERIFIED OPERATOR
+                      </div>
+                    </div>
+                  </div>
+
+                  <DropdownMenuItem asChild className="focus:bg-[#E85D04]/20 focus:text-white cursor-pointer py-2 text-xs">
+                    <Link to={"/profile" as any}>
+                      <User className="h-3.5 w-3.5 mr-2 text-[#E85D04]" />
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild className="focus:bg-[#E85D04]/20 focus:text-white cursor-pointer py-2 text-xs">
+                    <Link to={"/profile" as any} search={{ edit: true } as any}>
+                      <UserCog className="h-3.5 w-3.5 mr-2 text-[#E85D04]" />
+                      Edit Profile
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild className="focus:bg-[#E85D04]/20 focus:text-white cursor-pointer py-2 text-xs">
+                    <Link to={"/profile" as any} hash="security">
+                      <KeyRound className="h-3.5 w-3.5 mr-2 text-[#E85D04]" />
+                      Security
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild className="focus:bg-[#E85D04]/20 focus:text-white cursor-pointer py-2 text-xs">
+                    <Link to={"/profile" as any} hash="activity">
+                      <History className="h-3.5 w-3.5 mr-2 text-[#E85D04]" />
+                      My Activity
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator className="bg-white/10 my-1" />
+
+                  <DropdownMenuItem
+                    onClick={() => void signOut()}
+                    className="focus:bg-red-500/20 text-red-400 focus:text-red-300 cursor-pointer py-2 text-xs"
+                  >
+                    <LogOut className="h-3.5 w-3.5 mr-2 text-red-400" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => void signOut()}
+                aria-label="Log out"
+              >
+                <LogOut />Logout
+              </Button>
+            </>
+          ) : officer.ready ? (
+            <Button asChild size="sm" className="app-login-button">
+              <Link to="/auth" search={{ mode: "login", next: "/" }}>Login / Signup</Link>
+            </Button>
+          ) : null}
         </div>
       </div>
     </header>

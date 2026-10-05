@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { appendCustody, sha256Hex, validateImage } from "@/lib/forensics";
-import { ArrowLeft, ArrowRight, Camera, MapPin, Check, FileImage, Hash, Info, LockKeyhole, RefreshCcw, Upload, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Camera, MapPin, Check, FileImage, Hash, Info, LockKeyhole, RefreshCcw, Upload, CheckCircle2, AlertTriangle, XCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell, PageBack } from "@/components/app-shell";
 import { REAGENTS, SUBSTANCES, type AuditRecord } from "@/lib/app-data";
@@ -9,6 +9,7 @@ import { createEvidenceRecord, newRecordId } from "@/lib/evidence";
 import { useOfficer } from "@/hooks/use-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { calculateDeltaE2000, hexToLab, REAGENT_REFERENCES, classifySampleColor } from "@/lib/colorimetry";
+import { formatCoordinates, formatGpsDisplay, reverseGeocode } from "@/lib/location";
 
 export const Route = createFileRoute("/_authenticated/scan")({
   validateSearch: (search: Record<string, unknown>) => ({ substance: typeof search["substance"] === "string" ? search["substance"] : undefined }),
@@ -50,6 +51,9 @@ function ScanPage() {
   const [hash, setHash] = useState("");
   const [dims, setDims] = useState<{ width: number; height: number } | null>(null);
   const [gps, setGps] = useState<string>("");
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsSuccess, setGpsSuccess] = useState(false);
+  const [gpsError, setGpsError] = useState("");
 
   const wellAnalysis = useMemo(() => {
     return reagents.map((reagentName, idx) => {
@@ -103,7 +107,70 @@ function ScanPage() {
 
   const acceptBlob = async (blob: Blob, name: string, size: { width: number; height: number }) => { setHash(await sha256Hex(blob)); setDims(size); setFileName(name); setPhoto(URL.createObjectURL(blob)); };
   const handleFile = async (file: File | undefined) => { if (!file) return; const result = await validateImage(file); if (!result.ok) { setError(result.message); return; } setError(""); await acceptBlob(file, file.name, { width: result.width, height: result.height }); };
-  const requestGps = () => { if (!navigator.geolocation) { setGps("GPS unavailable"); return; } navigator.geolocation.getCurrentPosition((pos) => setGps(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)} (±${Math.round(pos.coords.accuracy)} m)`), () => setGps("GPS unavailable"), { enableHighAccuracy: true, timeout: 10000 }); };
+  const requestGps = () => {
+    if (gpsLoading) return;
+    setError("");
+    setGpsError("");
+
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      const msg = "Unable to determine your location. Please enter the location manually.";
+      setError(msg);
+      setGpsError(msg);
+      setGps("GPS unavailable");
+      return;
+    }
+
+    setGpsLoading(true);
+    setGpsSuccess(false);
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const accuracy = pos.coords.accuracy;
+        const coordsText = formatCoordinates(lat, lon);
+        const displayGps = formatGpsDisplay(lat, lon, accuracy);
+
+        // 1. Preserve coordinates and accuracy separately
+        setGps(displayGps);
+
+        // 2. Immediately populate the Seizure Location input with coordinates
+        setLocation(coordsText);
+
+        setGpsLoading(false);
+        setGpsSuccess(true);
+        setGpsError("");
+        setError("");
+
+        // 3. Attempt reverse-geocoding in background to enhance with human-readable location
+        try {
+          const resolved = await reverseGeocode(lat, lon);
+          if (resolved) {
+            // Update to human-readable address if user has not typed something else in the interim
+            setLocation((current) => (current === coordsText || current === "" ? resolved : current));
+          }
+        } catch {
+          // Fallback coordsText is already in place
+        }
+
+        // Restore button state after 4 seconds
+        setTimeout(() => {
+          setGpsSuccess(false);
+        }, 4000);
+      },
+      (err) => {
+        setGpsLoading(false);
+        setGpsSuccess(false);
+        let errMsg = "Unable to determine your location. Please enter the location manually.";
+        if (err.code === err.PERMISSION_DENIED || err.code === 1) {
+          errMsg = "Location permission is required to capture the seizure location.";
+        }
+        setError(errMsg);
+        setGpsError(errMsg);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  };
   const startCamera = async () => { setError(""); if (!window.isSecureContext) { setError("Camera needs a secure (HTTPS) connection. Use Upload file instead."); return; } if (!navigator.mediaDevices?.getUserMedia) { setError("Camera access is unavailable here. Use Upload file instead."); return; } try { const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false }); streamRef.current = stream; setCameraOn(true); requestAnimationFrame(() => { if (videoRef.current) { videoRef.current.srcObject = stream; void videoRef.current.play(); } }); } catch (err) { const name = err instanceof DOMException ? err.name : ""; setError(name === "NotAllowedError" ? "Camera permission was denied. Allow it in browser settings, or use Upload file." : name === "NotFoundError" ? "No camera found on this device. Use Upload file instead." : name === "NotReadableError" ? "The camera is busy. Close other apps using it and try again." : "Camera was unavailable. Use Upload file instead."); } };
   const stopCamera = () => { streamRef.current?.getTracks().forEach((track) => track.stop()); streamRef.current = null; setCameraOn(false); };
   useEffect(() => () => { streamRef.current?.getTracks().forEach((track) => track.stop()); }, []);
@@ -111,8 +178,75 @@ function ScanPage() {
   useEffect(() => { const onCmd = (e: Event) => { const type = (e as CustomEvent<string>).detail; if (type === "CAPTURE" && cameraOn) capture(); if (type === "NEXT_STEP") goNext(); if (type === "PREV_STEP") setStep((v) => Math.max(0, v - 1)); }; window.addEventListener("prahari-command", onCmd); return () => window.removeEventListener("prahari-command", onCmd); });
   const goNext = () => { if (!canContinue) { setError(step === 0 ? "Add a case number and seizure location to continue." : step === 2 ? "Capture or upload an evidence image to continue." : "Assign a reagent to all three wells."); return; } setError(""); if (step === 2) setAnalysisStarted(true); setStep((value) => Math.min(3, value + 1)); };
   const saveSeal = async () => { if (!hash || saving || sealed) return; setSaving(true); setError(""); try { let custody = await appendCustody([], recordId, "CREATED", officerName, `Image ${dims?.width ?? "?"}×${dims?.height ?? "?"} hashed`); custody = await appendCustody(custody, recordId, "SEALED", officerName, "sealed to shared cloud ledger"); await createEvidenceRecord({ ...resultRecord, sealed: true, synced: true, custody, reagents, firNumber, kitBatch, notes }); await queryClient.invalidateQueries({ queryKey: ["evidence"] }); setSealed(true); } catch (err) { setError(err instanceof Error ? `Could not save to the shared ledger: ${err.message}` : "Could not save to the shared ledger."); } finally { setSaving(false); } };
-  return <AppShell><div className="app-page-heading"><div><PageBack to="/" /><span className="app-kicker block mt-4">Forensic scanner</span><h1 className="app-title">New field test</h1><p>Presumptive analysis · offline-first workflow</p></div><span className="app-pill app-pill-sealed"><LockKeyhole size={12} />Original evidence is sealed before analysis</span></div><div className="app-stepper">{steps.map((label, index) => <button key={label} type="button" className="app-step" data-active={step === index} onClick={() => index <= step && setStep(index)}><span className="app-step-num">{index < step ? <Check size={13} /> : index + 1}</span><span>{label}</span></button>)}</div>{step === 0 && <CaseStep caseNumber={caseNumber} setCaseNumber={setCaseNumber} firNumber={firNumber} setFirNumber={setFirNumber} location={location} setLocation={setLocation} kitBatch={kitBatch} setKitBatch={setKitBatch} notes={notes} setNotes={setNotes} />}{step === 0 && <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><Button type="button" variant="outline" size="sm" onClick={requestGps}><MapPin />Use my location</Button><span>{gps || "GPS not recorded yet — never fabricated"}</span></div>}{step === 1 && <ReagentStep reagents={reagents} setReagents={setReagents} />}{step === 2 && <PhotoStep photo={photo} fileName={fileName} cameraOn={cameraOn} videoRef={videoRef} onFile={(f) => void handleFile(f)} onCamera={startCamera} onCapture={capture} onStop={stopCamera} onClear={() => { setPhoto(null); setFileName(""); }} />}{step === 3 && <ResultStep started={analysisStarted} sealed={sealed} record={resultRecord} wells={wellAnalysis} onSeal={() => void saveSeal()} onView={() => void navigate({ to: "/audit/$recordId", params: { recordId: resultRecord.id } })} />}{error && <p className="app-form-error mt-3" role="alert"><Info size={14} className="inline mr-1" />{error}</p>}<div className="app-form-actions"><Button type="button" variant="outline" onClick={() => { if (step === 0) void navigate({ to: "/" }); else setStep((value) => value - 1); }}><ArrowLeft />{step === 0 ? "Cancel" : "Back"}</Button>{step < 3 && <Button type="button" onClick={goNext}>Continue <ArrowRight /></Button>}{step === 3 && !sealed && <Button type="button" disabled={!hash || saving} onClick={() => void saveSeal()}><LockKeyhole />{saving ? "Sealing…" : "Save & seal"}</Button>}</div></AppShell>;
-}
+  return (
+    <AppShell>
+      <div className="app-page-heading">
+        <div>
+          <PageBack to="/" />
+          <span className="app-kicker block mt-4">Forensic scanner</span>
+          <h1 className="app-title">New field test</h1>
+          <p>Presumptive analysis · offline-first workflow</p>
+        </div>
+        <span className="app-pill app-pill-sealed">
+          <LockKeyhole size={12} />Original evidence is sealed before analysis
+        </span>
+      </div>
+      <div className="app-stepper">
+        {steps.map((label, index) => (
+          <button key={label} type="button" className="app-step" data-active={step === index} onClick={() => index <= step && setStep(index)}>
+            <span className="app-step-num">{index < step ? <Check size={13} /> : index + 1}</span>
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+      {step === 0 && (
+        <CaseStep
+          caseNumber={caseNumber}
+          setCaseNumber={setCaseNumber}
+          firNumber={firNumber}
+          setFirNumber={setFirNumber}
+          location={location}
+          setLocation={setLocation}
+          kitBatch={kitBatch}
+          setKitBatch={setKitBatch}
+          notes={notes}
+          setNotes={setNotes}
+        />
+      )}
+      {step === 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={requestGps}
+            disabled={gpsLoading}
+            aria-label="Use my current GPS location"
+          >
+            {gpsLoading ? (
+              <>
+                <Loader2 size={13} className="animate-spin mr-1.5" />
+                Getting location...
+              </>
+            ) : gpsSuccess ? (
+              <>
+                <Check size={13} className="text-green-600 mr-1.5" />
+                Location captured
+              </>
+            ) : (
+              <>
+                <MapPin size={13} className="mr-1.5" />
+                Use my location
+              </>
+            )}
+          </Button>
+          <span className={gpsError ? "text-red-500 font-medium" : ""}>
+            {gpsError || gps || "GPS not recorded yet — never fabricated"}
+          </span>
+        </div>
+      )}{step === 1 && <ReagentStep reagents={reagents} setReagents={setReagents} />}{step === 2 && <PhotoStep photo={photo} fileName={fileName} cameraOn={cameraOn} videoRef={videoRef} onFile={(f) => void handleFile(f)} onCamera={startCamera} onCapture={capture} onStop={stopCamera} onClear={() => { setPhoto(null); setFileName(""); }} />}{step === 3 && <ResultStep started={analysisStarted} sealed={sealed} record={resultRecord} wells={wellAnalysis} onSeal={() => void saveSeal()} onView={() => void navigate({ to: "/audit/$recordId", params: { recordId: resultRecord.id } })} />}{error && <p className="app-form-error mt-3" role="alert"><Info size={14} className="inline mr-1" />{error}</p>}<div className="app-form-actions"><Button type="button" variant="outline" onClick={() => { if (step === 0) void navigate({ to: "/" }); else setStep((value) => value - 1); }}><ArrowLeft />{step === 0 ? "Cancel" : "Back"}</Button>{step < 3 && <Button type="button" onClick={goNext}>Continue <ArrowRight /></Button>}{step === 3 && !sealed && <Button type="button" disabled={!hash || saving} onClick={() => void saveSeal()}><LockKeyhole />{saving ? "Sealing…" : "Save & seal"}</Button>}</div></AppShell>
+    );
+  }
 
 function CaseStep(props: { caseNumber: string; setCaseNumber: (v: string) => void; firNumber: string; setFirNumber: (v: string) => void; location: string; setLocation: (v: string) => void; kitBatch: string; setKitBatch: (v: string) => void; notes: string; setNotes: (v: string) => void }) { return <section className="app-card app-form-card"><h2>Case details</h2><p>Record the identifiers that travel with the evidence.</p><div className="app-form-grid"><Field label="Case number *" value={props.caseNumber} onChange={props.setCaseNumber} placeholder="NCR/DEL/2026/____" /><Field label="FIR number" value={props.firNumber} onChange={props.setFirNumber} placeholder="FIR / station reference" /><Field label="Seizure location *" value={props.location} onChange={props.setLocation} placeholder="e.g. Gate 3, New Delhi" /><Field label="Kit batch number" value={props.kitBatch} onChange={props.setKitBatch} placeholder="KIT-2026-____" /><div className="app-field app-field-full"><label htmlFor="scan-notes">Field notes</label><textarea id="scan-notes" value={props.notes} onChange={(event) => props.setNotes(event.target.value)} placeholder="Optional context about the seizure or sample" /></div></div></section>; }
 function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) { const id = label.toLowerCase().replaceAll(" ", "-").replace("*", ""); return <div className="app-field"><label htmlFor={id}>{label}</label><input id={id} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} maxLength={120} /></div>; }
