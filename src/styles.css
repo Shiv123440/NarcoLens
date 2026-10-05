@@ -33,6 +33,33 @@
   --color-chart-3: var(--cyan);
   --color-chart-4: var(--red);
   --color-chart-5: var(--blue);
+  --animate-aurora: aurora 60s linear infinite;
+}
+
+/* ==========================================================================
+   Aceternity UI: Aurora Background Animation & Utilities
+   ========================================================================== */
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
+}
+
+.animate-aurora,
+.after\:animate-aurora::after,
+[class*="after:animate-aurora"]::after {
+  animation: aurora 60s linear infinite !important;
+}
+
+.app-aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 :root {
@@ -69,9 +96,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   outline-offset: 2px;
 }
 
-.app-page { min-height: 100dvh; background: var(--canvas); }
-.app-main { width: min(100% - 2rem, 1180px); margin: 0 auto; padding: 1.25rem 0 7rem; }
-.app-header { background: color-mix(in oklab, var(--surface) 96%, transparent); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 30; backdrop-filter: blur(14px); }
+.app-page { min-height: 100dvh; background: var(--canvas); position: relative; }
+.app-main { position: relative; z-index: 5; width: min(100% - 2rem, 1180px); margin: 0 auto; padding: 1.25rem 0 7rem; }
+.app-header { background: color-mix(in oklab, var(--surface) 94%, transparent); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 30; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .app-header-inner { width: min(100% - 2rem, 1180px); min-height: 72px; margin: 0 auto; display: flex; align-items: center; gap: 1.25rem; }
 .app-brand { display: inline-flex; align-items: center; gap: .7rem; color: var(--ink); text-decoration: none; min-width: max-content; }
 .app-brand-mark { width: 34px; height: 38px; display: grid; place-items: center; color: var(--amber); background: var(--navy); border-radius: 10px 10px 12px 12px; }

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/profile-window";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -439,7 +440,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isAuth = location.pathname === "/auth";
   useEffect(() => { document.title = isAuth ? "Officer access · DRUG-SHIELD AI" : "DRUG-SHIELD AI · NCB Field Forensics"; }, [isAuth]);
   if (isAuth) return <>{children}</>;
-  return <div className="app-page"><a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 rounded bg-background px-3 py-2 text-sm">Skip to content</a><AppHeader /><main id="main" className="app-main">{children}</main><AppFooter /><PrahariWidget /></div>;
+  return (
+    <div className="app-page">
+      <div className="app-aurora-bg" aria-hidden="true">
+        <AuroraBackground
+          className="!h-full !min-h-screen !w-full !p-0 !bg-transparent dark:!bg-transparent"
+          showRadialGradient={true}
+        />
+      </div>
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 rounded bg-background px-3 py-2 text-sm">Skip to content</a>
+      <AppHeader />
+      <main id="main" className="app-main">{children}</main>
+      <AppFooter />
+      <PrahariWidget />
+    </div>
+  );
 }
 
 export function PageBack({ to = "/" }: { to?: "/" | "/scan" | "/audit" }) { return <Link to={to} className="app-link inline-flex items-center gap-1"><ChevronRight size={13} className="rotate-180" />Back</Link>; }
