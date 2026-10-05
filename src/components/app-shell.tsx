@@ -21,17 +21,7 @@ import {
   UserCog,
   History,
   CheckCircle2,
-  Menu,
-  ArrowRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/profile-window";
 import { AuroraBackground } from "@/components/ui/aurora-background";
@@ -69,8 +59,6 @@ export function AppHeader() {
   const queryClient = useQueryClient();
   const officer = useOfficer();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -93,7 +81,6 @@ export function AppHeader() {
   return (
     <header className="app-header">
       <div className="app-header-inner">
-        {/* Brand identity */}
         <Link to="/" className="app-brand" aria-label="NarcoLens dashboard">
           <ShieldMark />
           <span>
@@ -101,36 +88,23 @@ export function AppHeader() {
             <span className="app-brand-sub">NARCOTICS CONTROL BUREAU</span>
           </span>
         </Link>
-
-        {/* Hero-34 Announcement / Status Badge */}
-        <div className="hero-nav-announcement hidden xl:inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-medium border border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-400">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-          <span className="font-semibold tracking-wide uppercase text-[10px]">NEW TEST · FIELD READY</span>
-          <span className="opacity-40">|</span>
-          <span className="text-muted-foreground font-mono">v2.4 Live Ledger</span>
-        </div>
-
-        {/* Desktop Navigation */}
         <nav className="app-nav" aria-label="Primary navigation">
           <Link to="/" data-status={active === "dashboard" ? "active" : undefined}>Dashboard</Link>
           <Link to="/scan" search={{ substance: undefined }} data-status={active === "scan" ? "active" : undefined}>Scan</Link>
           <Link to="/audit" data-status={active === "audit" ? "active" : undefined}>Audit logs</Link>
         </nav>
-
         <div className="app-header-spacer" />
-
-        {/* Desktop & Tablet Actions */}
         <div className="app-header-actions">
           {officer.signedIn ? (
             <>
-              <span className="app-sync hidden sm:inline-flex" title="Connected to the shared evidence ledger">
+              <span className="app-sync" title="Connected to the shared evidence ledger">
                 <span className="app-sync-dot" />Cloud ledger
               </span>
 
               <button
                 type="button"
                 onClick={() => setProfileModalOpen(true)}
-                className="app-profile app-profile-clickable cursor-pointer hover:border-amber-400/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 active:scale-98 transition-all"
+                className="app-profile app-profile-clickable cursor-pointer hover:border-amber-400/50 hover:bg-zinc-50 active:scale-98 transition-all"
                 aria-label="Open Officer Profile Window"
               >
                 <span className="app-avatar bg-[#FCE8D5] text-[#7C2D12] font-bold">
@@ -165,142 +139,15 @@ export function AppHeader() {
                 variant="outline"
                 onClick={() => void signOut()}
                 aria-label="Log out"
-                className="hidden md:inline-flex"
               >
-                <LogOut className="w-3.5 h-3.5 mr-1" />Logout
+                <LogOut />Logout
               </Button>
             </>
           ) : officer.ready ? (
-            <Button asChild size="sm" className="app-login-button bg-[#FF8A1D] hover:bg-[#FF901F] text-black font-semibold shadow-md shadow-orange-500/20">
-              <Link to="/auth" search={{ mode: "login", next: "/" }}>
-                Login / Signup <ArrowRight className="w-3.5 h-3.5 ml-1" />
-              </Link>
+            <Button asChild size="sm" className="app-login-button">
+              <Link to="/auth" search={{ mode: "login", next: "/" }}>Login / Signup</Link>
             </Button>
           ) : null}
-
-          {/* Mobile Menu Sheet */}
-          <div className="md:hidden">
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg" aria-label="Open mobile navigation">
-                  <Menu className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[350px] p-6 flex flex-col justify-between">
-                <div>
-                  <SheetHeader className="text-left mb-6">
-                    <div className="flex items-center gap-2.5">
-                      <ShieldMark />
-                      <div>
-                        <SheetTitle className="text-base font-bold font-sans">NarcoLens</SheetTitle>
-                        <p className="text-xs text-muted-foreground font-mono">NARCOTICS CONTROL BUREAU</p>
-                      </div>
-                    </div>
-                  </SheetHeader>
-
-                  <div className="flex flex-col gap-1.5 mb-6">
-                    <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1 font-mono">Navigation</div>
-                    <Link
-                      to="/"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                        active === "dashboard" ? "bg-amber-500/10 text-amber-500 font-semibold" : "hover:bg-muted text-foreground"
-                      )}
-                    >
-                      Dashboard
-                      <ChevronRight className="w-4 h-4 opacity-50" />
-                    </Link>
-                    <Link
-                      to="/scan"
-                      search={{ substance: undefined }}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                        active === "scan" ? "bg-amber-500/10 text-amber-500 font-semibold" : "hover:bg-muted text-foreground"
-                      )}
-                    >
-                      Field Scan Test
-                      <ChevronRight className="w-4 h-4 opacity-50" />
-                    </Link>
-                    <Link
-                      to="/audit"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                        active === "audit" ? "bg-amber-500/10 text-amber-500 font-semibold" : "hover:bg-muted text-foreground"
-                      )}
-                    >
-                      Audit Ledger
-                      <ChevronRight className="w-4 h-4 opacity-50" />
-                    </Link>
-                  </div>
-
-                  {officer.signedIn && (
-                    <div className="border-t border-border pt-4 mb-4">
-                      <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2 font-mono">Officer Profile</div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setProfileModalOpen(true);
-                        }}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/60 hover:bg-muted cursor-pointer transition-colors text-left"
-                      >
-                        <span className="app-avatar bg-[#FCE8D5] text-[#7C2D12] font-bold">
-                          {avatarUrl ? (
-                            <img src={avatarUrl} alt={officer.displayName} className="app-avatar-img" />
-                          ) : (
-                            initials(officer.displayName || "Insp. Rajesh Kumar")
-                          )}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate text-foreground">{officer.displayName || "Insp. Rajesh Kumar"}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {officer.profile?.badge_id || officer.profile?.officer_id || "NCB-DEL-4082"} · {officer.profile?.station || "Delhi Unit"}
-                          </p>
-                        </div>
-                        <User className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="border-t border-border pt-4 flex flex-col gap-3">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
-                    <span className="flex items-center gap-1.5 font-mono">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                      Cloud ledger synced
-                    </span>
-                    <span className="text-[10px] bg-muted px-2 py-0.5 rounded font-mono">v2.4</span>
-                  </div>
-
-                  {officer.signedIn ? (
-                    <Button
-                      variant="outline"
-                      className="w-full justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        void signOut();
-                      }}
-                    >
-                      <LogOut className="w-4 h-4 mr-2" /> Sign out
-                    </Button>
-                  ) : (
-                    <Button asChild className="w-full bg-[#FF8A1D] hover:bg-[#FF901F] text-black font-semibold">
-                      <Link
-                        to="/auth"
-                        search={{ mode: "login", next: "/" }}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Officer Login <ArrowRight className="w-4 h-4 ml-1.5" />
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
         </div>
       </div>
     </header>
