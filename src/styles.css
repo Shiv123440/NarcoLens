@@ -92,18 +92,68 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 10px 28px color-mix(in oklab, var(--ink) 5%, transparent); }
 .app-kicker { color: var(--amber); font-family: "IBM Plex Mono", monospace; font-size: .66rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .app-title { font-family: "Space Grotesk", ui-sans-serif, sans-serif; letter-spacing: -.025em; }
-.app-hero { background: var(--navy); color: var(--surface); border-radius: 1rem; padding: clamp(1.4rem, 3vw, 2.4rem); display: grid; grid-template-columns: 1.1fr .9fr; gap: 2rem; overflow: hidden; position: relative; }
-.app-hero-copy { position: relative; z-index: 1; }
-.app-hero h1 { font-size: clamp(2.2rem, 5vw, 4.15rem); line-height: .98; margin: .65rem 0 1rem; max-width: 570px; }
-.app-hero p { color: color-mix(in oklab, var(--surface) 68%, transparent); max-width: 430px; line-height: 1.65; }
-.app-hero-tags { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1.4rem 0 1.6rem; }
-.app-hero-tag { border: 1px solid color-mix(in oklab, var(--surface) 16%, transparent); color: color-mix(in oklab, var(--surface) 76%, transparent); border-radius: 999px; padding: .42rem .6rem; font-family: "IBM Plex Mono", monospace; font-size: .62rem; }
-.app-hero-art { display: grid; place-items: center; min-height: 210px; }
-.app-wells { display: flex; align-items: center; gap: .8rem; }
-.app-well { width: clamp(64px, 9vw, 110px); aspect-ratio: 1; border-radius: 50%; background: var(--surface); border: 9px solid color-mix(in oklab, var(--surface) 15%, transparent); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--surface) 12%, transparent), 0 12px 40px color-mix(in oklab, var(--amber) 18%, transparent); }
-.app-well:nth-child(1) { background: var(--amber); }
-.app-well:nth-child(2) { background: var(--cyan); }
-.app-well:nth-child(3) { background: var(--green); }
+.app-hero {
+  position: relative;
+  width: 100%;
+  background: #14171A;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg, 1rem);
+  box-shadow: 0 10px 28px color-mix(in oklab, var(--ink) 6%, transparent);
+  overflow: hidden;
+  margin-bottom: 2rem;
+  padding: 0;
+  display: block;
+}
+.app-hero-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 948 / 279;
+  display: block;
+  overflow: hidden;
+  background: #14171A;
+}
+.app-hero-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+.app-hero-cta-hitbox {
+  position: absolute;
+  left: 5.27%;
+  top: 73.12%;
+  width: 21.84%;
+  height: 15.05%;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 10;
+  background: transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  display: block;
+}
+.app-hero-cta-hitbox::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 12px;
+}
+.app-hero-cta-hitbox:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 20px rgba(232, 93, 4, 0.55), inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+.app-hero-cta-hitbox:active {
+  transform: scale(0.98);
+}
+.app-hero-cta-hitbox:focus-visible {
+  outline: 2px solid var(--amber, #E85D04);
+  outline-offset: 3px;
+  box-shadow: 0 0 12px rgba(232, 93, 4, 0.6);
+}
 .app-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 2.1rem 0 .85rem; }
 .app-section-head h2 { font-size: 1.18rem; margin: 0; }
 .app-link { color: var(--ink); text-decoration: underline; text-decoration-color: var(--amber); text-underline-offset: 4px; font-size: .78rem; font-weight: 700; }
@@ -667,7 +717,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .app-nav { margin-left: .2rem; }
   .app-grid-substances { grid-template-columns: repeat(3, 1fr); }
   .app-stats { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
-  .app-hero { grid-template-columns: 1fr .75fr; }
   .app-detail-grid { grid-template-columns: 1fr; }
   .auth-layout { grid-template-columns: .8fr 1.2fr; }
 }
@@ -681,9 +730,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .app-sync-dot { width: 8px; height: 8px; }
   .app-profile-copy { display: none; }
   .app-header-actions .app-login-button { padding-inline: .65rem; font-size: .7rem; }
-  .app-hero { grid-template-columns: 1fr; gap: .5rem; }
-  .app-hero-art { min-height: 90px; }
-  .app-well { width: 58px; border-width: 6px; }
+  .app-hero-cta-hitbox::after { inset: -10px -6px; }
   .app-grid-substances { grid-template-columns: repeat(2, 1fr); }
   .app-stats { grid-template-columns: repeat(2, 1fr); }
   .app-footer { display: block; }
