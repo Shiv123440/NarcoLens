@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { recordsQuery } from "@/lib/evidence";
 import { CheckCircle2, ChevronRight, Clock3, Download, LockKeyhole, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { filterRecords, recordsToCsv, recordsToManifest } from "@/lib/forensics";
 import { AppShell, PageBack } from "@/components/app-shell";
-import { formatRecordTime, readStoredRecords, seedRecords, type AuditRecord, type Verdict } from "@/lib/app-data";
+import { formatRecordTime, type AuditRecord, type Verdict } from "@/lib/app-data";
 
 export const Route = createFileRoute("/_authenticated/audit/")({
   head: () => ({ meta: [
@@ -30,10 +32,10 @@ const filters: Array<{ id: "ALL" | Verdict; label: string }> = [
 ];
 
 function AuditPage() {
-  const [records, setRecords] = useState<AuditRecord[]>(seedRecords);
+  const recordsQ = useQuery(recordsQuery);
+  const records = useMemo(() => recordsQ.data ?? [], [recordsQ.data]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"ALL" | Verdict>("ALL");
-  useEffect(() => setRecords(readStoredRecords()), []);
 
   const visible = useMemo(() => filterRecords(records, { q: query, verdict: filter }), [records, query, filter]);
   const download = (content: string, name: string, type: string) => { const url = URL.createObjectURL(new Blob([content], { type })); const a = document.createElement("a"); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
@@ -66,7 +68,9 @@ function AuditPage() {
     </section>
 
     <section className="app-card app-recent mt-4" aria-label="Audit records">
-      {visible.length === 0 && <p className="p-4 text-sm text-muted-foreground">No records match this search.</p>}
+      {recordsQ.isLoading && <p className="p-4 text-sm text-muted-foreground">Loading shared evidence ledger…</p>}
+      {recordsQ.isError && <p className="p-4 text-sm text-destructive" role="alert">Could not load records: {recordsQ.error.message}</p>}
+      {recordsQ.isSuccess && visible.length === 0 && <p className="p-4 text-sm text-muted-foreground">{records.length === 0 ? "No evidence has been sealed yet. Start a field test to create the first record." : "No records match this search."}</p>}
       {visible.map((record) => (
         <Link key={record.id} to="/audit/$recordId" params={{ recordId: record.id }} className="app-row">
           <span className="app-row-main"><strong>{record.substance}</strong><span>{record.caseNumber} · {record.location}</span></span>

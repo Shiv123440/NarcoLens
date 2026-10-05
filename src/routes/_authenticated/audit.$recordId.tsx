@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { recordQuery } from "@/lib/evidence";
 import { CheckCircle2, Clock3, Hash, LockKeyhole, MapPin, ShieldCheck, User } from "lucide-react";
 import { verifyChain } from "@/lib/forensics";
 import { Button } from "@/components/ui/button";
 import { AppShell, PageBack } from "@/components/app-shell";
-import { formatRecordTime, readStoredRecords, seedRecords, type AuditRecord } from "@/lib/app-data";
+import { formatRecordTime, type AuditRecord } from "@/lib/app-data";
 
 export const Route = createFileRoute("/_authenticated/audit/$recordId")({
   head: () => ({ meta: [
@@ -18,13 +20,14 @@ export const Route = createFileRoute("/_authenticated/audit/$recordId")({
 
 function RecordPage() {
   const { recordId } = Route.useParams();
-  const [records, setRecords] = useState<AuditRecord[]>(seedRecords);
-  useEffect(() => setRecords(readStoredRecords()), []);
-  const record = records.find((item) => item.id === recordId);
+  const q = useQuery(recordQuery(recordId));
+  const record = q.data;
+
+  if (q.isLoading) return <AppShell><p className="text-sm text-muted-foreground">Loading evidence record…</p></AppShell>;
 
   if (!record) {
     return <AppShell>
-      <div className="app-page-heading"><div><PageBack to="/audit" /><h1 className="app-title mt-4">Record not found</h1><p>This record is not in the local ledger.</p></div></div>
+      <div className="app-page-heading"><div><PageBack to="/audit" /><h1 className="app-title mt-4">Record not found</h1><p>{q.isError ? `Could not load this record: ${q.error.message}` : "This record is not in the shared evidence ledger, or you do not have access to it."}</p></div></div>
       <Button asChild><Link to="/audit">Back to audit logs</Link></Button>
     </AppShell>;
   }
@@ -39,8 +42,8 @@ function RecordPage() {
     { label: "Case details recorded", done: true },
     { label: `Reagents assigned · ${record.reagent}`, done: true },
     { label: "Evidence photo captured & hashed", done: true },
-    { label: "Record sealed to local ledger", done: record.sealed },
-    { label: "Synced to central server", done: record.synced },
+    { label: "Record sealed to shared ledger", done: record.sealed },
+    { label: "Stored in shared cloud ledger", done: record.synced },
   ];
 
   return <AppShell>
@@ -100,7 +103,7 @@ function TamperCheck({ record }: { record: AuditRecord }) {
   const intact = result !== null && result.every(Boolean);
   return <section className="app-card mt-3 p-3">
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <div className="flex items-center gap-2 text-xs font-semibold"><ShieldCheck size={14} /> Tamper verification · local seal (unsigned)</div>
+      <div className="flex items-center gap-2 text-xs font-semibold"><ShieldCheck size={14} /> Tamper verification · hash-linked custody chain</div>
       <Button type="button" size="sm" variant="outline" disabled={chain.length === 0} onClick={() => void run()}>Verify custody chain</Button>
     </div>
     {chain.length === 0

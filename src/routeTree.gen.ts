@@ -10,14 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ScanRouteImport } from './routes/scan'
-import { Route as AuditIndexRouteImport } from './routes/audit.index'
-import { Route as AuditRecordIdRouteImport } from './routes/audit.$recordId'
+import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
+import { Route as AuthenticatedAuditIndexRouteImport } from './routes/_authenticated/audit.index'
+import { Route as AuthenticatedAuditRecordIdRouteImport } from './routes/_authenticated/audit.$recordId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -25,58 +30,65 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ScanRoute = ScanRouteImport.update({
+const AuthenticatedScanRoute = AuthenticatedScanRouteImport.update({
   id: '/scan',
   path: '/scan',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuditIndexRoute = AuditIndexRouteImport.update({
+const AuthenticatedAuditIndexRoute = AuthenticatedAuditIndexRouteImport.update({
   id: '/audit/',
   path: '/audit/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuditRecordIdRoute = AuditRecordIdRouteImport.update({
-  id: '/audit/$recordId',
-  path: '/audit/$recordId',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AuthenticatedAuditRecordIdRoute =
+  AuthenticatedAuditRecordIdRouteImport.update({
+    id: '/audit/$recordId',
+    path: '/audit/$recordId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/scan': typeof ScanRoute
-  '/audit/$recordId': typeof AuditRecordIdRoute
-  '/audit/': typeof AuditIndexRoute
+  '/scan': typeof AuthenticatedScanRoute
+  '/audit/$recordId': typeof AuthenticatedAuditRecordIdRoute
+  '/audit/': typeof AuthenticatedAuditIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/scan': typeof ScanRoute
-  '/audit/$recordId': typeof AuditRecordIdRoute
-  '/audit': typeof AuditIndexRoute
+  '/scan': typeof AuthenticatedScanRoute
+  '/audit/$recordId': typeof AuthenticatedAuditRecordIdRoute
+  '/audit': typeof AuthenticatedAuditIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/scan': typeof ScanRoute
-  '/audit/$recordId': typeof AuditRecordIdRoute
-  '/audit/': typeof AuditIndexRoute
+  '/_authenticated/scan': typeof AuthenticatedScanRoute
+  '/_authenticated/audit/$recordId': typeof AuthenticatedAuditRecordIdRoute
+  '/_authenticated/audit/': typeof AuthenticatedAuditIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths: '/' | '/auth' | '/scan' | '/audit/$recordId' | '/audit/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/auth' | '/scan' | '/audit/$recordId' | '/audit'
-  id: '__root__' | '/' | '/auth' | '/scan' | '/audit/$recordId' | '/audit/'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/scan'
+    | '/_authenticated/audit/$recordId'
+    | '/_authenticated/audit/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ScanRoute: typeof ScanRoute
-  AuditRecordIdRoute: typeof AuditRecordIdRoute
-  AuditIndexRoute: typeof AuditIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -88,6 +100,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -95,36 +114,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/scan': {
-      id: '/scan'
+    '/_authenticated/scan': {
+      id: '/_authenticated/scan'
       path: '/scan'
       fullPath: '/scan'
-      preLoaderRoute: typeof ScanRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedScanRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/audit/': {
-      id: '/audit/'
+    '/_authenticated/audit/': {
+      id: '/_authenticated/audit/'
       path: '/audit'
       fullPath: '/audit/'
-      preLoaderRoute: typeof AuditIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedAuditIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/audit/$recordId': {
-      id: '/audit/$recordId'
+    '/_authenticated/audit/$recordId': {
+      id: '/_authenticated/audit/$recordId'
       path: '/audit/$recordId'
       fullPath: '/audit/$recordId'
-      preLoaderRoute: typeof AuditRecordIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedAuditRecordIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedScanRoute: typeof AuthenticatedScanRoute
+  AuthenticatedAuditRecordIdRoute: typeof AuthenticatedAuditRecordIdRoute
+  AuthenticatedAuditIndexRoute: typeof AuthenticatedAuditIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedScanRoute: AuthenticatedScanRoute,
+  AuthenticatedAuditRecordIdRoute: AuthenticatedAuditRecordIdRoute,
+  AuthenticatedAuditIndexRoute: AuthenticatedAuditIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  ScanRoute: ScanRoute,
-  AuditRecordIdRoute: AuditRecordIdRoute,
-  AuditIndexRoute: AuditIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

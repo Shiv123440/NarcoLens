@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { matchCommand } from "@/lib/forensics";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Bot, ChevronRight, CircleHelp, FlaskConical, Mic, MicOff, Send, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
+import { LogOut, Bot, ChevronRight, CircleHelp, FlaskConical, Mic, MicOff, Send, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { initials, useOfficer } from "@/hooks/use-auth";
 
 function ShieldMark() {
   return <span className="app-brand-mark" aria-hidden="true"><ShieldCheck size={20} strokeWidth={2.4} /></span>;
@@ -10,6 +13,10 @@ function ShieldMark() {
 
 export function AppHeader() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const officer = useOfficer();
+  const signOut = async () => { await queryClient.cancelQueries(); queryClient.clear(); await supabase.auth.signOut(); void navigate({ to: "/auth", search: { mode: "login", next: "/" }, replace: true }); };
   const active = location.pathname === "/" ? "dashboard" : location.pathname.startsWith("/scan") ? "scan" : location.pathname.startsWith("/audit") ? "audit" : "";
   return (
     <header className="app-header">
@@ -24,9 +31,11 @@ export function AppHeader() {
         </nav>
         <div className="app-header-spacer" />
         <div className="app-header-actions">
-          <span className="app-sync" title="Local ledger is available offline"><span className="app-sync-dot" />Synced</span>
-          <span className="app-profile"><span className="app-avatar">RK</span><span className="app-profile-copy"><strong>Insp. Rajesh Kumar</strong><span>Field officer · DEMO</span></span></span>
-          <Button asChild size="sm" className="app-login-button"><Link to="/auth" search={{ mode: "login", next: "/" }}>Login / Signup</Link></Button>
+          {officer.signedIn ? <>
+            <span className="app-sync" title="Connected to the shared evidence ledger"><span className="app-sync-dot" />Cloud ledger</span>
+            <span className="app-profile"><span className="app-avatar">{initials(officer.displayName)}</span><span className="app-profile-copy"><strong>{officer.displayName}</strong><span>{officer.profile?.officer_id || "Officer"}{officer.profile?.station ? ` · ${officer.profile.station}` : ""}</span></span></span>
+            <Button type="button" size="sm" variant="outline" onClick={() => void signOut()} aria-label="Log out"><LogOut />Logout</Button>
+          </> : officer.ready ? <Button asChild size="sm" className="app-login-button"><Link to="/auth" search={{ mode: "login", next: "/" }}>Login / Signup</Link></Button> : null}
         </div>
       </div>
     </header>
@@ -55,7 +64,7 @@ export function PrahariWidget() {
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
   const [speak, setSpeak] = useState(false);
-  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([{ role: "assistant", text: "Hello, Inspector. Ask about the SOP or say a command like \"new test\" or \"capture\"." }]);
+  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([{ role: "assistant", text: "Hello, Officer. Ask about the SOP or say a command like \"new test\" or \"capture\"." }]);
   const recRef = useRef<SpeechRec | null>(null);
   const reply = (text: string) => {
     setMessages((m) => [...m, { role: "assistant", text }]);
