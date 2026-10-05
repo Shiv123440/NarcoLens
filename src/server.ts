@@ -44,8 +44,67 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+// Secure Server Proxy for Sarvam AI (shields API key from browser bundles)
+async function handleSarvamProxy(request: Request, env: unknown): Promise<Response> {
+  const url = new URL(request.url);
+  const targetPath = url.pathname.replace(/^\/api\/sarvam/, "");
+
+  // Resolve private server key from environment
+  const serverKey =
+    (typeof env === "object" && env !== null && "SARVAM_API_KEY" in env
+      ? (env as { SARVAM_API_KEY?: string }).SARVAM_API_KEY
+      : undefined) ||
+    process.env.SARVAM_API_KEY ||
+    process.env.VITE_SARVAM_API_KEY;
+
+  if (!serverKey) {
+    return new Response(JSON.stringify({ error: "Server Sarvam API key not configured" }), {
+      status: 503,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  const sarvamTargetUrl = `https://api.sarvam.ai${targetPath}`;
+
+  try {
+    const isFormData = request.headers.get("content-type")?.includes("multipart/form-data");
+    const headers: Record<string, string> = {
+      "api-subscription-key": serverKey,
+    };
+    if (!isFormData) {
+      headers["content-type"] = request.headers.get("content-type") || "application/json";
+    }
+
+    const res = await fetch(sarvamTargetUrl, {
+      method: request.method,
+      headers,
+      body: request.method !== "GET" && request.method !== "HEAD" ? await request.arrayBuffer() : undefined,
+    });
+
+    const responseHeaders = new Headers(res.headers);
+    responseHeaders.set("cache-control", "no-store");
+
+    return new Response(res.body, {
+      status: res.status,
+      headers: responseHeaders,
+    });
+  } catch (err: unknown) {
+    return new Response(JSON.stringify({ error: (err as Error)?.message || "Proxy connection error" }), {
+      status: 502,
+      headers: { "content-type": "application/json" },
+    });
+  }
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const url = new URL(request.url);
+
+    // Intercept /api/sarvam/* calls securely
+    if (url.pathname.startsWith("/api/sarvam")) {
+      return await handleSarvamProxy(request, env);
+    }
+
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
