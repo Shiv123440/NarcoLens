@@ -1,5 +1,5 @@
 # Roadmap
-- [x] Build the DRUG-SHIELD AI app from the uploaded specifications; incorporate the supplied lamp login HTML.
+- [x] Build the NarcoLens app from the uploaded specifications; incorporate the supplied lamp login HTML.
 - [x] Establish the dashboard, scanner, audit history, record detail, and Prahari assistant screens.
 - [x] Scanner: strict photo checks, SHA-256 of original bytes, camera error matrix, GPS (never fabricated), voice commands.
 - [x] Audit: hash-linked custody chain + tamper verification, CSV (formula-safe) and JSON manifest export.

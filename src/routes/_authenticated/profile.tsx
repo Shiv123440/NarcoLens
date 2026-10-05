@@ -5,12 +5,12 @@ import { ProfileContent } from "@/components/profile-window";
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "Officer Profile · DRUG-SHIELD AI" },
+      { title: "Officer Profile · NarcoLens" },
       {
         name: "description",
         content: "NCB field officer profile, credentials, speech settings, and terminal details.",
       },
-      { property: "og:title", content: "Officer Profile · DRUG-SHIELD AI" },
+      { property: "og:title", content: "Officer Profile · NarcoLens" },
       {
         property: "og:description",
         content: "NCB field officer profile, credentials, speech settings, and terminal details.",

@@ -11,10 +11,10 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Officer access · DRUG-SHIELD AI" },
-      { name: "description", content: "Sign in to the DRUG-SHIELD AI NCB field forensics workspace." },
-      { property: "og:title", content: "Officer access · DRUG-SHIELD AI" },
-      { property: "og:description", content: "Sign in to the DRUG-SHIELD AI NCB field forensics workspace." },
+      { title: "Officer access · NarcoLens" },
+      { name: "description", content: "Sign in to the NarcoLens NCB field forensics workspace." },
+      { property: "og:title", content: "Officer access · NarcoLens" },
+      { property: "og:description", content: "Sign in to the NarcoLens NCB field forensics workspace." },
     ],
   }),
   component: AuthPage,
@@ -221,7 +221,7 @@ function AuthPage() {
         {/* Form 1: LOGIN PANEL (Left side) */}
         <div className="auth-panel-box login-box" aria-hidden={isSignUp}>
           <h2 className="auth-panel-title">Login</h2>
-          <p className="auth-panel-subtitle">Enter your credentials to access DRUG-SHIELD AI</p>
+          <p className="auth-panel-subtitle">Enter your credentials to access NarcoLens</p>
 
           <form onSubmit={(e) => void handleLoginSubmit(e)} className="auth-clean-form">
             <div className="auth-field-box">
@@ -294,7 +294,7 @@ function AuthPage() {
         {/* Form 2: SIGN UP PANEL (Right side) */}
         <div className="auth-panel-box signup-box" aria-hidden={!isSignUp}>
           <h2 className="auth-panel-title">Sign Up</h2>
-          <p className="auth-panel-subtitle">Create your account to access DRUG-SHIELD AI</p>
+          <p className="auth-panel-subtitle">Create your account to access NarcoLens</p>
 
           <form onSubmit={(e) => void handleSignUpSubmit(e)} className="auth-clean-form">
             <div className="auth-field-box">
@@ -419,9 +419,11 @@ function AuthPage() {
           {/* Overlay Content in Login Mode */}
           <div className="auth-overlay-info login-info">
             <Link to="/" className="auth-overlay-brand">
-              <ShieldCheck size={18} className="text-white shrink-0" />
+              <span className="app-brand-mark w-7 h-7 shrink-0 rounded-md overflow-hidden bg-[#111214] inline-grid place-items-center" aria-hidden="true">
+                <img src="/narcolens-logo.png" alt="" className="w-full h-full object-cover rounded-[5px]" />
+              </span>
               <div className="auth-overlay-brand-text">
-                <span className="auth-overlay-brand-title">DRUG-SHIELD AI</span>
+                <span className="auth-overlay-brand-title">NarcoLens</span>
                 <span className="auth-overlay-brand-sub">NARCOTICS CONTROL BUREAU</span>
               </div>
             </Link>
@@ -437,9 +439,11 @@ function AuthPage() {
           {/* Overlay Content in Sign Up Mode */}
           <div className="auth-overlay-info signup-info">
             <Link to="/" className="auth-overlay-brand">
-              <ShieldCheck size={18} className="text-white shrink-0" />
+              <span className="app-brand-mark w-7 h-7 shrink-0 rounded-md overflow-hidden bg-[#111214] inline-grid place-items-center" aria-hidden="true">
+                <img src="/narcolens-logo.png" alt="" className="w-full h-full object-cover rounded-[5px]" />
+              </span>
               <div className="auth-overlay-brand-text">
-                <span className="auth-overlay-brand-title">DRUG-SHIELD AI</span>
+                <span className="auth-overlay-brand-title">NarcoLens</span>
                 <span className="auth-overlay-brand-sub">NARCOTICS CONTROL BUREAU</span>
               </div>
             </Link>

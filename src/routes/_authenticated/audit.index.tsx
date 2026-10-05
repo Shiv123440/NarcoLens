@@ -10,9 +10,9 @@ import { formatRecordTime, type AuditRecord, type Verdict } from "@/lib/app-data
 
 export const Route = createFileRoute("/_authenticated/audit/")({
   head: () => ({ meta: [
-    { title: "Audit logs & history · DRUG-SHIELD AI" },
+    { title: "Audit logs & history · NarcoLens" },
     { name: "description", content: "Search the sealed chain-of-custody ledger of NCB presumptive field tests." },
-    { property: "og:title", content: "Audit logs & history · DRUG-SHIELD AI" },
+    { property: "og:title", content: "Audit logs & history · NarcoLens" },
     { property: "og:description", content: "Search the sealed chain-of-custody ledger of NCB presumptive field tests." },
   ] }),
   component: AuditPage,
@@ -49,7 +49,7 @@ function AuditPage() {
         <p>Every sealed field test, searchable and tamper-evident.</p>
       </div>
       <span className="app-pill app-pill-sealed"><LockKeyhole size={12} />{records.filter((r) => r.sealed).length} sealed records</span>
-      <div className="flex gap-2"><Button type="button" size="sm" variant="outline" onClick={() => download(recordsToCsv(visible), "drug-shield-audit.csv", "text/csv")}><Download />Export CSV</Button><Button type="button" size="sm" variant="outline" onClick={() => download(recordsToManifest(visible), "drug-shield-manifest.json", "application/json")}><Download />JSON manifest</Button></div>
+      <div className="flex gap-2"><Button type="button" size="sm" variant="outline" onClick={() => download(recordsToCsv(visible), "narcolens-audit.csv", "text/csv")}><Download />Export CSV</Button><Button type="button" size="sm" variant="outline" onClick={() => download(recordsToManifest(visible), "narcolens-manifest.json", "application/json")}><Download />JSON manifest</Button></div>
     </div>
 
     <section className="app-card app-form-card">

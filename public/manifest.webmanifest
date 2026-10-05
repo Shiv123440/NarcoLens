@@ -1,0 +1,17 @@
+{
+  "name": "NarcoLens · Narcotics Control Bureau",
+  "short_name": "NarcoLens",
+  "description": "Offline-first presumptive field testing and chain-of-custody records for NCB officers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#101112",
+  "theme_color": "#E85D04",
+  "icons": [
+    {
+      "src": "/narcolens-logo.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

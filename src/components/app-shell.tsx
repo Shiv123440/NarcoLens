@@ -46,7 +46,11 @@ import {
 } from "@/lib/sarvam";
 
 function ShieldMark() {
-  return <span className="app-brand-mark" aria-hidden="true"><ShieldCheck size={20} strokeWidth={2.4} /></span>;
+  return (
+    <span className="app-brand-mark" aria-hidden="true">
+      <img src="/narcolens-logo.png" alt="" className="app-brand-logo-img" />
+    </span>
+  );
 }
 
 export function AppHeader() {
@@ -77,10 +81,10 @@ export function AppHeader() {
   return (
     <header className="app-header">
       <div className="app-header-inner">
-        <Link to="/" className="app-brand" aria-label="DRUG-SHIELD AI dashboard">
+        <Link to="/" className="app-brand" aria-label="NarcoLens dashboard">
           <ShieldMark />
           <span>
-            <span className="app-brand-name">DRUG-SHIELD AI</span>
+            <span className="app-brand-name">NarcoLens</span>
             <span className="app-brand-sub">NARCOTICS CONTROL BUREAU</span>
           </span>
         </Link>
@@ -438,7 +442,7 @@ export function PrahariWidget() {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const isAuth = location.pathname === "/auth";
-  useEffect(() => { document.title = isAuth ? "Officer access · DRUG-SHIELD AI" : "DRUG-SHIELD AI · NCB Field Forensics"; }, [isAuth]);
+  useEffect(() => { document.title = isAuth ? "Officer access · NarcoLens" : "NarcoLens · Narcotics Control Bureau"; }, [isAuth]);
   if (isAuth) return <>{children}</>;
   return (
     <div className="app-page">

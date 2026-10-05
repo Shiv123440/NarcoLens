@@ -14,9 +14,9 @@ import { formatCoordinates, formatGpsDisplay, reverseGeocode } from "@/lib/locat
 export const Route = createFileRoute("/_authenticated/scan")({
   validateSearch: (search: Record<string, unknown>) => ({ substance: typeof search["substance"] === "string" ? search["substance"] : undefined }),
   head: () => ({ meta: [
-    { title: "New field test · DRUG-SHIELD AI" },
+    { title: "New field test · NarcoLens" },
     { name: "description", content: "Record case details, assign reagents, capture evidence, and seal a presumptive NCB field test." },
-    { property: "og:title", content: "New field test · DRUG-SHIELD AI" },
+    { property: "og:title", content: "New field test · NarcoLens" },
     { property: "og:description", content: "Record case details, assign reagents, capture evidence, and seal a presumptive NCB field test." },
   ] }),
   component: ScanPage,

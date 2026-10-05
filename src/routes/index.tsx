@@ -30,9 +30,9 @@ import { useOfficer } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Officer dashboard · DRUG-SHIELD AI" },
+    { title: "Officer dashboard · NarcoLens" },
     { name: "description", content: "Start an offline-first NCB presumptive field test and review recent chain-of-custody records." },
-    { property: "og:title", content: "Officer dashboard · DRUG-SHIELD AI" },
+    { property: "og:title", content: "Officer dashboard · NarcoLens" },
     { property: "og:description", content: "Start an offline-first NCB presumptive field test and review recent chain-of-custody records." },
   ] }),
   component: Dashboard,

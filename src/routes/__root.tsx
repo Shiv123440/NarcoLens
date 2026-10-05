@@ -18,7 +18,7 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <p className="app-kicker">DRUG-SHIELD AI</p>
+        <p className="app-kicker">NarcoLens</p>
         <h1 className="mt-3 text-6xl font-bold text-foreground">404</h1>
         <p className="mt-4 text-sm text-muted-foreground">This field unit page does not exist.</p>
         <Link to="/" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Return to dashboard</Link>
@@ -51,16 +51,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "DRUG-SHIELD AI · NCB Field Forensics" },
+      { title: "NarcoLens · Narcotics Control Bureau" },
+      { name: "application-name", content: "NarcoLens" },
+      { name: "apple-mobile-web-app-title", content: "NarcoLens" },
       { name: "description", content: "Offline-first presumptive field testing and chain-of-custody records for NCB officers." },
-      { property: "og:title", content: "DRUG-SHIELD AI · NCB Field Forensics" },
+      { property: "og:title", content: "NarcoLens · Narcotics Control Bureau" },
       { property: "og:description", content: "Offline-first presumptive field testing and chain-of-custody records for NCB officers." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "NarcoLens · Narcotics Control Bureau" },
+      { name: "twitter:description", content: "Offline-first presumptive field testing and chain-of-custody records for NCB officers." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/narcolens-logo.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/narcolens-logo.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" },

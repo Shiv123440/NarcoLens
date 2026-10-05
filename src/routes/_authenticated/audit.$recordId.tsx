@@ -11,9 +11,9 @@ import { LegalCertificate } from "@/components/legal-certificate";
 
 export const Route = createFileRoute("/_authenticated/audit/$recordId")({
   head: () => ({ meta: [
-    { title: "Evidence record · DRUG-SHIELD AI" },
+    { title: "Evidence record · NarcoLens" },
     { name: "description", content: "Sealed chain-of-custody record with SHA-256 evidence seal and audit trail." },
-    { property: "og:title", content: "Evidence record · DRUG-SHIELD AI" },
+    { property: "og:title", content: "Evidence record · NarcoLens" },
     { property: "og:description", content: "Sealed chain-of-custody record with SHA-256 evidence seal and audit trail." },
   ] }),
   component: RecordPage,
