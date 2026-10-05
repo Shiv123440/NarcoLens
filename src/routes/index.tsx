@@ -15,6 +15,7 @@ import {
   MapPin,
   ScanLine,
   Target,
+  TriangleAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell, SectionIcon } from "@/components/app-shell";
@@ -344,35 +345,124 @@ function Dashboard() {
       ))}
     </div>
   </section>
-  <div className="app-section-head"><h2 className="app-title">Evidence overview</h2><Link to="/audit" className="app-link">View all records <ArrowUpRight size={13} className="inline" /></Link></div>
+  <div className="app-section-head app-evidence-head">
+    <div className="app-evidence-title-group">
+      <h2 className="app-title">Evidence overview</h2>
+      <span className="app-evidence-accent-bar" aria-hidden="true" />
+    </div>
+    <div className="app-evidence-watermark" aria-hidden="true">
+      <svg viewBox="0 0 160 80" fill="none" className="w-full h-full opacity-[0.08] text-[#C28B5E]">
+        <path d="M 20 80 A 65 65 0 0 1 140 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 32 80 A 53 53 0 0 1 128 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 44 80 A 41 41 0 0 1 116 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 56 80 A 29 29 0 0 1 104 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 68 80 A 17 17 0 0 1 92 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+      </svg>
+    </div>
+    <Link to="/audit" className="app-link app-evidence-link">
+      <span>View all records</span>
+      <ArrowUpRight size={13} className="inline ml-0.5 app-evidence-link-icon" aria-hidden="true" />
+    </Link>
+  </div>
   <section className="app-stats" aria-label="Evidence overview">
     <div className="app-card app-stat">
-      <div className="app-stat-label">Sealed records</div>
-      <div className="app-stat-value">{sealed}</div>
-      <div className="app-stat-note">
-        <LockKeyhole size={12} className="inline mr-1 shrink-0" aria-hidden="true" />
-        <span>SHA-256 verified</span>
+      <span className="app-stat-accent-bar" aria-hidden="true" />
+      <div className="app-stat-icon-wrap app-stat-icon-peach" aria-hidden="true">
+        <Database size={22} strokeWidth={2} />
+      </div>
+      <div className="app-stat-content">
+        <div className="app-stat-label">Sealed records</div>
+        <div className="app-stat-value">{sealed}</div>
+        <div className="app-stat-note">
+          <LockKeyhole size={12} className="inline mr-1 shrink-0 text-slate-500" aria-hidden="true" />
+          <span>SHA-256 verified</span>
+        </div>
+      </div>
+      <div className="app-stat-sparkline-wrap" aria-hidden="true">
+        <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
+          <path
+            d="M 3 22 C 11 25, 17 15, 23 16 C 29 17, 34 23, 41 15 C 46 9, 50 7, 53 6"
+            stroke="#EA580C"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
     </div>
     <div className="app-card app-stat">
-      <div className="app-stat-label">Tests today</div>
-      <div className="app-stat-value">{today}</div>
-      <div className="app-stat-note">
-        <span>IST field activity</span>
+      <span className="app-stat-accent-bar" aria-hidden="true" />
+      <div className="app-stat-icon-wrap app-stat-icon-blue" aria-hidden="true">
+        <FlaskConical size={22} strokeWidth={2} />
+      </div>
+      <div className="app-stat-content">
+        <div className="app-stat-label">Tests today</div>
+        <div className="app-stat-value">{today}</div>
+        <div className="app-stat-note">
+          <Calendar size={12} className="inline mr-1 shrink-0 text-slate-500" aria-hidden="true" />
+          <span>IST field activity</span>
+        </div>
+      </div>
+      <div className="app-stat-sparkline-wrap" aria-hidden="true">
+        <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
+          <path
+            d="M 3 20 C 9 22, 16 11, 23 11 C 30 11, 35 19, 42 12 C 46 8, 49 5, 53 4"
+            stroke="#2563EB"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
     </div>
     <div className="app-card app-stat">
-      <div className="app-stat-label">Detected</div>
-      <div className="app-stat-value">{detected}</div>
-      <div className="app-stat-note">
-        <span>Presumptive positive</span>
+      <span className="app-stat-accent-bar" aria-hidden="true" />
+      <div className="app-stat-icon-wrap app-stat-icon-red" aria-hidden="true">
+        <TriangleAlert size={22} strokeWidth={2} />
+      </div>
+      <div className="app-stat-content">
+        <div className="app-stat-label">Detected</div>
+        <div className="app-stat-value">{detected}</div>
+        <div className="app-stat-note">
+          <Target size={12} className="inline mr-1 shrink-0 text-red-500" aria-hidden="true" />
+          <span>Presumptive positive</span>
+        </div>
+      </div>
+      <div className="app-stat-sparkline-wrap" aria-hidden="true">
+        <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
+          <path
+            d="M 3 20 C 11 23, 17 9, 25 11 C 33 13, 36 20, 43 11 C 47 6, 50 5, 53 4"
+            stroke="#DC2626"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
     </div>
     <div className="app-card app-stat">
-      <div className="app-stat-label">To confirm</div>
-      <div className="app-stat-value">{toConfirm}</div>
-      <div className="app-stat-note">
-        <span>Needs lab confirmation</span>
+      <span className="app-stat-accent-bar" aria-hidden="true" />
+      <div className="app-stat-icon-wrap app-stat-icon-green" aria-hidden="true">
+        <FileText size={22} strokeWidth={2} />
+      </div>
+      <div className="app-stat-content">
+        <div className="app-stat-label">To confirm</div>
+        <div className="app-stat-value">{toConfirm}</div>
+        <div className="app-stat-note">
+          <FlaskConical size={12} className="inline mr-1 shrink-0 text-emerald-600" aria-hidden="true" />
+          <span>Needs lab confirmation</span>
+        </div>
+      </div>
+      <div className="app-stat-sparkline-wrap" aria-hidden="true">
+        <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
+          <path
+            d="M 3 22 C 10 24, 16 13, 24 13 C 32 13, 36 19, 43 13 C 47 9, 50 7, 53 5"
+            stroke="#16A34A"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
     </div>
   </section>
