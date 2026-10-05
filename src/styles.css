@@ -98,25 +98,267 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .app-page { min-height: 100dvh; background: var(--canvas); position: relative; }
 .app-main { position: relative; z-index: 5; width: min(100% - 2rem, 1180px); margin: 0 auto; padding: 1.25rem 0 7rem; }
-.app-header { background: color-mix(in oklab, var(--surface) 94%, transparent); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 30; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
-.app-header-inner { width: min(100% - 2rem, 1180px); min-height: 72px; margin: 0 auto; display: flex; align-items: center; gap: 1.25rem; }
-.app-brand { display: inline-flex; align-items: center; gap: .7rem; color: var(--ink); text-decoration: none; min-width: max-content; }
-.app-brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; overflow: hidden; background: #111214; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); flex-shrink: 0; }
-.app-brand-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 8px; }
-.app-brand-name { font-family: "Space Grotesk", ui-sans-serif, sans-serif; font-size: 1.02rem; font-weight: 750; letter-spacing: -0.01em; line-height: 1.05; color: var(--ink); }
-.app-brand-sub { color: var(--muted-ink); display: block; font-family: "IBM Plex Mono", monospace; font-size: .56rem; letter-spacing: .15em; margin-top: .15rem; }
-.app-nav { display: flex; gap: .25rem; margin-left: 1.5rem; }
-.app-nav a { color: var(--muted-ink); text-decoration: none; font-size: .85rem; font-weight: 600; padding: .55rem .7rem; border-radius: .5rem; }
-.app-nav a:hover, .app-nav a[data-status="active"] { color: var(--ink); background: var(--soft); }
-.app-header-spacer { flex: 1; }
-.app-header-actions { display: flex; align-items: center; gap: .7rem; }
-.app-sync { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--line); color: var(--muted-ink); background: var(--surface); border-radius: 999px; padding: .42rem .68rem; font-family: "IBM Plex Mono", monospace; font-size: .65rem; }
-.app-sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
-.app-profile { display: flex; align-items: center; gap: .55rem; padding: .25rem .55rem .25rem .25rem; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
-.app-avatar { display: grid; place-items: center; width: 31px; height: 31px; border-radius: 50%; background: var(--soft-amber); color: var(--ink); font-family: "IBM Plex Mono", monospace; font-size: .65rem; font-weight: 700; }
-.app-profile-copy { display: none; line-height: 1.1; }
-.app-profile-copy strong { display: block; font-size: .72rem; }
-.app-profile-copy span { color: var(--muted-ink); font-size: .6rem; }
+/* ==========================================================================
+   NarcoLens Top Navigation Bar (Dark Charcoal Pill Navbar)
+   ========================================================================== */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 1.25rem 1.25rem 0.5rem;
+  background: transparent;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.app-header-inner {
+  width: min(100%, 1240px);
+  min-height: 82px;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #2E3136 0%, #242629 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.55), 0 4px 12px -2px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1.75rem;
+  box-sizing: border-box;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: #FFFFFF;
+  text-decoration: none;
+  min-width: max-content;
+  user-select: none;
+}
+
+.app-brand-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #111214;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.app-brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.app-brand-name {
+  font-family: "Space Grotesk", "Inter", -apple-system, sans-serif;
+  font-size: 1.18rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  color: #FFFFFF;
+}
+
+.app-brand-sub {
+  color: #8F9BA8;
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  margin-top: 0.22rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Center Section: Navigation Links */
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 2.25rem;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.app-nav-item {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  color: #C4C8CE;
+  text-decoration: none;
+  font-family: "Work Sans", "Inter", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.35rem 0.2rem;
+  transition: color 0.18s ease;
+  user-select: none;
+}
+
+.app-nav-item:hover {
+  color: #FFFFFF;
+}
+
+.app-nav-item-active,
+.app-nav a[data-status="active"] {
+  color: #FFA000 !important;
+  font-weight: 600;
+}
+
+.app-nav-underline {
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: #FFA000;
+  border-radius: 2px;
+}
+
+/* Right Section: User Profile & Actions */
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.app-nav-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 1rem 0.35rem 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: left;
+  user-select: none;
+}
+
+.app-nav-profile:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.app-nav-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #F5D0B5;
+  color: #7C2D12;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.app-nav-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-nav-profile-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.app-nav-profile-email {
+  color: #FFFFFF;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: "Work Sans", "Inter", sans-serif;
+}
+
+.app-nav-profile-sub {
+  color: #8F9BA8;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  margin-top: 0.12rem;
+}
+
+.app-nav-chevron {
+  color: #8F9BA8;
+  margin-left: 0.25rem;
+  transition: transform 0.18s ease;
+}
+
+.app-nav-profile:hover .app-nav-chevron {
+  color: #FFFFFF;
+}
+
+/* Outlined Pill Logout Button */
+.app-nav-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  background: transparent;
+  color: #FFFFFF;
+  font-family: "Work Sans", "Inter", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.app-nav-logout:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.app-nav-login-btn {
+  border-radius: 9999px;
+  background: #FFA000;
+  color: #000000;
+  font-weight: 600;
+  border: none;
+  padding: 0.5rem 1.15rem;
+  font-size: 0.82rem;
+  box-shadow: 0 4px 14px rgba(255, 160, 0, 0.25);
+}
+
+.app-nav-login-btn:hover {
+  background: #FFB020;
+}
+
+@media (max-width: 960px) {
+  .app-nav { gap: 1.5rem; }
+  .app-nav-item { font-size: 0.88rem; }
+  .app-header-inner { padding: 0.65rem 1.25rem; }
+}
+@media (max-width: 820px) {
+  .app-nav { display: none; }
+  .app-nav-profile-sub { display: none; }
+}
+@media (max-width: 640px) {
+  .app-header { padding: 0.75rem 0.75rem 0.25rem; }
+  .app-header-inner { min-height: 64px; border-radius: 32px; padding: 0.5rem 1rem; width: 100%; }
+  .app-brand-name { font-size: 0.95rem; }
+  .app-brand-sub { font-size: 0.52rem; }
+  .app-brand-mark { width: 38px; height: 38px; }
+  .app-nav-profile-copy { display: none; }
+  .app-nav-logout span { display: none; }
+  .app-nav-logout { padding: 0.5rem; }
+}
 .app-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 10px 28px color-mix(in oklab, var(--ink) 5%, transparent); }
 .app-kicker { color: var(--amber); font-family: "IBM Plex Mono", monospace; font-size: .66rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .app-title { font-family: "Space Grotesk", ui-sans-serif, sans-serif; letter-spacing: -.025em; }

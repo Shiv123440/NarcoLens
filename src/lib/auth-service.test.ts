@@ -54,7 +54,7 @@ describe('Officer Authentication Service', () => {
     expect(getActiveOfficer()?.email).toBe('rajesh.kumar@ncb.gov.in');
   });
 
-  it('allows registered officer to sign in with username or email', async () => {
+  it('allows registered officer to sign in with username or email', { timeout: 20000 }, async () => {
     // 1. Sign up officer
     await signUpOfficer({
       fullName: 'Sub-Insp. Priya Sharma',

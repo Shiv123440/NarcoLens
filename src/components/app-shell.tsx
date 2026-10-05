@@ -21,7 +21,17 @@ import {
   UserCog,
   History,
   CheckCircle2,
+  Menu,
+  ArrowRight,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/profile-window";
 import { AuroraBackground } from "@/components/ui/aurora-background";
@@ -48,7 +58,7 @@ import {
 function ShieldMark() {
   return (
     <span className="app-brand-mark" aria-hidden="true">
-      <img src="/narcolens-logo.png" alt="" className="app-brand-logo-img" />
+      <img src="/narcolens-logo.png" alt="NarcoLens Logo" className="app-brand-logo-img" />
     </span>
   );
 }
@@ -59,6 +69,8 @@ export function AppHeader() {
   const queryClient = useQueryClient();
   const officer = useOfficer();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -77,10 +89,31 @@ export function AppHeader() {
       : "";
 
   const avatarUrl = officer.profile?.avatar_url;
+  const displayEmail =
+    officer.profile?.email ||
+    officer.session?.user.email ||
+    (officer.signedIn && officer.displayName?.includes("@")
+      ? officer.displayName
+      : officer.signedIn
+      ? `${officer.displayName.toLowerCase().replace(/[^a-z0-9]/g, "") || "officer"}@ncb.gov.in`
+      : "down@yahoo.com");
+
+  const displayInitials = initials(
+    officer.profile?.full_name ||
+    officer.displayName ||
+    displayEmail ||
+    "DY"
+  );
+
+  const displayOrg =
+    officer.profile?.station
+      ? `${(officer.profile?.officer_id || displayEmail.split("@")[0] || "DOWN").toUpperCase()} · ${officer.profile.station}`
+      : `${(displayEmail.split("@")[0] || "DOWN@YAHOO.COM").toUpperCase()} · Delhi Zonal Unit`;
 
   return (
     <header className="app-header">
       <div className="app-header-inner">
+        {/* Left Section: Brand Identity */}
         <Link to="/" className="app-brand" aria-label="NarcoLens dashboard">
           <ShieldMark />
           <span>
@@ -88,44 +121,63 @@ export function AppHeader() {
             <span className="app-brand-sub">NARCOTICS CONTROL BUREAU</span>
           </span>
         </Link>
+
+        {/* Center Section: Navigation Links */}
         <nav className="app-nav" aria-label="Primary navigation">
-          <Link to="/" data-status={active === "dashboard" ? "active" : undefined}>Dashboard</Link>
-          <Link to="/scan" search={{ substance: undefined }} data-status={active === "scan" ? "active" : undefined}>Scan</Link>
-          <Link to="/audit" data-status={active === "audit" ? "active" : undefined}>Audit logs</Link>
+          <Link
+            to="/"
+            className={cn("app-nav-item", active === "dashboard" && "app-nav-item-active")}
+            data-status={active === "dashboard" ? "active" : undefined}
+          >
+            <span>Dashboard</span>
+            {active === "dashboard" && <span className="app-nav-underline" aria-hidden="true" />}
+          </Link>
+          <Link
+            to="/scan"
+            search={{ substance: undefined }}
+            className={cn("app-nav-item", active === "scan" && "app-nav-item-active")}
+            data-status={active === "scan" ? "active" : undefined}
+          >
+            <span>Scan</span>
+            {active === "scan" && <span className="app-nav-underline" aria-hidden="true" />}
+          </Link>
+          <Link
+            to="/audit"
+            className={cn("app-nav-item", active === "audit" && "app-nav-item-active")}
+            data-status={active === "audit" ? "active" : undefined}
+          >
+            <span>Audit logs</span>
+            {active === "audit" && <span className="app-nav-underline" aria-hidden="true" />}
+          </Link>
         </nav>
-        <div className="app-header-spacer" />
+
+        {/* Right Section: User Profile & Logout */}
         <div className="app-header-actions">
           {officer.signedIn ? (
             <>
-              <span className="app-sync" title="Connected to the shared evidence ledger">
-                <span className="app-sync-dot" />Cloud ledger
-              </span>
-
+              {/* User Profile Pill */}
               <button
                 type="button"
                 onClick={() => setProfileModalOpen(true)}
-                className="app-profile app-profile-clickable cursor-pointer hover:border-amber-400/50 hover:bg-zinc-50 active:scale-98 transition-all"
+                className="app-nav-profile"
                 aria-label="Open Officer Profile Window"
               >
-                <span className="app-avatar bg-[#FCE8D5] text-[#7C2D12] font-bold">
+                <span className="app-nav-avatar">
                   {avatarUrl ? (
                     <img
                       src={avatarUrl}
-                      alt={officer.displayName}
-                      className="app-avatar-img"
+                      alt={displayEmail}
+                      className="app-nav-avatar-img"
                     />
                   ) : (
-                    initials(officer.displayName || "Insp. Rajesh Kumar")
+                    displayInitials
                   )}
                 </span>
-                <span className="app-profile-copy">
-                  <strong>{officer.displayName || "Insp. Rajesh Kumar"}</strong>
-                  <span>
-                    {officer.profile?.badge_id || officer.profile?.officer_id || "NCB-DEL-4082"}
-                    {officer.profile?.station ? ` · ${officer.profile.station}` : " · Delhi Zonal Unit"}
-                  </span>
+                <span className="app-nav-profile-copy">
+                  <span className="app-nav-profile-email">{displayEmail}</span>
+                  <span className="app-nav-profile-sub">{displayOrg}</span>
                 </span>
-                <ChevronDown size={13} className="app-profile-chevron text-zinc-500" />
+                <ChevronDown size={14} className="app-nav-chevron" />
               </button>
 
               <ProfileModal
@@ -133,21 +185,138 @@ export function AppHeader() {
                 onOpenChange={setProfileModalOpen}
               />
 
-              <Button
+              {/* Logout Button */}
+              <button
                 type="button"
-                size="sm"
-                variant="outline"
                 onClick={() => void signOut()}
-                aria-label="Log out"
+                className="app-nav-logout"
+                aria-label="Logout"
               >
-                <LogOut />Logout
-              </Button>
+                <LogOut size={15} strokeWidth={2.2} />
+                <span>Logout</span>
+              </button>
             </>
           ) : officer.ready ? (
-            <Button asChild size="sm" className="app-login-button">
-              <Link to="/auth" search={{ mode: "login", next: "/" }}>Login / Signup</Link>
+            <Button asChild size="sm" className="app-nav-login-btn">
+              <Link to="/auth" search={{ mode: "login", next: "/" }}>
+                Login / Signup <ArrowRight size={14} className="ml-1" />
+              </Link>
             </Button>
           ) : null}
+
+          {/* Mobile Navigation Drawer Toggle */}
+          <div className="md:hidden">
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-white hover:bg-white/10" aria-label="Open navigation menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[350px] p-6 flex flex-col justify-between bg-[#1D1F23] border-white/10 text-white">
+                <div>
+                  <SheetHeader className="text-left mb-6">
+                    <div className="flex items-center gap-2.5">
+                      <ShieldMark />
+                      <div>
+                        <SheetTitle className="text-base font-bold text-white font-sans">NarcoLens</SheetTitle>
+                        <p className="text-xs text-[#8F9BA8] font-mono">NARCOTICS CONTROL BUREAU</p>
+                      </div>
+                    </div>
+                  </SheetHeader>
+
+                  <div className="flex flex-col gap-2 mb-6">
+                    <div className="text-[11px] font-semibold text-[#8F9BA8] uppercase tracking-wider px-3 mb-1 font-mono">Navigation</div>
+                    <Link
+                      to="/"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                        active === "dashboard" ? "bg-[#FFA000]/15 text-[#FFA000] font-semibold" : "hover:bg-white/5 text-zinc-300 hover:text-white"
+                      )}
+                    >
+                      Dashboard
+                      <ChevronRight className="w-4 h-4 opacity-50" />
+                    </Link>
+                    <Link
+                      to="/scan"
+                      search={{ substance: undefined }}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                        active === "scan" ? "bg-[#FFA000]/15 text-[#FFA000] font-semibold" : "hover:bg-white/5 text-zinc-300 hover:text-white"
+                      )}
+                    >
+                      Scan
+                      <ChevronRight className="w-4 h-4 opacity-50" />
+                    </Link>
+                    <Link
+                      to="/audit"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                        active === "audit" ? "bg-[#FFA000]/15 text-[#FFA000] font-semibold" : "hover:bg-white/5 text-zinc-300 hover:text-white"
+                      )}
+                    >
+                      Audit logs
+                      <ChevronRight className="w-4 h-4 opacity-50" />
+                    </Link>
+                  </div>
+
+                  {officer.signedIn && (
+                    <div className="border-t border-white/10 pt-4 mb-4">
+                      <div className="text-[11px] font-semibold text-[#8F9BA8] uppercase tracking-wider px-3 mb-2 font-mono">Officer Profile</div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setProfileModalOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer transition-colors text-left"
+                      >
+                        <span className="app-nav-avatar">
+                          {avatarUrl ? (
+                            <img src={avatarUrl} alt={displayEmail} className="app-nav-avatar-img" />
+                          ) : (
+                            displayInitials
+                          )}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate text-white">{displayEmail}</p>
+                          <p className="text-xs text-[#8F9BA8] truncate">{displayOrg}</p>
+                        </div>
+                        <User className="w-4 h-4 text-[#8F9BA8]" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-white/10 pt-4 flex flex-col gap-3">
+                  {officer.signedIn ? (
+                    <button
+                      type="button"
+                      className="w-full py-2.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        void signOut();
+                      }}
+                    >
+                      <LogOut className="w-4 h-4" /> Logout
+                    </button>
+                  ) : (
+                    <Button asChild className="w-full bg-[#FFA000] hover:bg-[#FFB020] text-black font-semibold">
+                      <Link
+                        to="/auth"
+                        search={{ mode: "login", next: "/" }}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Login / Signup <ArrowRight className="w-4 h-4 ml-1.5" />
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>
