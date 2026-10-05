@@ -1,5 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, CheckCircle2, ChevronRight, Clock3, FileCheck2, FileText, LockKeyhole, ScanLine } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Calendar,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  Database,
+  Disc,
+  FileCheck2,
+  FileText,
+  FlaskConical,
+  LockKeyhole,
+  MapPin,
+  ScanLine,
+  Target,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell, SectionIcon } from "@/components/app-shell";
 import { formatRecordTime, SUBSTANCES, type AuditRecord } from "@/lib/app-data";
@@ -109,6 +125,134 @@ function SubstanceWatermark({ id }: { id: string }) {
         <line x1="80" y1="88" x2="104" y2="88" />
       </g>
     </svg>
+  );
+}
+
+function VialSwatch({ substance, verdict, sealed }: { substance: string; verdict: string; sealed?: boolean }) {
+  let fluidColor = "#94A3B8";
+  const s = (substance || "").toLowerCase();
+
+  if (verdict === "POSITIVE") {
+    if (s.includes("heroin") || s.includes("morphine")) {
+      fluidColor = "#9F1239";
+    } else if (s.includes("cocaine")) {
+      fluidColor = "#1D4ED8";
+    } else if (s.includes("cannabis")) {
+      fluidColor = "#7E22CE";
+    } else if (s.includes("amphetamine")) {
+      fluidColor = "#EA580C";
+    } else {
+      fluidColor = "#BE123C";
+    }
+  } else if (verdict === "INCONCLUSIVE") {
+    fluidColor = "#D97706";
+  } else if (sealed) {
+    fluidColor = "#64748B";
+  }
+
+  return (
+    <svg width="22" height="38" viewBox="0 0 22 38" fill="none" className="shrink-0 app-vial-svg" aria-hidden="true">
+      <rect x="4" y="2" width="14" height="8" rx="2" fill="#E2E8F0" stroke="#CBD5E1" strokeWidth="1" />
+      <line x1="8" y1="4" x2="8" y2="8" stroke="#94A3B8" strokeWidth="1" strokeLinecap="round" />
+      <line x1="11" y1="4" x2="11" y2="8" stroke="#94A3B8" strokeWidth="1" strokeLinecap="round" />
+      <line x1="14" y1="4" x2="14" y2="8" stroke="#94A3B8" strokeWidth="1" strokeLinecap="round" />
+      <rect x="5" y="10" width="12" height="25" rx="3" fill="#F8FAFC" stroke="#CBD5E1" strokeWidth="1" />
+      <rect x="6" y="18" width="10" height="16" rx="2" fill={fluidColor} />
+      <ellipse cx="11" cy="18" rx="5" ry="1.5" fill={fluidColor} opacity="0.9" />
+      <line x1="7" y1="12" x2="7" y2="32" stroke="#FFFFFF" strokeWidth="1" opacity="0.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function splitLocation(loc: string) {
+  if (!loc) return { primary: "Field location", secondary: "Unspecified" };
+  if (loc.includes("·")) {
+    const parts = loc.split("·").map((p) => p.trim());
+    return { primary: parts[1] ? `${parts[1]},` : parts[0], secondary: parts[1] ? parts[0] : "" };
+  }
+  if (loc.includes(",")) {
+    const parts = loc.split(",");
+    const primary = parts[0]?.trim() ? `${parts[0].trim()},` : "";
+    const secondary = parts.slice(1).join(",").trim();
+    return { primary, secondary };
+  }
+  return { primary: loc, secondary: "" };
+}
+
+function splitRecordTime(timestamp: string) {
+  try {
+    const d = new Date(timestamp);
+    if (isNaN(d.getTime())) return { date: timestamp, time: "" };
+    const date = new Intl.DateTimeFormat("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(d) + ",";
+    const time = new Intl.DateTimeFormat("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(d).toLowerCase();
+    return { date, time };
+  } catch {
+    return { date: timestamp, time: "" };
+  }
+}
+
+function getReagentInfo(reagent: string) {
+  const r = (reagent || "").toLowerCase();
+  let boxClass = "app-reagent-amber";
+  let name = reagent || "Reference kit";
+
+  if (r.includes("marquis")) {
+    boxClass = "app-reagent-red";
+    name = "Marquis reagent";
+  } else if (r.includes("scott")) {
+    boxClass = "app-reagent-blue";
+    name = "Scott reagent";
+  } else if (r.includes("duquenois")) {
+    boxClass = "app-reagent-purple";
+    name = "Duquenois-Levine";
+  } else if (r.includes("simon")) {
+    boxClass = "app-reagent-blue";
+    name = "Simon's reagent";
+  } else if (r) {
+    name = r.includes("reagent") ? reagent : `${reagent} reagent`;
+  }
+
+  return { boxClass, name };
+}
+
+function renderLedgerBadge(record: AuditRecord) {
+  if (record.verdict === "POSITIVE") {
+    return (
+      <span className="app-ledger-badge app-badge-positive">
+        <Target size={13} strokeWidth={2.4} aria-hidden="true" />
+        <span>Detected · {record.substance}</span>
+      </span>
+    );
+  }
+  if (record.verdict === "INCONCLUSIVE") {
+    return (
+      <span className="app-ledger-badge app-badge-inconclusive">
+        <Clock3 size={13} strokeWidth={2.4} aria-hidden="true" />
+        <span>Result unclear</span>
+      </span>
+    );
+  }
+  if (record.sealed) {
+    return (
+      <span className="app-ledger-badge app-badge-sealed">
+        <Disc size={13} strokeWidth={2.4} aria-hidden="true" />
+        <span>Sealed</span>
+      </span>
+    );
+  }
+  return (
+    <span className="app-ledger-badge app-badge-negative">
+      <CheckCircle2 size={13} strokeWidth={2.4} aria-hidden="true" />
+      <span>No drug detected</span>
+    </span>
   );
 }
 
@@ -232,7 +376,113 @@ function Dashboard() {
       </div>
     </div>
   </section>
-  <div className="app-section-head"><h2 className="app-title">Recent field tests</h2><span className="app-kicker">Shared ledger</span></div>
-  <section className="app-card app-recent">{!officer.signedIn && officer.ready && <div className="p-4 text-sm text-muted-foreground">Sign in as an officer to view the shared evidence history. <Link to="/auth" search={{ mode: "login", next: "/" }} className="app-link">Login / Signup</Link></div>}{officer.signedIn && recordsQ.isLoading && <p className="p-4 text-sm text-muted-foreground">Loading shared evidence ledger…</p>}{officer.signedIn && recordsQ.isError && <p className="p-4 text-sm text-destructive" role="alert">Could not load records: {recordsQ.error.message}</p>}{officer.signedIn && recordsQ.isSuccess && records.length === 0 && <p className="p-4 text-sm text-muted-foreground">No evidence sealed yet. Start a field test to create the first record.</p>}{records.slice(0, 5).map((record) => <Link key={record.id} to="/audit/$recordId" params={{ recordId: record.id }} className="app-row"><span className="app-row-main"><strong>{record.substance}</strong><span>{record.caseNumber} · {record.location}</span></span><span className="app-row-meta">{formatRecordTime(record.timestamp)}</span>{statusFor(record)}<ChevronRight size={16} className="text-muted-foreground" /></Link>)}</section>
+  <div className="app-section-head app-ledger-head">
+    <div className="app-ledger-title-group">
+      <h2 className="app-title">Recent field tests</h2>
+      <span className="app-ledger-accent-bar" aria-hidden="true" />
+    </div>
+    <div className="app-substance-watermark-center" aria-hidden="true">
+      <svg viewBox="0 0 160 80" fill="none" className="w-full h-full opacity-[0.07] text-[#C28B5E]">
+        <path d="M 30 80 A 60 60 0 0 1 130 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 40 80 A 50 50 0 0 1 120 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 50 80 A 40 40 0 0 1 110 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 60 80 A 30 30 0 0 1 100 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M 70 80 A 20 20 0 0 1 90 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+      </svg>
+    </div>
+    <div className="app-ledger-badge-top">
+      <Database size={15} strokeWidth={2.2} className="app-ledger-db-icon" aria-hidden="true" />
+      <span className="app-ledger-divider" aria-hidden="true" />
+      <span className="app-kicker app-ledger-kicker">Shared ledger</span>
+    </div>
+  </div>
+  <section className="app-ledger-card" aria-label="Recent field tests ledger">
+    {!officer.signedIn && officer.ready && (
+      <div className="p-4 text-sm text-muted-foreground">
+        Sign in as an officer to view the shared evidence history.{" "}
+        <Link to="/auth" search={{ mode: "login", next: "/" }} className="app-link">
+          Login / Signup
+        </Link>
+      </div>
+    )}
+    {officer.signedIn && recordsQ.isLoading && (
+      <p className="p-4 text-sm text-muted-foreground">Loading shared evidence ledger…</p>
+    )}
+    {officer.signedIn && recordsQ.isError && (
+      <p className="p-4 text-sm text-destructive" role="alert">
+        Could not load records: {recordsQ.error.message}
+      </p>
+    )}
+    {officer.signedIn && recordsQ.isSuccess && records.length === 0 && (
+      <p className="p-4 text-sm text-muted-foreground">
+        No evidence sealed yet. Start a field test to create the first record.
+      </p>
+    )}
+    {records.slice(0, 5).map((record) => {
+      const loc = splitLocation(record.location);
+      const dt = splitRecordTime(record.timestamp);
+      const reagentInfo = getReagentInfo(record.reagent);
+
+      return (
+        <Link
+          key={record.id}
+          to="/audit/$recordId"
+          params={{ recordId: record.id }}
+          className="app-ledger-row"
+        >
+          <span className="app-ledger-row-accent" aria-hidden="true" />
+
+          {/* Col 1: Sample & Case */}
+          <div className="app-ledger-col app-ledger-col-sample">
+            <VialSwatch substance={record.substance} verdict={record.verdict} sealed={record.sealed} />
+            <div className="app-ledger-sample-info">
+              <strong className="app-ledger-sample-name">{record.substance || "Unknown sample"}</strong>
+              <span className="app-ledger-case-num">Case: {record.caseNumber}</span>
+            </div>
+          </div>
+
+          {/* Col 2: Location */}
+          <div className="app-ledger-col app-ledger-col-loc">
+            <span className="app-ledger-icon-box app-ledger-icon-loc" aria-hidden="true">
+              <MapPin size={14} strokeWidth={2.2} />
+            </span>
+            <div className="app-ledger-text-duo">
+              <span className="app-ledger-text-primary">{loc.primary}</span>
+              {loc.secondary && <span className="app-ledger-text-secondary">{loc.secondary}</span>}
+            </div>
+          </div>
+
+          {/* Col 3: Reagent */}
+          <div className="app-ledger-col app-ledger-col-reagent">
+            <span className={`app-ledger-icon-box ${reagentInfo.boxClass}`} aria-hidden="true">
+              <FlaskConical size={14} strokeWidth={2.2} />
+            </span>
+            <span className="app-ledger-reagent-name">{reagentInfo.name}</span>
+          </div>
+
+          {/* Col 4: Date & Time */}
+          <div className="app-ledger-col app-ledger-col-time">
+            <span className="app-ledger-icon-box app-ledger-icon-cal" aria-hidden="true">
+              <Calendar size={14} strokeWidth={2.2} />
+            </span>
+            <div className="app-ledger-text-duo">
+              <span className="app-ledger-text-primary">{dt.date}</span>
+              {dt.time && <span className="app-ledger-text-secondary">{dt.time}</span>}
+            </div>
+          </div>
+
+          {/* Col 5: Status Badge */}
+          <div className="app-ledger-col app-ledger-col-status">
+            {renderLedgerBadge(record)}
+          </div>
+
+          {/* Col 6: Action Chevron */}
+          <div className="app-ledger-col app-ledger-col-action" aria-hidden="true">
+            <ArrowRight size={16} strokeWidth={2.2} className="app-ledger-arrow" />
+          </div>
+        </Link>
+      );
+    })}
+  </section>
   </AppShell>;
 }
