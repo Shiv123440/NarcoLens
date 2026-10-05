@@ -4,9 +4,12 @@ import { appendCustody, sha256Hex, validateImage } from "@/lib/forensics";
 import { ArrowLeft, ArrowRight, Camera, MapPin, Check, FileImage, Hash, Info, LockKeyhole, RefreshCcw, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell, PageBack } from "@/components/app-shell";
-import { REAGENTS, SUBSTANCES, writeStoredRecords, readStoredRecords, type AuditRecord } from "@/lib/app-data";
+import { REAGENTS, SUBSTANCES, type AuditRecord } from "@/lib/app-data";
+import { createEvidenceRecord, newRecordId } from "@/lib/evidence";
+import { useOfficer } from "@/hooks/use-auth";
+import { useQueryClient } from "@tanstack/react-query";
 
-export const Route = createFileRoute("/scan")({
+export const Route = createFileRoute("/_authenticated/scan")({
   validateSearch: (search: Record<string, unknown>) => ({ substance: typeof search["substance"] === "string" ? search["substance"] : undefined }),
   head: () => ({ meta: [
     { title: "New field test · DRUG-SHIELD AI" },
@@ -19,7 +22,7 @@ export const Route = createFileRoute("/scan")({
 
 const steps = ["Case", "Reagents", "Photo", "Result"];
 function ScanPage() {
-  const search = useSearch({ from: "/scan" });
+  const search = useSearch({ from: "/_authenticated/scan" });
   const navigate = useNavigate();
   const preset = SUBSTANCES.find((item) => item.id === search.substance);
   const [step, setStep] = useState(0);
@@ -38,11 +41,15 @@ function ScanPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canContinue = step === 0 ? caseNumber.trim().length >= 3 && location.trim().length >= 2 : step === 1 ? reagents.every(Boolean) : step === 2 ? Boolean(photo) : true;
-  const [recordId] = useState(() => `NCR-2026-${Math.floor(1000 + Math.random() * 8999)}`);
+  const [recordId] = useState(() => newRecordId());
+  const officer = useOfficer();
+  const queryClient = useQueryClient();
+  const [saving, setSaving] = useState(false);
+  const officerName = officer.profile ? `${officer.profile.full_name}${officer.profile.officer_id ? ` (${officer.profile.officer_id})` : ""}` : officer.displayName || "Unknown officer";
   const [hash, setHash] = useState("");
   const [dims, setDims] = useState<{ width: number; height: number } | null>(null);
   const [gps, setGps] = useState<string>("");
-  const resultRecord = useMemo<AuditRecord>(() => ({ id: recordId, caseNumber: caseNumber || "NCR/DEL/2026/NEW", substance: preset?.name ?? "Unknown sample", summary: "Local presumptive analysis completed · local seal (unsigned)", verdict: "INCONCLUSIVE", timestamp: new Date().toISOString(), location: location || "Field location unavailable", officer: "Insp. Rajesh Kumar", sha256: hash || "hashing…", sealed: sealed, reagent: reagents[0] ?? "Marquis", confidence: 72, synced: false, imageWidth: dims?.width, imageHeight: dims?.height, gps: gps || "GPS unavailable" }), [recordId, caseNumber, location, preset?.name, reagents, sealed, hash, dims, gps]);
+  const resultRecord = useMemo<AuditRecord>(() => ({ id: recordId, caseNumber: caseNumber || "NCR/DEL/2026/NEW", substance: preset?.name ?? "Unknown sample", summary: "Presumptive analysis completed · sealed to shared ledger", verdict: "INCONCLUSIVE", timestamp: new Date().toISOString(), location: location || "Field location unavailable", officer: officerName, sha256: hash || "hashing…", sealed: sealed, reagent: reagents[0] ?? "Marquis", confidence: 72, synced: false, imageWidth: dims?.width, imageHeight: dims?.height, gps: gps || "GPS unavailable" }), [recordId, caseNumber, location, preset?.name, reagents, sealed, hash, dims, gps, officerName]);
   const acceptBlob = async (blob: Blob, name: string, size: { width: number; height: number }) => { setHash(await sha256Hex(blob)); setDims(size); setFileName(name); setPhoto(URL.createObjectURL(blob)); };
   const handleFile = async (file: File | undefined) => { if (!file) return; const result = await validateImage(file); if (!result.ok) { setError(result.message); return; } setError(""); await acceptBlob(file, file.name, { width: result.width, height: result.height }); };
   const requestGps = () => { if (!navigator.geolocation) { setGps("GPS unavailable"); return; } navigator.geolocation.getCurrentPosition((pos) => setGps(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)} (±${Math.round(pos.coords.accuracy)} m)`), () => setGps("GPS unavailable"), { enableHighAccuracy: true, timeout: 10000 }); };
@@ -52,7 +59,7 @@ function ScanPage() {
   const capture = () => { const video = videoRef.current; if (!video || !video.videoWidth) { setError("The camera is not ready yet. Try again or upload an image."); return; } const canvas = document.createElement("canvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext("2d")?.drawImage(video, 0, 0); canvas.toBlob((blob) => { if (blob) void acceptBlob(blob, "camera-capture.jpg", { width: canvas.width, height: canvas.height }); }, "image/jpeg", 0.92); stopCamera(); };
   useEffect(() => { const onCmd = (e: Event) => { const type = (e as CustomEvent<string>).detail; if (type === "CAPTURE" && cameraOn) capture(); if (type === "NEXT_STEP") goNext(); if (type === "PREV_STEP") setStep((v) => Math.max(0, v - 1)); }; window.addEventListener("prahari-command", onCmd); return () => window.removeEventListener("prahari-command", onCmd); });
   const goNext = () => { if (!canContinue) { setError(step === 0 ? "Add a case number and seizure location to continue." : step === 2 ? "Capture or upload an evidence image to continue." : "Assign a reagent to all three wells."); return; } setError(""); if (step === 2) setAnalysisStarted(true); setStep((value) => Math.min(3, value + 1)); };
-  const saveSeal = async () => { if (!hash) return; let custody = await appendCustody([], recordId, "CREATED", resultRecord.officer, `Image ${dims?.width ?? "?"}×${dims?.height ?? "?"} hashed`); custody = await appendCustody(custody, recordId, "SEALED", resultRecord.officer, "local seal (unsigned)"); const record = { ...resultRecord, sealed: true, custody }; writeStoredRecords([record, ...readStoredRecords().filter((r) => r.id !== record.id)]); setSealed(true); };
+  const saveSeal = async () => { if (!hash || saving || sealed) return; setSaving(true); setError(""); try { let custody = await appendCustody([], recordId, "CREATED", officerName, `Image ${dims?.width ?? "?"}×${dims?.height ?? "?"} hashed`); custody = await appendCustody(custody, recordId, "SEALED", officerName, "sealed to shared cloud ledger"); await createEvidenceRecord({ ...resultRecord, sealed: true, synced: true, custody, reagents, firNumber, kitBatch, notes }); await queryClient.invalidateQueries({ queryKey: ["evidence"] }); setSealed(true); } catch (err) { setError(err instanceof Error ? `Could not save to the shared ledger: ${err.message}` : "Could not save to the shared ledger."); } finally { setSaving(false); } };
   return <AppShell><div className="app-page-heading"><div><PageBack to="/" /><span className="app-kicker block mt-4">Forensic scanner</span><h1 className="app-title">New field test</h1><p>Presumptive analysis · offline-first workflow</p></div><span className="app-pill app-pill-sealed"><LockKeyhole size={12} />Original evidence is sealed before analysis</span></div><div className="app-stepper">{steps.map((label, index) => <button key={label} type="button" className="app-step" data-active={step === index} onClick={() => index <= step && setStep(index)}><span className="app-step-num">{index < step ? <Check size={13} /> : index + 1}</span><span>{label}</span></button>)}</div>{step === 0 && <CaseStep caseNumber={caseNumber} setCaseNumber={setCaseNumber} firNumber={firNumber} setFirNumber={setFirNumber} location={location} setLocation={setLocation} kitBatch={kitBatch} setKitBatch={setKitBatch} notes={notes} setNotes={setNotes} />}{step === 0 && <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><Button type="button" variant="outline" size="sm" onClick={requestGps}><MapPin />Use my location</Button><span>{gps || "GPS not recorded yet — never fabricated"}</span></div>}{step === 1 && <ReagentStep reagents={reagents} setReagents={setReagents} />}{step === 2 && <PhotoStep photo={photo} fileName={fileName} cameraOn={cameraOn} videoRef={videoRef} onFile={(f) => void handleFile(f)} onCamera={startCamera} onCapture={capture} onStop={stopCamera} onClear={() => { setPhoto(null); setFileName(""); }} />}{step === 3 && <ResultStep started={analysisStarted} sealed={sealed} record={resultRecord} onSeal={() => void saveSeal()} onView={() => void navigate({ to: "/audit/$recordId", params: { recordId: resultRecord.id } })} />}{error && <p className="app-form-error mt-3" role="alert"><Info size={14} className="inline mr-1" />{error}</p>}<div className="app-form-actions"><Button type="button" variant="outline" onClick={() => { if (step === 0) void navigate({ to: "/" }); else setStep((value) => value - 1); }}><ArrowLeft />{step === 0 ? "Cancel" : "Back"}</Button>{step < 3 && <Button type="button" onClick={goNext}>Continue <ArrowRight /></Button>}{step === 3 && !sealed && <Button type="button" disabled={!hash} onClick={() => void saveSeal()}><LockKeyhole />Save & seal</Button>}</div></AppShell>;
 }
 

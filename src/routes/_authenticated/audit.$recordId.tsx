@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AppShell, PageBack } from "@/components/app-shell";
 import { formatRecordTime, readStoredRecords, seedRecords, type AuditRecord } from "@/lib/app-data";
 
-export const Route = createFileRoute("/audit/$recordId")({
+export const Route = createFileRoute("/_authenticated/audit/$recordId")({
   head: () => ({ meta: [
     { title: "Evidence record · DRUG-SHIELD AI" },
     { name: "description", content: "Sealed chain-of-custody record with SHA-256 evidence seal and audit trail." },

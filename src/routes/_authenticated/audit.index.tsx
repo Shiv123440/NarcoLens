@@ -6,7 +6,7 @@ import { filterRecords, recordsToCsv, recordsToManifest } from "@/lib/forensics"
 import { AppShell, PageBack } from "@/components/app-shell";
 import { formatRecordTime, readStoredRecords, seedRecords, type AuditRecord, type Verdict } from "@/lib/app-data";
 
-export const Route = createFileRoute("/audit/")({
+export const Route = createFileRoute("/_authenticated/audit/")({
   head: () => ({ meta: [
     { title: "Audit logs & history · DRUG-SHIELD AI" },
     { name: "description", content: "Search the sealed chain-of-custody ledger of NCB presumptive field tests." },
