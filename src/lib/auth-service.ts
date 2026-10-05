@@ -63,6 +63,22 @@ export function saveRegisteredOfficer(officer: StoredOfficer): void {
   localStorage.setItem(REGISTERED_OFFICERS_KEY, JSON.stringify(list));
 }
 
+export function validatePassword(password: string): { valid: boolean; error?: string } {
+  if (password.length < 8) {
+    return { valid: false, error: "Password must be at least 8 characters long." };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, error: "Password must contain at least one uppercase letter (A-Z)." };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, error: "Password must contain at least one lowercase letter (a-z)." };
+  }
+  if (!/[0-9]/.test(password)) {
+    return { valid: false, error: "Password must contain at least one number (0-9)." };
+  }
+  return { valid: true };
+}
+
 export async function signUpOfficer({
   fullName,
   officerId,
@@ -78,6 +94,12 @@ export async function signUpOfficer({
   password: string;
   autoSignIn?: boolean;
 }): Promise<{ success: boolean; error?: string; officer?: OfficerUser }> {
+  // Validate password rules (at least 8 chars, 1 uppercase, 1 lowercase, 1 number)
+  const pwCheck = validatePassword(password);
+  if (!pwCheck.valid) {
+    return { success: false, error: pwCheck.error };
+  }
+
   const cleanEmail = email.trim().toLowerCase();
   const cleanName = fullName.trim();
   const cleanOfficerId = officerId.trim().toUpperCase();
@@ -191,11 +213,16 @@ export async function signInOfficer({
     }
   } catch {}
 
-  // 2. Fallback to registered officer store (bypasses "Email not confirmed" requirement)
+  // 2. Fallback to registered officer store (supports email, username, or officer ID)
   const officers = getRegisteredOfficers();
-  const matched = officers.find((o) => o.email.toLowerCase() === cleanEmail);
+  const matched = officers.find(
+    (o) =>
+      o.email.toLowerCase() === cleanEmail ||
+      o.full_name.toLowerCase() === cleanEmail ||
+      o.officer_id.toLowerCase() === cleanEmail
+  );
 
-  if (matched && matched.passwordHash === hashPassword(password)) {
+  if (matched && (matched.passwordHash === hashPassword(password) || matched.passwordHash === password)) {
     const officerUser: OfficerUser = {
       id: matched.id,
       email: matched.email,
@@ -208,7 +235,7 @@ export async function signInOfficer({
     return { success: true, officer: officerUser };
   }
 
-  return { success: false, error: "Email or password is incorrect." };
+  return { success: false, error: "Username/Email or password is incorrect." };
 }
 
 export async function signOutOfficer(): Promise<void> {
