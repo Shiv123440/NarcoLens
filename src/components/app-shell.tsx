@@ -21,6 +21,7 @@ import {
   UserCog,
   History,
   CheckCircle2,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/profile-window";
@@ -59,12 +60,15 @@ export function AppHeader() {
   const queryClient = useQueryClient();
   const officer = useOfficer();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
     await signOutOfficer();
     void navigate({ to: "/auth", search: { mode: "login", next: "/" }, replace: true });
   };
+
   const active =
     location.pathname === "/"
       ? "dashboard"
@@ -79,32 +83,62 @@ export function AppHeader() {
   const avatarUrl = officer.profile?.avatar_url;
 
   return (
-    <header className="app-header">
-      <div className="app-header-inner">
-        <Link to="/" className="app-brand" aria-label="NarcoLens dashboard">
+    <header className="app-header-wrapper">
+      <nav
+        className="app-pill-nav"
+        aria-label="Primary navigation"
+      >
+        {/* Brand / Logo */}
+        <Link to="/" className="app-brand" aria-label="NarcoLens dashboard" onClick={() => setMobileMenuOpen(false)}>
           <ShieldMark />
-          <span>
+          <span className="app-brand-text">
             <span className="app-brand-name">NarcoLens</span>
             <span className="app-brand-sub">NARCOTICS CONTROL BUREAU</span>
           </span>
         </Link>
-        <nav className="app-nav" aria-label="Primary navigation">
-          <Link to="/" data-status={active === "dashboard" ? "active" : undefined}>Dashboard</Link>
-          <Link to="/scan" search={{ substance: undefined }} data-status={active === "scan" ? "active" : undefined}>Scan</Link>
-          <Link to="/audit" data-status={active === "audit" ? "active" : undefined}>Audit logs</Link>
-        </nav>
-        <div className="app-header-spacer" />
-        <div className="app-header-actions">
+
+        {/* Desktop Animated Navigation Links */}
+        <div className="app-pill-links">
+          <Link
+            to="/"
+            className={`app-pill-link ${active === "dashboard" ? "is-active" : ""}`}
+          >
+            <span className="app-pill-link-track">
+              <span className="app-pill-link-label">{active === "dashboard" ? "● Dashboard" : "Dashboard"}</span>
+              <span className="app-pill-link-label is-hovered">Dashboard</span>
+            </span>
+          </Link>
+
+          <Link
+            to="/scan"
+            search={{ substance: undefined }}
+            className={`app-pill-link ${active === "scan" ? "is-active" : ""}`}
+          >
+            <span className="app-pill-link-track">
+              <span className="app-pill-link-label">{active === "scan" ? "● Scan" : "Scan"}</span>
+              <span className="app-pill-link-label is-hovered">Scan</span>
+            </span>
+          </Link>
+
+          <Link
+            to="/audit"
+            className={`app-pill-link ${active === "audit" ? "is-active" : ""}`}
+          >
+            <span className="app-pill-link-track">
+              <span className="app-pill-link-label">{active === "audit" ? "● Audit logs" : "Audit logs"}</span>
+              <span className="app-pill-link-label is-hovered">Audit logs</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* Right Section: Actions & Mobile Toggle */}
+        <div className="app-pill-actions">
           {officer.signedIn ? (
             <>
-              <span className="app-sync" title="Connected to the shared evidence ledger">
-                <span className="app-sync-dot" />Cloud ledger
-              </span>
-
               <button
                 type="button"
                 onClick={() => setProfileModalOpen(true)}
-                className="app-profile app-profile-clickable cursor-pointer hover:border-amber-400/50 hover:bg-zinc-50 active:scale-98 transition-all"
+                className="app-profile app-profile-clickable"
                 aria-label="Open Officer Profile Window"
               >
                 <span className="app-avatar bg-[#FCE8D5] text-[#7C2D12] font-bold">
@@ -125,7 +159,7 @@ export function AppHeader() {
                     {officer.profile?.station ? ` · ${officer.profile.station}` : " · Delhi Zonal Unit"}
                   </span>
                 </span>
-                <ChevronDown size={13} className="app-profile-chevron text-zinc-500" />
+                <ChevronDown size={13} className="app-profile-chevron" />
               </button>
 
               <ProfileModal
@@ -137,10 +171,12 @@ export function AppHeader() {
                 type="button"
                 size="sm"
                 variant="outline"
+                className="app-pill-logout-btn"
                 onClick={() => void signOut()}
                 aria-label="Log out"
               >
-                <LogOut />Logout
+                <LogOut size={14} />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </>
           ) : officer.ready ? (
@@ -148,8 +184,49 @@ export function AppHeader() {
               <Link to="/auth" search={{ mode: "login", next: "/" }}>Login / Signup</Link>
             </Button>
           ) : null}
+
+          {/* Mobile Hamburger Toggle */}
+          <button
+            type="button"
+            className="app-mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
-      </div>
+      </nav>
+
+      {/* Mobile Menu Dropdown */}
+      {mobileMenuOpen && (
+        <div className="app-mobile-drawer animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="app-mobile-links">
+            <Link
+              to="/"
+              className={`app-mobile-link ${active === "dashboard" ? "is-active" : ""}`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Dashboard
+            </Link>
+            <Link
+              to="/scan"
+              search={{ substance: undefined }}
+              className={`app-mobile-link ${active === "scan" ? "is-active" : ""}`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Scan
+            </Link>
+            <Link
+              to="/audit"
+              className={`app-mobile-link ${active === "audit" ? "is-active" : ""}`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Audit logs
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
