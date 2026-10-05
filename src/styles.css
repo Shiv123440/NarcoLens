@@ -215,44 +215,172 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-timeline-item span { display: block; color: var(--muted-ink); font-size: .64rem; margin-top: .25rem; }
 .app-empty { padding: 2rem; text-align: center; color: var(--muted-ink); font-size: .8rem; }
 /* =========================================================
-   SLIDING DIAGONAL AUTHENTICATION BOX (YouTube Shorts / Image 1 & 2)
+   CINEMATIC DARK FORENSIC SECURITY PORTAL
    ========================================================= */
 
-.auth-slider-page {
+.auth-forensic-viewport {
   min-height: 100dvh;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: oklch(0.09 0.02 255);
+  background-color: #070B12;
   padding: 1.5rem;
   overflow: hidden;
   position: relative;
   box-sizing: border-box;
 }
 
-/* Ambient background glow */
-.auth-slider-page::before {
-  content: "";
+/* Background Layer: Forensic Laboratory Ambient Graphics */
+.auth-forensic-bg {
   position: absolute;
-  width: 650px;
-  height: 650px;
-  background: radial-gradient(circle, rgba(243, 91, 10, 0.15) 0%, transparent 70%);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
   pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, #0d1624 0%, #070B12 85%);
 }
 
-/* Main unified card */
-.auth-slider-card {
+.auth-forensic-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(4, 9, 16, 0.72) 0%, rgba(7, 11, 18, 0.94) 100%);
+  z-index: 1;
+}
+
+/* Left Side HUD Telemetry & Evidence Pouch */
+.auth-hud-left {
+  position: absolute;
+  left: clamp(1rem, 3.5vw, 4rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 0;
+  opacity: 0.32;
+  transition: opacity 0.3s ease;
+}
+
+.auth-hud-kicker {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #E85D04;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.auth-hud-divider {
+  width: 36px;
+  height: 2px;
+  background: #E85D04;
+  opacity: 0.65;
+}
+
+.auth-hud-tags {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  color: #A7B0C0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.auth-evidence-pouch {
+  margin-top: 1.25rem;
+  width: 145px;
+  padding: 0.8rem;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(4px);
+}
+
+.auth-pouch-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
+.auth-pouch-title {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #F5F7FA;
+}
+
+.auth-pouch-qr {
+  width: 18px;
+  height: 18px;
+  background: repeating-conic-gradient(#fff 0% 25%, transparent 0% 50%) 50% / 6px 6px;
+  opacity: 0.7;
+}
+
+.auth-pouch-barcodes {
+  height: 14px;
+  width: 100%;
+  background: repeating-linear-gradient(90deg, #fff 0px, #fff 2px, transparent 2px, transparent 4px, #fff 4px, #fff 7px, transparent 7px, transparent 9px);
+  opacity: 0.45;
+  margin-bottom: 0.35rem;
+}
+
+.auth-pouch-id {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.52rem;
+  color: #A7B0C0;
+  letter-spacing: 0.08em;
+}
+
+/* Right Side HUD Biometric Fingerprint Scanner */
+.auth-hud-right {
+  position: absolute;
+  right: clamp(1rem, 3.5vw, 4rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 0;
+  opacity: 0.32;
+  transition: opacity 0.3s ease;
+}
+
+.auth-fingerprint-hud {
   position: relative;
-  width: min(100%, 860px);
-  height: 500px;
-  background: #0a0f1d;
+  width: 155px;
+  height: 190px;
+  margin-top: 0.8rem;
+  display: grid;
+  place-items: center;
+}
+
+.auth-fingerprint-svg {
+  width: 100%;
+  height: 100%;
+  color: #E85D04;
+}
+
+.auth-scan-reticle {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed rgba(232, 93, 4, 0.35);
+  border-radius: 12px;
+}
+
+/* Main Forensic Security Authentication Card */
+.auth-forensic-card {
+  position: relative;
+  width: min(100%, 880px);
+  height: 510px;
+  background: #0C1320;
   border-radius: 20px;
-  border: 2px solid var(--amber);
-  box-shadow: 0 0 35px rgba(243, 91, 10, 0.45), 0 25px 80px rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8), 0 0 35px rgba(232, 93, 4, 0.12);
   overflow: hidden;
   z-index: 2;
   box-sizing: border-box;
@@ -267,10 +395,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 2.75rem 3.25rem;
+  padding: 2.75rem 3.5rem;
   transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease-in-out;
   z-index: 2;
   box-sizing: border-box;
+  background: #0C1320;
 }
 
 /* Login panel sits on left */
@@ -280,7 +409,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   opacity: 1;
   pointer-events: auto;
 }
-.auth-slider-card.active .auth-panel-box.login-box {
+.auth-forensic-card.active .auth-panel-box.login-box {
   transform: translateX(-120%);
   opacity: 0;
   pointer-events: none;
@@ -293,7 +422,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   opacity: 0;
   pointer-events: none;
 }
-.auth-slider-card.active .auth-panel-box.signup-box {
+.auth-forensic-card.active .auth-panel-box.signup-box {
   transform: translateX(0);
   opacity: 1;
   pointer-events: auto;
@@ -301,11 +430,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .auth-panel-title {
   font-family: "Space Grotesk", sans-serif;
-  font-size: 2rem;
+  font-size: 2.1rem;
   font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 1.6rem;
+  color: #F5F7FA;
+  margin: 0 0 0.25rem;
   letter-spacing: -0.02em;
+}
+
+.auth-panel-subtitle {
+  font-size: 0.78rem;
+  color: #A7B0C0;
+  margin: 0 0 1.6rem;
 }
 
 .auth-clean-form {
@@ -313,94 +448,106 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   flex-direction: column;
 }
 
-/* Underline inputs from Image 1 & 2 */
+/* Underline inputs */
 .auth-underline-group {
   position: relative;
   width: 100%;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.32);
-  transition: border-color 0.25s ease;
+  margin-bottom: 1.45rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.025);
+  border-radius: 4px 4px 0 0;
+  transition: border-color 0.25s ease, background 0.25s ease;
 }
 .auth-underline-group:focus-within {
-  border-bottom-color: var(--amber);
+  border-bottom-color: #E85D04;
+  background: rgba(232, 93, 4, 0.035);
 }
 .auth-underline-group input {
   width: 100%;
-  height: 38px;
+  height: 42px;
   background: transparent !important;
   border: none !important;
   outline: none !important;
-  color: #ffffff !important;
-  font-size: 0.95rem;
-  padding: 0 32px 0 0;
+  color: #F5F7FA !important;
+  font-size: 0.92rem;
+  padding: 0 35px 0 10px;
   box-sizing: border-box;
   font-family: inherit;
 }
 .auth-underline-group label {
   position: absolute;
-  left: 0;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.65);
+  color: #A7B0C0;
   font-size: 0.88rem;
   pointer-events: none;
-  transition: all 0.25s ease;
+  transition: all 0.22s ease;
 }
 .auth-underline-group input:focus ~ label,
 .auth-underline-group input:not(:placeholder-shown) ~ label {
-  top: -8px;
-  font-size: 0.7rem;
-  color: var(--amber);
-  font-weight: 600;
+  top: -9px;
+  left: 0;
+  font-size: 0.68rem;
+  color: #E85D04;
+  font-weight: 700;
+  font-family: "IBM Plex Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 .auth-field-right-icon {
   position: absolute;
-  right: 2px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.55);
+  color: #A7B0C0;
   pointer-events: none;
   transition: color 0.25s ease;
 }
 .auth-underline-group:focus-within .auth-field-right-icon {
-  color: var(--amber);
+  color: #E85D04;
 }
 
-/* Pill Button with vibrant gradient & glow */
-.auth-slider-btn {
+/* Primary CTA Button (#F05A0A with restrained shadow) */
+.auth-cta-btn {
   width: 100%;
   height: 44px;
   border-radius: 9999px;
   border: none;
   outline: none;
-  background: linear-gradient(90deg, #f35b0a, #ff7a29);
-  color: #ffffff;
+  background: #F05A0A;
+  color: #F5F7FA;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 18px rgba(243, 91, 10, 0.45);
-  transition: all 0.25s ease;
+  box-shadow: 0 8px 25px rgba(240, 90, 10, 0.22);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: 0.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
-.auth-slider-btn:hover:not(:disabled) {
-  box-shadow: 0 6px 26px rgba(243, 91, 10, 0.65);
+.auth-cta-btn:hover:not(:disabled) {
+  background: #FF6A16;
+  box-shadow: 0 10px 28px rgba(255, 106, 22, 0.32);
   transform: translateY(-1px);
 }
-.auth-slider-btn:disabled {
-  opacity: 0.7;
+.auth-cta-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px rgba(240, 90, 10, 0.2);
+}
+.auth-cta-btn:disabled {
+  opacity: 0.65;
   cursor: not-allowed;
 }
 
 /* Switch link */
 .auth-switch-line {
   text-align: center;
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.8rem;
+  color: #A7B0C0;
   margin-top: 1.15rem;
   margin-bottom: 0;
 }
@@ -408,7 +555,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background: none;
   border: none;
   padding: 0;
-  color: var(--amber);
+  color: #E85D04;
   font-weight: 700;
   cursor: pointer;
   font-size: inherit;
@@ -416,7 +563,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   margin-left: 0.25rem;
 }
 .auth-switch-btn:hover {
-  color: #ff954d;
+  color: #FF6A16;
   text-decoration: underline;
 }
 
@@ -427,7 +574,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   right: 0;
   width: 50%;
   height: 100%;
-  background: linear-gradient(135deg, #f35b0a 0%, #ea580c 45%, #c2410c 75%, #9a3412 100%);
+  background: linear-gradient(145deg, #E85D04 0%, #C84605 55%, #8F2F06 100%);
   clip-path: polygon(28% 0%, 100% 0%, 100% 100%, 0% 100%);
   transition: all 0.7s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;
@@ -435,23 +582,35 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   justify-content: center;
   z-index: 5;
   box-sizing: border-box;
-  padding: 2.5rem;
-  color: #ffffff;
+  padding: 3rem;
+  color: #F5F7FA;
+  overflow: hidden;
 }
 
 /* In active state (Sign Up mode), overlay moves to the left! */
-.auth-slider-card.active .auth-curved-overlay {
+.auth-forensic-card.active .auth-curved-overlay {
   right: 50%;
   clip-path: polygon(0% 0%, 100% 0%, 72% 100%, 0% 100%);
 }
 
+/* Watermark Pattern inside orange overlay */
+.auth-overlay-watermark {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.12) 0%, transparent 60%), repeating-radial-gradient(circle at 60% 40%, transparent 0, transparent 8px, rgba(0, 0, 0, 0.08) 9px, transparent 10px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 /* Overlay text contents */
 .auth-overlay-info {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  max-width: 320px;
+  align-items: flex-start;
+  text-align: left;
+  max-width: 340px;
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 .auth-overlay-info.login-info {
@@ -460,22 +619,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-overlay-info.signup-info {
   display: none;
 }
-.auth-slider-card.active .auth-overlay-info.login-info {
+.auth-forensic-card.active .auth-overlay-info.login-info {
   display: none;
 }
-.auth-slider-card.active .auth-overlay-info.signup-info {
+.auth-forensic-card.active .auth-overlay-info.signup-info {
   display: flex;
 }
 
 .auth-overlay-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1.3rem;
-  background: rgba(0, 0, 0, 0.28);
-  padding: 0.35rem 0.85rem;
+  gap: 0.65rem;
+  margin-bottom: 1.6rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.4rem 0.9rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   text-decoration: none;
 }
 .auth-overlay-brand-text {
@@ -486,7 +645,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.05em;
-  color: #ffffff;
+  color: #FFFFFF;
 }
 .auth-overlay-brand-sub {
   display: block;
@@ -495,29 +654,28 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.auth-overlay-title {
+.auth-overlay-heading-hero {
   font-family: "Space Grotesk", sans-serif;
-  font-size: 2.1rem;
+  font-size: 2.2rem;
   font-weight: 800;
-  letter-spacing: 0.02em;
-  margin: 0 0 0.45rem;
-  color: #ffffff;
-}
-.auth-overlay-heading {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 0 0 0.65rem;
-  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+  color: #FFFFFF;
 }
 .auth-overlay-desc {
-  font-size: 0.78rem;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
   margin: 0;
 }
 
 @media (max-width: 768px) {
-  .auth-slider-card {
+  .auth-hud-left,
+  .auth-hud-right {
+    display: none;
+  }
+  .auth-forensic-card {
     height: auto;
     min-height: 520px;
   }
@@ -532,10 +690,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .auth-panel-box.signup-box {
     display: none;
   }
-  .auth-slider-card.active .auth-panel-box.login-box {
+  .auth-forensic-card.active .auth-panel-box.login-box {
     display: none;
   }
-  .auth-slider-card.active .auth-panel-box.signup-box {
+  .auth-forensic-card.active .auth-panel-box.signup-box {
     display: flex;
     transform: none;
     opacity: 1;

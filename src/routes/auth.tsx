@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { User, Lock, Mail, ShieldCheck, ArrowRight } from "lucide-react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import { signUpOfficer, signInOfficer, getActiveOfficer, validatePassword } from "@/lib/auth-service";
 
 export const Route = createFileRoute("/auth")({
@@ -19,10 +20,77 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const SPRING = {
+  mass: 0.1, // Responsive spring inertia
+  damping: 10, // Fluid, realistic damping
+  stiffness: 131, // Snappy recovery
+};
+
+function SpringMouseFollow({
+  containerRef,
+}: {
+  containerRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const xSpring = useSpring(x, SPRING);
+  const ySpring = useSpring(y, SPRING);
+  const opacity = useMotionValue(0);
+  const opacitySpring = useSpring(opacity, SPRING);
+  const scale = useMotionValue(0);
+  const scaleSpring = useSpring(scale, SPRING);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      const bounds = el.getBoundingClientRect();
+      x.set(e.clientX - bounds.left);
+      y.set(e.clientY - bounds.top);
+    };
+
+    const handlePointerEnter = () => {
+      opacity.set(1);
+      scale.set(1);
+    };
+
+    const handlePointerLeave = () => {
+      opacity.set(0);
+      scale.set(0);
+    };
+
+    el.addEventListener("pointermove", handlePointerMove);
+    el.addEventListener("pointerenter", handlePointerEnter);
+    el.addEventListener("pointerleave", handlePointerLeave);
+
+    return () => {
+      el.removeEventListener("pointermove", handlePointerMove);
+      el.removeEventListener("pointerenter", handlePointerEnter);
+      el.removeEventListener("pointerleave", handlePointerLeave);
+    };
+  }, [containerRef, x, y, opacity, scale]);
+
+  return (
+    <motion.div
+      style={{
+        x: xSpring,
+        y: ySpring,
+        opacity: opacitySpring,
+        scale: scaleSpring,
+        translateX: "-50%",
+        translateY: "-50%",
+      }}
+      className="pointer-events-none absolute z-10 h-72 w-72 rounded-full bg-gradient-to-r from-[#E85D04]/22 via-[#F05A0A]/14 to-transparent blur-3xl"
+    />
+  );
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
   const [isSignUp, setIsSignUp] = useState(search.mode === "signup");
+  const cardRef = useRef<HTMLDivElement | null>(null);
 
   // Login form state
   const [loginIdentifier, setLoginIdentifier] = useState("");
@@ -137,11 +205,87 @@ function AuthPage() {
   };
 
   return (
-    <main className="auth-slider-page">
-      <div className={`auth-slider-card ${isSignUp ? "active" : ""}`}>
+    <main className="auth-forensic-viewport">
+      {/* Background Layer: Forensic Laboratory Ambient Graphics */}
+      <div className="auth-forensic-bg" aria-hidden="true">
+        {/* Left Side: Narcotics Control Bureau Field Evidence HUD */}
+        <div className="auth-hud-left">
+          <div className="auth-hud-kicker">
+            <span>NARCOTICS</span>
+            <span>CONTROL</span>
+            <span>BUREAU</span>
+          </div>
+          <div className="auth-hud-divider" />
+          <div className="auth-hud-tags">
+            <span>ANALYSE</span>
+            <span>DETECT</span>
+            <span>SECURE</span>
+            <span>VERIFY</span>
+          </div>
+
+          {/* Evidence Bag Illustration */}
+          <div className="auth-evidence-pouch">
+            <div className="auth-pouch-badge">
+              <span className="auth-pouch-title">EVIDENCE</span>
+              <div className="auth-pouch-qr" />
+            </div>
+            <div className="auth-pouch-barcodes" />
+            <div className="auth-pouch-id">NCB-SZ-2026-8841</div>
+          </div>
+        </div>
+
+        {/* Right Side: Biometric Fingerprint Analysis HUD */}
+        <div className="auth-hud-right">
+          <div className="auth-hud-kicker text-right">
+            <span>EVIDENCE</span>
+            <span>VERIFIED</span>
+            <span>CHAIN OF CUSTODY</span>
+            <span>SECURED</span>
+          </div>
+          <div className="auth-hud-divider ml-auto" />
+          <div className="auth-hud-tags text-right">
+            <span>FORENSIC</span>
+            <span>ANALYSIS</span>
+            <span>FIELD TESTING</span>
+            <span>DIGITAL RECORDS</span>
+          </div>
+
+          {/* Concentric Biometric Fingerprint Pattern */}
+          <div className="auth-fingerprint-hud">
+            <svg viewBox="0 0 200 240" className="auth-fingerprint-svg" fill="none" stroke="currentColor">
+              <path d="M100 20 C60 20 30 50 30 100 C30 160 50 200 100 230" strokeWidth="1.5" strokeOpacity="0.35" />
+              <path d="M100 35 C70 35 45 60 45 105 C45 155 60 190 100 215" strokeWidth="1.5" strokeOpacity="0.45" />
+              <path d="M100 50 C80 50 60 70 60 110 C60 150 70 180 100 200" strokeWidth="1.5" strokeOpacity="0.55" />
+              <path d="M100 65 C88 65 75 80 75 115 C75 145 80 170 100 185" strokeWidth="1.5" strokeOpacity="0.65" />
+              <path d="M100 80 C95 80 88 90 88 120 C88 140 92 160 100 170" strokeWidth="1.5" strokeOpacity="0.75" />
+              <path d="M100 20 C140 20 170 50 170 100 C170 160 150 200 100 230" strokeWidth="1.5" strokeOpacity="0.35" />
+              <path d="M100 35 C130 35 155 60 155 105 C155 155 140 190 100 215" strokeWidth="1.5" strokeOpacity="0.45" />
+              <path d="M100 50 C120 50 140 70 140 110 C140 150 130 180 100 200" strokeWidth="1.5" strokeOpacity="0.55" />
+              <path d="M100 65 C112 65 125 80 125 115 C125 145 120 170 100 185" strokeWidth="1.5" strokeOpacity="0.65" />
+              <path d="M100 80 C105 80 112 90 112 120 C112 140 108 160 100 170" strokeWidth="1.5" strokeOpacity="0.75" />
+              <circle cx="100" cy="120" r="4" fill="currentColor" fillOpacity="0.8" />
+            </svg>
+            <div className="auth-scan-reticle" />
+          </div>
+        </div>
+
+        {/* Ambient Dark Navy Forensic Lab Overlay */}
+        <div className="auth-forensic-overlay" />
+      </div>
+
+      {/* Main Forensic Authentication Card */}
+      <div
+        ref={cardRef}
+        className={`auth-forensic-card ${isSignUp ? "active" : ""}`}
+      >
+        {/* Spring Mouse Follow Spotlight */}
+        <SpringMouseFollow containerRef={cardRef} />
+
         {/* Form 1: LOGIN PANEL (Left side) */}
         <div className="auth-panel-box login-box" aria-hidden={isSignUp}>
           <h2 className="auth-panel-title">Login</h2>
+          <p className="auth-panel-subtitle">Enter your credentials to access DRUG-SHIELD AI</p>
+
           <form onSubmit={(e) => void handleLoginSubmit(e)} className="auth-clean-form">
             <div className="auth-underline-group">
               <input
@@ -183,8 +327,8 @@ function AuthPage() {
               </p>
             )}
 
-            <button type="submit" disabled={busy} className="auth-slider-btn">
-              {busy ? "Signing in…" : "Login"}
+            <button type="submit" disabled={busy} className="auth-cta-btn">
+              <span>{busy ? "Signing in…" : "Login"}</span>
               <ArrowRight size={16} />
             </button>
 
@@ -209,6 +353,8 @@ function AuthPage() {
         {/* Form 2: SIGN UP PANEL (Right side) */}
         <div className="auth-panel-box signup-box" aria-hidden={!isSignUp}>
           <h2 className="auth-panel-title">Sign Up</h2>
+          <p className="auth-panel-subtitle">Create your account to access DRUG-SHIELD AI</p>
+
           <form onSubmit={(e) => void handleSignUpSubmit(e)} className="auth-clean-form">
             <div className="auth-underline-group">
               <input
@@ -255,37 +401,37 @@ function AuthPage() {
             {/* Password Requirement Indicators */}
             <div className="flex flex-wrap gap-1.5 mb-3 text-[10px] font-mono">
               <span
-                className={`rounded px-1.5 py-0.5 border ${
+                className={`rounded px-1.5 py-0.5 border transition-colors ${
                   hasMinLength
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                    : "border-zinc-700 bg-zinc-900/50 text-zinc-400"
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-semibold"
+                    : "border-white/10 bg-white/[0.03] text-[#A7B0C0]"
                 }`}
               >
                 {hasMinLength ? "✓ 8+ chars" : "8+ chars"}
               </span>
               <span
-                className={`rounded px-1.5 py-0.5 border ${
+                className={`rounded px-1.5 py-0.5 border transition-colors ${
                   hasUppercase
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                    : "border-zinc-700 bg-zinc-900/50 text-zinc-400"
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-semibold"
+                    : "border-white/10 bg-white/[0.03] text-[#A7B0C0]"
                 }`}
               >
                 {hasUppercase ? "✓ 1 Uppercase" : "1 Uppercase"}
               </span>
               <span
-                className={`rounded px-1.5 py-0.5 border ${
+                className={`rounded px-1.5 py-0.5 border transition-colors ${
                   hasLowercase
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                    : "border-zinc-700 bg-zinc-900/50 text-zinc-400"
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-semibold"
+                    : "border-white/10 bg-white/[0.03] text-[#A7B0C0]"
                 }`}
               >
                 {hasLowercase ? "✓ 1 Lowercase" : "1 Lowercase"}
               </span>
               <span
-                className={`rounded px-1.5 py-0.5 border ${
+                className={`rounded px-1.5 py-0.5 border transition-colors ${
                   hasNumber
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                    : "border-zinc-700 bg-zinc-900/50 text-zinc-400"
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-semibold"
+                    : "border-white/10 bg-white/[0.03] text-[#A7B0C0]"
                 }`}
               >
                 {hasNumber ? "✓ 1 Number" : "1 Number"}
@@ -298,8 +444,8 @@ function AuthPage() {
               </p>
             )}
 
-            <button type="submit" disabled={busy} className="auth-slider-btn">
-              {busy ? "Registering…" : "Register"}
+            <button type="submit" disabled={busy} className="auth-cta-btn">
+              <span>{busy ? "Registering…" : "Register"}</span>
               <ArrowRight size={16} />
             </button>
 
@@ -321,20 +467,24 @@ function AuthPage() {
           </form>
         </div>
 
-        {/* Sliding Diagonal Overlay Shape */}
+        {/* Sliding Diagonal Information Overlay */}
         <div className="auth-curved-overlay" aria-hidden="true">
+          {/* Inner Forensic Watermark Pattern */}
+          <div className="auth-overlay-watermark" />
+
           {/* Overlay Content in Login Mode */}
           <div className="auth-overlay-info login-info">
             <Link to="/" className="auth-overlay-brand">
-              <ShieldCheck size={20} className="text-white shrink-0" />
+              <ShieldCheck size={18} className="text-white shrink-0" />
               <div className="auth-overlay-brand-text">
                 <span className="auth-overlay-brand-title">DRUG-SHIELD AI</span>
                 <span className="auth-overlay-brand-sub">NARCOTICS CONTROL BUREAU</span>
               </div>
             </Link>
 
-            <h2 className="auth-overlay-title">WELCOME BACK!</h2>
-            <h3 className="auth-overlay-heading">Field evidence, kept intact.</h3>
+            <h2 className="auth-overlay-heading-hero">
+              SECURE FIELD <span className="block text-[#FFC499]">EVIDENCE.</span>
+            </h2>
             <p className="auth-overlay-desc">
               A focused workspace for presumptive testing, evidence sealing, and chain-of-custody records in the field.
             </p>
@@ -343,15 +493,16 @@ function AuthPage() {
           {/* Overlay Content in Sign Up Mode */}
           <div className="auth-overlay-info signup-info">
             <Link to="/" className="auth-overlay-brand">
-              <ShieldCheck size={20} className="text-white shrink-0" />
+              <ShieldCheck size={18} className="text-white shrink-0" />
               <div className="auth-overlay-brand-text">
                 <span className="auth-overlay-brand-title">DRUG-SHIELD AI</span>
                 <span className="auth-overlay-brand-sub">NARCOTICS CONTROL BUREAU</span>
               </div>
             </Link>
 
-            <h2 className="auth-overlay-title">WELCOME!</h2>
-            <h3 className="auth-overlay-heading">Field evidence, kept intact.</h3>
+            <h2 className="auth-overlay-heading-hero">
+              SECURE FIELD <span className="block text-[#FFC499]">EVIDENCE.</span>
+            </h2>
             <p className="auth-overlay-desc">
               A focused workspace for presumptive testing, evidence sealing, and chain-of-custody records in the field.
             </p>
