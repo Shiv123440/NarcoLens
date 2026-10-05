@@ -517,7 +517,7 @@ function Dashboard() {
       <h2 className="app-title">Recent field tests</h2>
       <span className="app-ledger-accent-bar" aria-hidden="true" />
     </div>
-    <div className="app-substance-watermark-center" aria-hidden="true">
+    <div className="app-substance-watermark-center app-ledger-watermark" aria-hidden="true">
       <svg viewBox="0 0 160 80" fill="none" className="w-full h-full opacity-[0.07] text-[#C28B5E]">
         <path d="M 30 80 A 60 60 0 0 1 130 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
         <path d="M 40 80 A 50 50 0 0 1 120 80" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
