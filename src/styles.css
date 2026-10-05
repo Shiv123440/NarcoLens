@@ -287,6 +287,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* Login panel sits on left */
 .auth-panel-box.login-box {
   left: 0;
+  width: 60%;
+  padding-left: 2.75rem;
+  padding-right: clamp(4.5rem, 10vw, 5.5rem);
   transform: translateX(0);
   opacity: 1;
   pointer-events: auto;
@@ -297,9 +300,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   pointer-events: none;
 }
 
-/* Signup panel sits on right */
+/* Signup panel sits on right - generous left padding ensures text never crosses the diagonal line */
 .auth-panel-box.signup-box {
   right: 0;
+  width: 60%;
+  padding-left: clamp(6.25rem, 13vw, 7.5rem);
+  padding-right: 2.25rem;
   transform: translateX(120%);
   opacity: 0;
   pointer-events: none;
@@ -317,18 +323,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: #F5F7FA;
   margin: 0 0 0.2rem;
   letter-spacing: -0.02em;
+  max-width: 310px;
 }
 
 .auth-panel-subtitle {
   font-size: 0.76rem;
   color: #A7B0C0;
-  margin: 0 0 1.35rem;
+  margin: 0 0 1.25rem;
+  max-width: 310px;
 }
 
 .auth-clean-form {
   display: flex;
   flex-direction: column;
-  max-width: 320px;
+  max-width: 310px;
+  width: 100%;
 }
 
 /* Modern Dark Input Fields */
@@ -475,7 +484,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background: rgba(210, 65, 5, 0.82);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  clip-path: polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%);
+  clip-path: polygon(14% 0%, 100% 0%, 100% 100%, 0% 100%);
   transition: all 0.7s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;
   align-items: center;
@@ -490,7 +499,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* In active state (Sign Up mode), overlay moves to the left! */
 .auth-forensic-card.active .auth-curved-overlay {
   right: 50%;
-  clip-path: polygon(0% 0%, 100% 0%, 82% 100%, 0% 100%);
+  clip-path: polygon(0% 0%, 100% 0%, 86% 100%, 0% 100%);
 }
 
 /* Overlay text contents */
@@ -503,7 +512,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   text-align: left;
   box-sizing: border-box;
   width: 100%;
-  max-width: 360px;
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
@@ -511,6 +519,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-overlay-info.login-info {
   display: flex;
   padding: 2.5rem 2rem 2.5rem clamp(4.5rem, 16%, 5.5rem);
+  max-width: 350px;
 }
 .auth-overlay-info.signup-info {
   display: none;
@@ -522,7 +531,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .auth-forensic-card.active .auth-overlay-info.signup-info {
   display: flex;
-  padding: 2.5rem clamp(4.5rem, 16%, 5.5rem) 2.5rem 2.5rem;
+  padding: 2.5rem clamp(5rem, 18%, 6rem) 2.5rem 2.25rem;
+  max-width: 310px;
 }
 
 .auth-overlay-brand {
@@ -574,7 +584,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   line-height: 1.55;
   color: rgba(255, 255, 255, 0.92);
   margin: 0;
-  max-width: 280px;
+  max-width: 245px;
 }
 
 @media (max-width: 768px) {
