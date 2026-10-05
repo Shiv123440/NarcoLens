@@ -53,15 +53,19 @@ export interface TtsResponse {
   error?: string;
 }
 
-export const DEFAULT_SARVAM_KEY = 'sk_q0s7w9v8_WIKE8wvNfQRQUgiHW3eSTdIF';
-
+// Safe key resolver: Never bundles fallback secrets into browser builds
 export function getSarvamKey(overrideKey?: string): string {
   if (overrideKey && overrideKey.trim()) return overrideKey.trim();
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem('sarvam_api_key');
     if (stored && stored.trim()) return stored.trim();
   }
-  return import.meta.env.VITE_SARVAM_API_KEY || DEFAULT_SARVAM_KEY;
+  // Optional environment key for SSR/server/tests
+  return (
+    (typeof process !== 'undefined' && process.env?.SARVAM_API_KEY) ||
+    import.meta.env.VITE_SARVAM_API_KEY ||
+    ''
+  );
 }
 
 const SYSTEM_PROMPT =
@@ -75,7 +79,8 @@ const SYSTEM_PROMPT =
 
 /**
  * Sends conversation to Sarvam AI (sarvam-105b-conversations)
- * with graceful fallback to local forensic knowledge engine if offline.
+ * via secure server proxy (shielding credentials from client bundle)
+ * or direct endpoint if custom key is supplied, with graceful offline fallback.
  */
 export async function chatWithPrahari(
   message: string,
@@ -83,16 +88,25 @@ export async function chatWithPrahari(
   language: SupportedLanguage = 'en-IN',
   apiKey?: string
 ): Promise<ChatResponse> {
-  const key = getSarvamKey(apiKey);
+  const directKey = getSarvamKey(apiKey);
+  // If running in browser and no explicit custom key given, route through secure server proxy
+  const useProxy = typeof window !== 'undefined' && !apiKey && !localStorage.getItem('sarvam_api_key');
+  const targetUrl = useProxy
+    ? '/api/sarvam/v1/chat/completions'
+    : 'https://api.sarvam.ai/v1/chat/completions';
 
-  if (key) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (directKey && !useProxy) {
+    headers['api-subscription-key'] = directKey;
+  }
+
+  if (useProxy || directKey) {
     try {
-      const res = await fetch('https://api.sarvam.ai/v1/chat/completions', {
+      const res = await fetch(targetUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'api-subscription-key': key,
-        },
+        headers,
         body: JSON.stringify({
           model: 'sarvam-105b-conversations',
           messages: [
@@ -138,8 +152,11 @@ export async function transcribeAudioWithSarvam(
   language: SupportedLanguage = 'en-IN',
   apiKey?: string
 ): Promise<SttResponse> {
-  const key = getSarvamKey(apiKey);
-  if (!key) {
+  const directKey = getSarvamKey(apiKey);
+  const useProxy = typeof window !== 'undefined' && !apiKey && !localStorage.getItem('sarvam_api_key');
+  const targetUrl = useProxy ? '/api/sarvam/speech-to-text' : 'https://api.sarvam.ai/speech-to-text';
+
+  if (!useProxy && !directKey) {
     return { transcript: '', error: 'Sarvam API key required' };
   }
 
@@ -151,11 +168,14 @@ export async function transcribeAudioWithSarvam(
     formData.append('language_code', language);
     formData.append('keyterms', JSON.stringify(['FIR', 'NDPS', 'Marquis', 'Mecke', 'Mandelin', 'Prahari', 'BSA']));
 
-    const res = await fetch('https://api.sarvam.ai/speech-to-text', {
+    const headers: Record<string, string> = {};
+    if (directKey && !useProxy) {
+      headers['api-subscription-key'] = directKey;
+    }
+
+    const res = await fetch(targetUrl, {
       method: 'POST',
-      headers: {
-        'api-subscription-key': key,
-      },
+      headers,
       body: formData,
     });
 
@@ -180,16 +200,22 @@ export async function synthesizeSpeechWithSarvam(
   language: SupportedLanguage = 'en-IN',
   apiKey?: string
 ): Promise<string | null> {
-  const key = getSarvamKey(apiKey);
+  const directKey = getSarvamKey(apiKey);
+  const useProxy = typeof window !== 'undefined' && !apiKey && !localStorage.getItem('sarvam_api_key');
+  const targetUrl = useProxy ? '/api/sarvam/text-to-speech' : 'https://api.sarvam.ai/text-to-speech';
 
-  if (key) {
+  if (useProxy || directKey) {
     try {
-      const res = await fetch('https://api.sarvam.ai/text-to-speech', {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (directKey && !useProxy) {
+        headers['api-subscription-key'] = directKey;
+      }
+
+      const res = await fetch(targetUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'api-subscription-key': key,
-        },
+        headers,
         body: JSON.stringify({
           inputs: [text.slice(0, 500)],
           target_language_code: language,

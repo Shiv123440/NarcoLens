@@ -32,3 +32,8 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Environment & Credentials
+.env
+.env.*
+!.env.example

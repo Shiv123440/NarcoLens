@@ -41,7 +41,6 @@ import {
   chatWithPrahari,
   synthesizeSpeechWithSarvam,
   SUPPORTED_LANGUAGES,
-  DEFAULT_SARVAM_KEY,
   type IndicLanguageCode,
   type ChatMessage,
 } from "@/lib/sarvam";
@@ -270,7 +269,7 @@ export function PrahariWidget() {
   const [speak, setSpeak] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showKeyInput, setShowKeyInput] = useState(false);
-  const [apiKey, setApiKey] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("sarvam_api_key") || DEFAULT_SARVAM_KEY : DEFAULT_SARVAM_KEY));
+  const [apiKey, setApiKey] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("sarvam_api_key") || "" : ""));
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: "Jai Hind, Officer. I am Prahari AI, powered by Sarvam AI. Ask about the NDPS SOP, reagent validation, or speak a voice command like \"new test\" or \"capture\"." },
   ]);
