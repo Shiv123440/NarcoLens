@@ -114,11 +114,55 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-substance h3 { font-size: .88rem; margin: 0 0 .3rem; }
 .app-substance p { color: var(--muted-ink); margin: 0; font-size: .68rem; line-height: 1.35; }
 .app-pending { color: var(--amber); font-size: .58rem; font-family: "IBM Plex Mono", monospace; }
-.app-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; }
-.app-stat { padding: 1rem 1.1rem; }
-.app-stat-label { color: var(--muted-ink); font-size: .72rem; }
-.app-stat-value { font-family: "Space Grotesk", sans-serif; font-size: 1.8rem; font-weight: 700; margin-top: .4rem; }
-.app-stat-note { color: var(--muted-ink); font-size: .62rem; margin-top: .15rem; }
+.app-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+  align-items: stretch;
+}
+.app-stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.15rem 1.25rem;
+  min-height: 124px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.app-stat-label {
+  display: block;
+  color: var(--muted-ink);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.app-stat-value {
+  display: block;
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(2rem, 3.2vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  margin: 0.55rem 0 0.6rem 0;
+}
+.app-stat-note {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted-ink);
+  font-size: 0.68rem;
+  line-height: 1.35;
+  margin-top: auto;
+  white-space: normal;
+  word-break: break-word;
+}
+.app-stat-note svg {
+  flex-shrink: 0;
+  color: var(--muted-ink);
+}
 .app-recent { overflow: hidden; }
 .app-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.15rem; border-top: 1px solid var(--line); text-decoration: none; color: inherit; }
 .app-row:first-child { border-top: 0; }
@@ -622,6 +666,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (max-width: 860px) {
   .app-nav { margin-left: .2rem; }
   .app-grid-substances { grid-template-columns: repeat(3, 1fr); }
+  .app-stats { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
   .app-hero { grid-template-columns: 1fr .75fr; }
   .app-detail-grid { grid-template-columns: 1fr; }
   .auth-layout { grid-template-columns: .8fr 1.2fr; }
@@ -664,5 +709,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .auth-lamp-wrap { min-height: 210px; }
   .auth-lamp { width: 190px; }
   .auth-card { width: 100%; }
+}
+@media (max-width: 520px) {
+  .app-stats { grid-template-columns: 1fr; gap: .65rem; }
+  .app-stat { min-height: 110px; padding: 1rem 1.15rem; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
