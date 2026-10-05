@@ -3,7 +3,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import type { AuditRecord, Verdict } from "./app-data";
+import { seedRecords, type AuditRecord, type Verdict } from "./app-data";
 import type { CustodyEvent } from "./forensics";
 import { getActiveOfficer } from "./auth-service";
 
@@ -19,6 +19,13 @@ export function getLocalEvidenceRecords(): AuditRecord[] {
   } catch {
     return [];
   }
+}
+
+export function resetDemoEvidenceData(): AuditRecord[] {
+  if (typeof window === "undefined") return [...seedRecords];
+  localStorage.setItem(LOCAL_EVIDENCE_KEY, JSON.stringify(seedRecords));
+  window.dispatchEvent(new Event("drugshield-evidence-reset"));
+  return [...seedRecords];
 }
 
 export function saveLocalEvidenceRecord(record: AuditRecord): void {

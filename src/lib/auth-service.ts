@@ -15,6 +15,11 @@ export interface OfficerUser {
   verified_at?: string;
   verified_by?: string;
   two_factor_enabled?: boolean;
+  badge_id?: string;
+  device_id?: string;
+  district?: string;
+  speak_aloud?: boolean;
+  language?: "en" | "hi";
 }
 
 export interface StoredOfficer extends OfficerUser {
@@ -257,15 +262,20 @@ export function updateActiveOfficerProfile(updates: Partial<OfficerUser>): Offic
   const current = getActiveOfficer() || {
     id: `off_${Date.now()}`,
     email: "officer@ncb.gov.in",
-    full_name: "Shivendra Singh",
-    officer_id: "7864555",
+    full_name: "Insp. Rajesh Kumar",
+    officer_id: "NCB-DEL-4082",
+    badge_id: "NCB-DEL-4082",
+    device_id: "FIELD-UNIT-07",
+    district: "New Delhi, Delhi",
     station: "Delhi Zonal Unit",
-    department: "Narcotics Control Bureau (NCB)",
-    rank: "Field Forensic Investigator",
+    department: "NCB · Delhi Zonal Unit",
+    rank: "Inspector",
     created_at: new Date().toISOString(),
     verified: true,
     verified_at: "2026-01-15T09:30:00Z",
     verified_by: "NCB Directorate HQ, New Delhi",
+    speak_aloud: true,
+    language: "en" as const,
   };
 
   const updated: OfficerUser = {
@@ -273,6 +283,11 @@ export function updateActiveOfficerProfile(updates: Partial<OfficerUser>): Offic
     ...updates,
     id: current.id,
     officer_id: updates.officer_id !== undefined ? updates.officer_id : current.officer_id,
+    badge_id: updates.badge_id !== undefined ? updates.badge_id : (current.badge_id || current.officer_id),
+    device_id: updates.device_id !== undefined ? updates.device_id : (current.device_id || "FIELD-UNIT-07"),
+    district: updates.district !== undefined ? updates.district : (current.district || current.station || "New Delhi, Delhi"),
+    speak_aloud: updates.speak_aloud !== undefined ? updates.speak_aloud : (current.speak_aloud ?? true),
+    language: updates.language !== undefined ? updates.language : (current.language || "en"),
   };
 
   setActiveOfficer(updated);
@@ -301,6 +316,11 @@ export function updateActiveOfficerProfile(updates: Partial<OfficerUser>): Offic
         phone: updated.phone,
         department: updated.department,
         avatar_url: updated.avatar_url,
+        badge_id: updated.badge_id,
+        device_id: updated.device_id,
+        district: updated.district,
+        speak_aloud: updated.speak_aloud,
+        language: updated.language,
       },
     });
   } catch {}

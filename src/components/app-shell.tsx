@@ -23,6 +23,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProfileModal } from "@/components/profile-window";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +53,7 @@ export function AppHeader() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const officer = useOfficer();
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -94,101 +96,37 @@ export function AppHeader() {
                 <span className="app-sync-dot" />Cloud ledger
               </span>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="app-profile app-profile-clickable"
-                    aria-label="Operator Profile Menu"
-                  >
-                    <span className="app-avatar">
-                      {avatarUrl ? (
-                        <img
-                          src={avatarUrl}
-                          alt={officer.displayName}
-                          className="app-avatar-img"
-                        />
-                      ) : (
-                        initials(officer.displayName)
-                      )}
-                    </span>
-                    <span className="app-profile-copy">
-                      <strong>{officer.displayName}</strong>
-                      <span>
-                        {officer.profile?.officer_id || "Officer"}
-                        {officer.profile?.station ? ` · ${officer.profile.station}` : ""}
-                      </span>
-                    </span>
-                    <ChevronDown size={13} className="app-profile-chevron" />
-                  </button>
-                </DropdownMenuTrigger>
+              <button
+                type="button"
+                onClick={() => setProfileModalOpen(true)}
+                className="app-profile app-profile-clickable cursor-pointer hover:border-amber-400/50 hover:bg-zinc-50 active:scale-98 transition-all"
+                aria-label="Open Officer Profile Window"
+              >
+                <span className="app-avatar bg-[#FCE8D5] text-[#7C2D12] font-bold">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={officer.displayName}
+                      className="app-avatar-img"
+                    />
+                  ) : (
+                    initials(officer.displayName || "Insp. Rajesh Kumar")
+                  )}
+                </span>
+                <span className="app-profile-copy">
+                  <strong>{officer.displayName || "Insp. Rajesh Kumar"}</strong>
+                  <span>
+                    {officer.profile?.badge_id || officer.profile?.officer_id || "NCB-DEL-4082"}
+                    {officer.profile?.station ? ` · ${officer.profile.station}` : " · Delhi Zonal Unit"}
+                  </span>
+                </span>
+                <ChevronDown size={13} className="app-profile-chevron text-zinc-500" />
+              </button>
 
-                <DropdownMenuContent
-                  align="end"
-                  className="app-profile-dropdown w-64 p-2 bg-[#0F1626] text-[#F5F7FA] border-white/10 shadow-2xl z-50"
-                >
-                  <div className="px-3 py-2.5 bg-white/5 rounded-md mb-1.5 flex items-center gap-3">
-                    <span className="app-avatar ring-1 ring-[#E85D04]/60">
-                      {avatarUrl ? (
-                        <img
-                          src={avatarUrl}
-                          alt={officer.displayName}
-                          className="app-avatar-img"
-                        />
-                      ) : (
-                        initials(officer.displayName)
-                      )}
-                    </span>
-                    <div className="min-w-0 flex-1 leading-snug">
-                      <div className="font-bold text-xs truncate text-white">{officer.displayName}</div>
-                      <div className="text-[10px] text-zinc-400 font-mono truncate">
-                        ID: {officer.profile?.officer_id || "7864555"}
-                      </div>
-                      <div className="inline-flex items-center gap-1 text-[9px] text-[#22c55e] font-semibold mt-0.5">
-                        <CheckCircle2 size={10} /> VERIFIED OPERATOR
-                      </div>
-                    </div>
-                  </div>
-
-                  <DropdownMenuItem asChild className="focus:bg-[#E85D04]/20 focus:text-white cursor-pointer py-2 text-xs">
-                    <Link to={"/profile" as any}>
-                      <User className="h-3.5 w-3.5 mr-2 text-[#E85D04]" />
-                      My Profile
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild className="focus:bg-[#E85D04]/20 focus:text-white cursor-pointer py-2 text-xs">
-                    <Link to={"/profile" as any} search={{ edit: true } as any}>
-                      <UserCog className="h-3.5 w-3.5 mr-2 text-[#E85D04]" />
-                      Edit Profile
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild className="focus:bg-[#E85D04]/20 focus:text-white cursor-pointer py-2 text-xs">
-                    <Link to={"/profile" as any} hash="security">
-                      <KeyRound className="h-3.5 w-3.5 mr-2 text-[#E85D04]" />
-                      Security
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild className="focus:bg-[#E85D04]/20 focus:text-white cursor-pointer py-2 text-xs">
-                    <Link to={"/profile" as any} hash="activity">
-                      <History className="h-3.5 w-3.5 mr-2 text-[#E85D04]" />
-                      My Activity
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator className="bg-white/10 my-1" />
-
-                  <DropdownMenuItem
-                    onClick={() => void signOut()}
-                    className="focus:bg-red-500/20 text-red-400 focus:text-red-300 cursor-pointer py-2 text-xs"
-                  >
-                    <LogOut className="h-3.5 w-3.5 mr-2 text-red-400" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <ProfileModal
+                open={profileModalOpen}
+                onOpenChange={setProfileModalOpen}
+              />
 
               <Button
                 type="button"
