@@ -38,6 +38,7 @@ export const REAGENTS = [
   "Duquenois-Levine",
 ] as const;
 
+// Test fixtures only — the live ledger is the shared cloud evidence_records table.
 export const seedRecords: AuditRecord[] = [
   {
     id: "NCR-2026-0917",
@@ -85,28 +86,6 @@ export const seedRecords: AuditRecord[] = [
     synced: false,
   },
 ];
-
-export function readStoredRecords(): AuditRecord[] {
-  if (typeof window === "undefined") return seedRecords;
-  try {
-    const stored = window.localStorage.getItem("drug-shield-records");
-    if (!stored) return seedRecords;
-    const parsed: unknown = JSON.parse(stored);
-    if (!Array.isArray(parsed)) return seedRecords;
-    return parsed as AuditRecord[];
-  } catch {
-    return seedRecords;
-  }
-}
-
-export function writeStoredRecords(records: AuditRecord[]) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem("drug-shield-records", JSON.stringify(records));
-  } catch {
-    // Keep the in-memory workflow usable when storage is blocked or full.
-  }
-}
 
 export function formatRecordTime(timestamp: string) {
   return new Intl.DateTimeFormat("en-IN", {
