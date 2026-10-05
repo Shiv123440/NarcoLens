@@ -14,16 +14,142 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      evidence_records: {
+        Row: {
+          case_number: string
+          confidence: number
+          created_at: string
+          created_by: string
+          custody: Json
+          fir_number: string | null
+          gps: string | null
+          id: string
+          image_height: number | null
+          image_width: number | null
+          kit_batch: string | null
+          location: string
+          notes: string | null
+          officer_name: string
+          reagent: string
+          reagents: string[]
+          sealed: boolean
+          sha256: string
+          substance: string
+          summary: string
+          tested_at: string
+          verdict: string
+        }
+        Insert: {
+          case_number: string
+          confidence?: number
+          created_at?: string
+          created_by?: string
+          custody?: Json
+          fir_number?: string | null
+          gps?: string | null
+          id: string
+          image_height?: number | null
+          image_width?: number | null
+          kit_batch?: string | null
+          location?: string
+          notes?: string | null
+          officer_name?: string
+          reagent?: string
+          reagents?: string[]
+          sealed?: boolean
+          sha256: string
+          substance: string
+          summary?: string
+          tested_at?: string
+          verdict: string
+        }
+        Update: {
+          case_number?: string
+          confidence?: number
+          created_at?: string
+          created_by?: string
+          custody?: Json
+          fir_number?: string | null
+          gps?: string | null
+          id?: string
+          image_height?: number | null
+          image_width?: number | null
+          kit_batch?: string | null
+          location?: string
+          notes?: string | null
+          officer_name?: string
+          reagent?: string
+          reagents?: string[]
+          sealed?: boolean
+          sha256?: string
+          substance?: string
+          summary?: string
+          tested_at?: string
+          verdict?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          officer_id: string
+          station: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string
+          id: string
+          officer_id?: string
+          station?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          officer_id?: string
+          station?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_evidence: { Args: { _user_id: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "supervisor" | "officer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +276,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "supervisor", "officer"],
+    },
   },
 } as const
