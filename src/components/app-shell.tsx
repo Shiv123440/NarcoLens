@@ -98,35 +98,59 @@ export function AppHeader() {
         </Link>
 
         {/* Desktop Animated Navigation Links */}
-        <div className="app-pill-links">
+        <div className="hidden md:flex items-center gap-7 ml-3">
           <Link
             to="/"
-            className={`app-pill-link ${active === "dashboard" ? "is-active" : ""}`}
+            className="relative overflow-hidden h-6 group inline-flex flex-col text-sm font-medium"
           >
-            <span className="app-pill-link-track">
-              <span className="app-pill-link-label">{active === "dashboard" ? "● Dashboard" : "Dashboard"}</span>
-              <span className="app-pill-link-label is-hovered">Dashboard</span>
+            <span
+              className={`block transition-transform duration-300 group-hover:-translate-y-full ${
+                active === "dashboard" ? "text-amber-400 font-semibold" : "text-zinc-300"
+              }`}
+            >
+              Dashboard
+            </span>
+            <span
+              className="block absolute top-full left-0 transition-transform duration-300 group-hover:-translate-y-full text-amber-400 font-semibold"
+            >
+              Dashboard
             </span>
           </Link>
 
           <Link
             to="/scan"
             search={{ substance: undefined }}
-            className={`app-pill-link ${active === "scan" ? "is-active" : ""}`}
+            className="relative overflow-hidden h-6 group inline-flex flex-col text-sm font-medium"
           >
-            <span className="app-pill-link-track">
-              <span className="app-pill-link-label">{active === "scan" ? "● Scan" : "Scan"}</span>
-              <span className="app-pill-link-label is-hovered">Scan</span>
+            <span
+              className={`block transition-transform duration-300 group-hover:-translate-y-full ${
+                active === "scan" ? "text-amber-400 font-semibold" : "text-zinc-300"
+              }`}
+            >
+              Scan
+            </span>
+            <span
+              className="block absolute top-full left-0 transition-transform duration-300 group-hover:-translate-y-full text-amber-400 font-semibold"
+            >
+              Scan
             </span>
           </Link>
 
           <Link
             to="/audit"
-            className={`app-pill-link ${active === "audit" ? "is-active" : ""}`}
+            className="relative overflow-hidden h-6 group inline-flex flex-col text-sm font-medium"
           >
-            <span className="app-pill-link-track">
-              <span className="app-pill-link-label">{active === "audit" ? "● Audit logs" : "Audit logs"}</span>
-              <span className="app-pill-link-label is-hovered">Audit logs</span>
+            <span
+              className={`block transition-transform duration-300 group-hover:-translate-y-full ${
+                active === "audit" ? "text-amber-400 font-semibold" : "text-zinc-300"
+              }`}
+            >
+              Audit logs
+            </span>
+            <span
+              className="block absolute top-full left-0 transition-transform duration-300 group-hover:-translate-y-full text-amber-400 font-semibold"
+            >
+              Audit logs
             </span>
           </Link>
         </div>
