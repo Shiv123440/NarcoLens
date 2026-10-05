@@ -818,7 +818,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
-  margin: 2.2rem 0 0.95rem;
+  margin: 2.8rem 0 0.95rem;
   padding-bottom: 0.15rem;
 }
 .app-ledger-title-group {
@@ -841,7 +841,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background: var(--amber, #E85D04);
   border-radius: 999px;
 }
+.app-substance-watermark-center,
+.app-ledger-watermark {
+  position: absolute;
+  left: 50%;
+  top: -12px;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 65px;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
 .app-ledger-badge-top {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1633,7 +1647,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .auth-card { width: 100%; }
 }
 @media (max-width: 520px) {
-  .app-evidence-watermark { display: none; }
+  .app-evidence-watermark,
+  .app-substance-watermark-center,
+  .app-ledger-watermark { display: none; }
+  .app-ledger-head { margin-top: 2.2rem; }
   .app-stats { grid-template-columns: 1fr; gap: .65rem; }
   .app-stat { min-height: 98px; padding: 0.95rem 1rem; }
 }
