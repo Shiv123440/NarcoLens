@@ -82,148 +82,120 @@ export function AppHeader() {
   const avatarUrl = officer.profile?.avatar_url;
 
   return (
-    <header className="app-header-wrapper">
+    <header className="app-header-apple-wrapper">
       <nav
-        className="app-pill-nav"
+        className="app-apple-nav"
         aria-label="Primary navigation"
       >
-        {/* Brand / Logo */}
-        <Link to="/" className="app-brand" aria-label="NarcoLens dashboard" onClick={() => setMobileMenuOpen(false)}>
-          <ShieldMark />
-          <span className="app-brand-text">
-            <span className="app-brand-name">NarcoLens</span>
-            <span className="app-brand-sub">NARCOTICS CONTROL BUREAU</span>
-          </span>
-        </Link>
-
-        {/* Desktop Animated Navigation Links */}
-        <div className="hidden md:flex items-center gap-7 ml-3">
-          <Link
-            to="/"
-            className="relative overflow-hidden h-6 group inline-flex flex-col text-sm font-medium"
-          >
-            <span
-              className={`block transition-transform duration-300 group-hover:-translate-y-full ${
-                active === "dashboard" ? "text-amber-400 font-semibold" : "text-zinc-300"
-              }`}
-            >
-              Dashboard
-            </span>
-            <span
-              className="block absolute top-full left-0 transition-transform duration-300 group-hover:-translate-y-full text-amber-400 font-semibold"
-            >
-              Dashboard
+        <div className="app-apple-nav-inner">
+          {/* Brand Logo */}
+          <Link to="/" className="app-brand" aria-label="NarcoLens dashboard" onClick={() => setMobileMenuOpen(false)}>
+            <ShieldMark />
+            <span className="app-brand-text">
+              <span className="app-brand-name">NarcoLens</span>
+              <span className="app-brand-sub">NARCOTICS CONTROL BUREAU</span>
             </span>
           </Link>
 
-          <Link
-            to="/scan"
-            search={{ substance: undefined }}
-            className="relative overflow-hidden h-6 group inline-flex flex-col text-sm font-medium"
-          >
-            <span
-              className={`block transition-transform duration-300 group-hover:-translate-y-full ${
-                active === "scan" ? "text-amber-400 font-semibold" : "text-zinc-300"
-              }`}
+          {/* Centered Apple-Style Navigation Links */}
+          <div className="app-apple-links">
+            <Link
+              to="/"
+              className={`app-apple-link ${active === "dashboard" ? "is-active" : ""}`}
             >
-              Scan
-            </span>
-            <span
-              className="block absolute top-full left-0 transition-transform duration-300 group-hover:-translate-y-full text-amber-400 font-semibold"
-            >
-              Scan
-            </span>
-          </Link>
+              <span>Dashboard</span>
+              {active === "dashboard" && <span className="app-apple-link-indicator" />}
+            </Link>
 
-          <Link
-            to="/audit"
-            className="relative overflow-hidden h-6 group inline-flex flex-col text-sm font-medium"
-          >
-            <span
-              className={`block transition-transform duration-300 group-hover:-translate-y-full ${
-                active === "audit" ? "text-amber-400 font-semibold" : "text-zinc-300"
-              }`}
+            <Link
+              to="/scan"
+              search={{ substance: undefined }}
+              className={`app-apple-link ${active === "scan" ? "is-active" : ""}`}
             >
-              Audit logs
-            </span>
-            <span
-              className="block absolute top-full left-0 transition-transform duration-300 group-hover:-translate-y-full text-amber-400 font-semibold"
-            >
-              Audit logs
-            </span>
-          </Link>
-        </div>
+              <span>Scan</span>
+              {active === "scan" && <span className="app-apple-link-indicator" />}
+            </Link>
 
-        {/* Right Section: Actions & Mobile Toggle */}
-        <div className="app-pill-actions">
-          {officer.signedIn ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setProfileModalOpen(true)}
-                className="app-profile app-profile-clickable"
-                aria-label="Open Officer Profile Window"
-              >
-                <span className="app-avatar bg-[#FCE8D5] text-[#7C2D12] font-bold">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={officer.displayName}
-                      className="app-avatar-img"
-                    />
-                  ) : (
-                    initials(officer.displayName || "Insp. Rajesh Kumar")
-                  )}
-                </span>
-                <span className="app-profile-copy">
-                  <strong>{officer.displayName || "Insp. Rajesh Kumar"}</strong>
-                  <span>
-                    {officer.profile?.badge_id || officer.profile?.officer_id || "NCB-DEL-4082"}
-                    {officer.profile?.station ? ` · ${officer.profile.station}` : " · Delhi Zonal Unit"}
+            <Link
+              to="/audit"
+              className={`app-apple-link ${active === "audit" ? "is-active" : ""}`}
+            >
+              <span>Audit logs</span>
+              {active === "audit" && <span className="app-apple-link-indicator" />}
+            </Link>
+          </div>
+
+          {/* Right Section: Actions & Mobile Toggle */}
+          <div className="app-apple-actions">
+            {officer.signedIn ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setProfileModalOpen(true)}
+                  className="app-profile app-profile-clickable"
+                  aria-label="Open Officer Profile Window"
+                >
+                  <span className="app-avatar bg-[#FCE8D5] text-[#7C2D12] font-bold">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt={officer.displayName}
+                        className="app-avatar-img"
+                      />
+                    ) : (
+                      initials(officer.displayName || "Insp. Rajesh Kumar")
+                    )}
                   </span>
-                </span>
-                <ChevronDown size={13} className="app-profile-chevron" />
-              </button>
+                  <span className="app-profile-copy">
+                    <strong>{officer.displayName || "Insp. Rajesh Kumar"}</strong>
+                    <span>
+                      {officer.profile?.badge_id || officer.profile?.officer_id || "NCB-DEL-4082"}
+                      {officer.profile?.station ? ` · ${officer.profile.station}` : " · Delhi Zonal Unit"}
+                    </span>
+                  </span>
+                  <ChevronDown size={13} className="app-profile-chevron" />
+                </button>
 
-              <ProfileModal
-                open={profileModalOpen}
-                onOpenChange={setProfileModalOpen}
-              />
+                <ProfileModal
+                  open={profileModalOpen}
+                  onOpenChange={setProfileModalOpen}
+                />
 
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="app-pill-logout-btn"
-                onClick={() => void signOut()}
-                aria-label="Log out"
-              >
-                <LogOut size={14} />
-                <span className="hidden sm:inline">Logout</span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="app-apple-logout-btn"
+                  onClick={() => void signOut()}
+                  aria-label="Log out"
+                >
+                  <LogOut size={13} />
+                  <span className="hidden sm:inline">Logout</span>
+                </Button>
+              </>
+            ) : officer.ready ? (
+              <Button asChild size="sm" className="app-login-button">
+                <Link to="/auth" search={{ mode: "login", next: "/" }}>Login / Signup</Link>
               </Button>
-            </>
-          ) : officer.ready ? (
-            <Button asChild size="sm" className="app-login-button">
-              <Link to="/auth" search={{ mode: "login", next: "/" }}>Login / Signup</Link>
-            </Button>
-          ) : null}
+            ) : null}
 
-          {/* Mobile Hamburger Toggle */}
-          <button
-            type="button"
-            className="app-mobile-menu-btn"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+            {/* Mobile Hamburger Toggle */}
+            <button
+              type="button"
+              className="app-mobile-menu-btn"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="app-mobile-drawer animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="app-apple-mobile-drawer animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="app-mobile-links">
             <Link
               to="/"
