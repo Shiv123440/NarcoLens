@@ -239,46 +239,49 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   z-index: 0;
   overflow: hidden;
   background:
-    radial-gradient(circle at center, rgba(7, 11, 18, 0.65) 0%, rgba(7, 11, 18, 0.88) 100%),
+    radial-gradient(circle at center, rgba(7, 11, 18, 0.45) 0%, rgba(7, 11, 18, 0.78) 100%),
     url('/forensic-lab-bg.png') center/cover no-repeat;
 }
 
 .auth-forensic-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, transparent 40%, rgba(4, 8, 14, 0.75) 100%);
+  background: radial-gradient(circle at center, transparent 35%, rgba(4, 8, 14, 0.65) 100%);
   pointer-events: none;
   z-index: 1;
 }
 
-/* Main Forensic Security Authentication Card */
+/* Main Forensic Security Authentication Card - Glass Container */
 .auth-forensic-card {
   position: relative;
   width: min(100%, 880px);
   height: 510px;
-  background: #0C1320;
+  background: transparent;
   border-radius: 20px;
-  border: 1px solid rgba(232, 93, 4, 0.35);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 32px rgba(232, 93, 4, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 4px 24px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   z-index: 2;
   box-sizing: border-box;
 }
 
-/* Form panels */
+/* Form panels - Dark Glass Surface */
 .auth-panel-box {
   position: absolute;
   top: 0;
-  width: 50%;
+  width: 60%;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 2.25rem 3rem;
+  padding: 2.25rem 3.5rem 2.25rem 3rem;
   transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease-in-out;
   z-index: 2;
   box-sizing: border-box;
-  background: #0C1320;
+  background: rgba(11, 18, 32, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Login panel sits on left */
@@ -325,6 +328,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-clean-form {
   display: flex;
   flex-direction: column;
+  max-width: 320px;
 }
 
 /* Modern Dark Input Fields */
@@ -353,8 +357,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-input-wrapper input {
   width: 100%;
   height: 42px;
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: 8px !important;
   outline: none !important;
   color: #F5F7FA !important;
@@ -367,8 +371,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .auth-input-wrapper input:focus {
   border-color: #E85D04 !important;
-  background: rgba(232, 93, 4, 0.04) !important;
-  box-shadow: 0 0 0 1px rgba(232, 93, 4, 0.4), 0 0 12px rgba(232, 93, 4, 0.14) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 0 0 1px rgba(232, 93, 4, 0.4), 0 0 10px rgba(232, 93, 4, 0.12) !important;
 }
 
 .auth-input-wrapper input::placeholder {
@@ -380,11 +384,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-clean-form input:-webkit-autofill:hover,
 .auth-clean-form input:-webkit-autofill:focus,
 .auth-clean-form input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #0E1624 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #0F1626 inset !important;
   -webkit-text-fill-color: #F5F7FA !important;
   caret-color: #F5F7FA !important;
   border-radius: 8px !important;
-  border-color: rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -402,20 +406,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: #E85D04;
 }
 
-/* Primary CTA Button (#F05A0A with restrained shadow) */
+/* Primary CTA Button (#E85D04 with restrained shadow) */
 .auth-cta-btn {
   width: 100%;
   height: 44px;
   border-radius: 9999px;
   border: none;
   outline: none;
-  background: #F05A0A;
+  background: #E85D04;
   color: #F5F7FA;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 25px rgba(240, 90, 10, 0.22);
+  box-shadow: 0 4px 16px rgba(232, 93, 4, 0.28);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: 0.35rem;
   display: flex;
@@ -424,13 +428,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   gap: 0.45rem;
 }
 .auth-cta-btn:hover:not(:disabled) {
-  background: #FF6A16;
-  box-shadow: 0 10px 28px rgba(255, 106, 22, 0.32);
+  background: #F06A14;
+  box-shadow: 0 6px 20px rgba(232, 93, 4, 0.36);
   transform: translateY(-1px);
 }
 .auth-cta-btn:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 4px 14px rgba(240, 90, 10, 0.2);
+  box-shadow: 0 2px 8px rgba(232, 93, 4, 0.2);
 }
 .auth-cta-btn:disabled {
   opacity: 0.65;
@@ -461,14 +465,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   text-decoration: underline;
 }
 
-/* Sliding Diagonal Overlay Shape */
+/* Sliding Diagonal Overlay Shape - Translucent Burnt-Orange Glass */
 .auth-curved-overlay {
   position: absolute;
   top: 0;
   right: 0;
   width: 50%;
   height: 100%;
-  background: linear-gradient(145deg, #E85D04 0%, #C84605 55%, #8F2F06 100%);
+  background: rgba(210, 65, 5, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   clip-path: polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%);
   transition: all 0.7s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;
@@ -485,17 +491,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-forensic-card.active .auth-curved-overlay {
   right: 50%;
   clip-path: polygon(0% 0%, 100% 0%, 82% 100%, 0% 100%);
-}
-
-/* Watermark Pattern inside orange overlay */
-.auth-overlay-watermark {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.14) 0%, transparent 60%),
-    repeating-radial-gradient(circle at 60% 40%, transparent 0, transparent 8px, rgba(0, 0, 0, 0.08) 9px, transparent 10px);
-  opacity: 0.35;
-  pointer-events: none;
 }
 
 /* Overlay text contents */
@@ -534,8 +529,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
-  margin-bottom: 1.4rem;
-  background: rgba(0, 0, 0, 0.32);
+  margin-bottom: 1.35rem;
+  background: rgba(0, 0, 0, 0.28);
   padding: 0.4rem 0.85rem;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -564,7 +559,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .auth-overlay-heading-hero {
   font-family: "Space Grotesk", sans-serif;
-  font-size: 1.95rem;
+  font-size: 1.85rem;
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -577,9 +572,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-overlay-desc {
   font-size: 0.8rem;
   line-height: 1.55;
-  color: rgba(255, 255, 255, 0.90);
+  color: rgba(255, 255, 255, 0.92);
   margin: 0;
-  max-width: 290px;
+  max-width: 280px;
 }
 
 @media (max-width: 768px) {

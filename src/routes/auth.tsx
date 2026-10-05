@@ -81,7 +81,7 @@ function SpringMouseFollow({
         translateX: "-50%",
         translateY: "-50%",
       }}
-      className="pointer-events-none absolute z-10 h-72 w-72 rounded-full bg-gradient-to-r from-[#E85D04]/22 via-[#F05A0A]/14 to-transparent blur-3xl"
+      className="pointer-events-none absolute z-10 h-64 w-64 rounded-full bg-gradient-to-r from-white/[0.04] via-[#E85D04]/[0.05] to-transparent blur-2xl"
     />
   );
 }
@@ -416,9 +416,6 @@ function AuthPage() {
 
         {/* Sliding Diagonal Information Overlay */}
         <div className="auth-curved-overlay" aria-hidden="true">
-          {/* Inner Forensic Watermark Pattern */}
-          <div className="auth-overlay-watermark" />
-
           {/* Overlay Content in Login Mode */}
           <div className="auth-overlay-info login-info">
             <Link to="/" className="auth-overlay-brand">
