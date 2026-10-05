@@ -207,71 +207,8 @@ function AuthPage() {
   return (
     <main className="auth-forensic-viewport">
       {/* Background Layer: Forensic Laboratory Ambient Graphics */}
-      <div className="auth-forensic-bg" aria-hidden="true">
-        {/* Left Side: Narcotics Control Bureau Field Evidence HUD */}
-        <div className="auth-hud-left">
-          <div className="auth-hud-kicker">
-            <span>NARCOTICS</span>
-            <span>CONTROL</span>
-            <span>BUREAU</span>
-          </div>
-          <div className="auth-hud-divider" />
-          <div className="auth-hud-tags">
-            <span>ANALYSE</span>
-            <span>DETECT</span>
-            <span>SECURE</span>
-            <span>VERIFY</span>
-          </div>
-
-          {/* Evidence Bag Illustration */}
-          <div className="auth-evidence-pouch">
-            <div className="auth-pouch-badge">
-              <span className="auth-pouch-title">EVIDENCE</span>
-              <div className="auth-pouch-qr" />
-            </div>
-            <div className="auth-pouch-barcodes" />
-            <div className="auth-pouch-id">NCB-SZ-2026-8841</div>
-          </div>
-        </div>
-
-        {/* Right Side: Biometric Fingerprint Analysis HUD */}
-        <div className="auth-hud-right">
-          <div className="auth-hud-kicker text-right">
-            <span>EVIDENCE</span>
-            <span>VERIFIED</span>
-            <span>CHAIN OF CUSTODY</span>
-            <span>SECURED</span>
-          </div>
-          <div className="auth-hud-divider ml-auto" />
-          <div className="auth-hud-tags text-right">
-            <span>FORENSIC</span>
-            <span>ANALYSIS</span>
-            <span>FIELD TESTING</span>
-            <span>DIGITAL RECORDS</span>
-          </div>
-
-          {/* Concentric Biometric Fingerprint Pattern */}
-          <div className="auth-fingerprint-hud">
-            <svg viewBox="0 0 200 240" className="auth-fingerprint-svg" fill="none" stroke="currentColor">
-              <path d="M100 20 C60 20 30 50 30 100 C30 160 50 200 100 230" strokeWidth="1.5" strokeOpacity="0.35" />
-              <path d="M100 35 C70 35 45 60 45 105 C45 155 60 190 100 215" strokeWidth="1.5" strokeOpacity="0.45" />
-              <path d="M100 50 C80 50 60 70 60 110 C60 150 70 180 100 200" strokeWidth="1.5" strokeOpacity="0.55" />
-              <path d="M100 65 C88 65 75 80 75 115 C75 145 80 170 100 185" strokeWidth="1.5" strokeOpacity="0.65" />
-              <path d="M100 80 C95 80 88 90 88 120 C88 140 92 160 100 170" strokeWidth="1.5" strokeOpacity="0.75" />
-              <path d="M100 20 C140 20 170 50 170 100 C170 160 150 200 100 230" strokeWidth="1.5" strokeOpacity="0.35" />
-              <path d="M100 35 C130 35 155 60 155 105 C155 155 140 190 100 215" strokeWidth="1.5" strokeOpacity="0.45" />
-              <path d="M100 50 C120 50 140 70 140 110 C140 150 130 180 100 200" strokeWidth="1.5" strokeOpacity="0.55" />
-              <path d="M100 65 C112 65 125 80 125 115 C125 145 120 170 100 185" strokeWidth="1.5" strokeOpacity="0.65" />
-              <path d="M100 80 C105 80 112 90 112 120 C112 140 108 160 100 170" strokeWidth="1.5" strokeOpacity="0.75" />
-              <circle cx="100" cy="120" r="4" fill="currentColor" fillOpacity="0.8" />
-            </svg>
-            <div className="auth-scan-reticle" />
-          </div>
-        </div>
-
-        {/* Ambient Dark Navy Forensic Lab Overlay */}
-        <div className="auth-forensic-overlay" />
-      </div>
+      <div className="auth-forensic-bg" aria-hidden="true" />
+      <div className="auth-forensic-overlay" aria-hidden="true" />
 
       {/* Main Forensic Authentication Card */}
       <div
@@ -287,32 +224,36 @@ function AuthPage() {
           <p className="auth-panel-subtitle">Enter your credentials to access DRUG-SHIELD AI</p>
 
           <form onSubmit={(e) => void handleLoginSubmit(e)} className="auth-clean-form">
-            <div className="auth-underline-group">
-              <input
-                id="login-username"
-                type="text"
-                value={loginIdentifier}
-                onChange={(e) => setLoginIdentifier(e.target.value)}
-                placeholder=" "
-                autoComplete="username"
-                required
-              />
-              <label htmlFor="login-username">Username</label>
-              <User size={18} className="auth-field-right-icon" />
+            <div className="auth-field-box">
+              <label htmlFor="login-username" className="auth-field-label">Username</label>
+              <div className="auth-input-wrapper">
+                <input
+                  id="login-username"
+                  type="text"
+                  value={loginIdentifier}
+                  onChange={(e) => setLoginIdentifier(e.target.value)}
+                  placeholder="Enter username or email"
+                  autoComplete="username"
+                  required
+                />
+                <User size={18} className="auth-field-icon" />
+              </div>
             </div>
 
-            <div className="auth-underline-group">
-              <input
-                id="login-password"
-                type="password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                placeholder=" "
-                autoComplete="current-password"
-                required
-              />
-              <label htmlFor="login-password">Password</label>
-              <Lock size={18} className="auth-field-right-icon" />
+            <div className="auth-field-box">
+              <label htmlFor="login-password" className="auth-field-label">Password</label>
+              <div className="auth-input-wrapper">
+                <input
+                  id="login-password"
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="Enter password"
+                  autoComplete="current-password"
+                  required
+                />
+                <Lock size={18} className="auth-field-icon" />
+              </div>
             </div>
 
             {loginError && (
@@ -356,46 +297,52 @@ function AuthPage() {
           <p className="auth-panel-subtitle">Create your account to access DRUG-SHIELD AI</p>
 
           <form onSubmit={(e) => void handleSignUpSubmit(e)} className="auth-clean-form">
-            <div className="auth-underline-group">
-              <input
-                id="signup-username"
-                type="text"
-                value={signupUsername}
-                onChange={(e) => setSignupUsername(e.target.value)}
-                placeholder=" "
-                autoComplete="name"
-                required
-              />
-              <label htmlFor="signup-username">Username</label>
-              <User size={18} className="auth-field-right-icon" />
+            <div className="auth-field-box">
+              <label htmlFor="signup-username" className="auth-field-label">Username</label>
+              <div className="auth-input-wrapper">
+                <input
+                  id="signup-username"
+                  type="text"
+                  value={signupUsername}
+                  onChange={(e) => setSignupUsername(e.target.value)}
+                  placeholder="Enter officer username"
+                  autoComplete="name"
+                  required
+                />
+                <User size={18} className="auth-field-icon" />
+              </div>
             </div>
 
-            <div className="auth-underline-group">
-              <input
-                id="signup-email"
-                type="email"
-                value={signupEmail}
-                onChange={(e) => setSignupEmail(e.target.value)}
-                placeholder=" "
-                autoComplete="email"
-                required
-              />
-              <label htmlFor="signup-email">Email</label>
-              <Mail size={18} className="auth-field-right-icon" />
+            <div className="auth-field-box">
+              <label htmlFor="signup-email" className="auth-field-label">Email</label>
+              <div className="auth-input-wrapper">
+                <input
+                  id="signup-email"
+                  type="email"
+                  value={signupEmail}
+                  onChange={(e) => setSignupEmail(e.target.value)}
+                  placeholder="name@agency.gov.in"
+                  autoComplete="email"
+                  required
+                />
+                <Mail size={18} className="auth-field-icon" />
+              </div>
             </div>
 
-            <div className="auth-underline-group mb-2">
-              <input
-                id="signup-password"
-                type="password"
-                value={signupPassword}
-                onChange={(e) => setSignupPassword(e.target.value)}
-                placeholder=" "
-                autoComplete="new-password"
-                required
-              />
-              <label htmlFor="signup-password">Password</label>
-              <Lock size={18} className="auth-field-right-icon" />
+            <div className="auth-field-box mb-2">
+              <label htmlFor="signup-password" className="auth-field-label">Password</label>
+              <div className="auth-input-wrapper">
+                <input
+                  id="signup-password"
+                  type="password"
+                  value={signupPassword}
+                  onChange={(e) => setSignupPassword(e.target.value)}
+                  placeholder="Create secure password"
+                  autoComplete="new-password"
+                  required
+                />
+                <Lock size={18} className="auth-field-icon" />
+              </div>
             </div>
 
             {/* Password Requirement Indicators */}

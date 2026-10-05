@@ -231,145 +231,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   box-sizing: border-box;
 }
 
-/* Background Layer: Forensic Laboratory Ambient Graphics */
+/* Background Layer: Forensic Laboratory Photographic Scene */
 .auth-forensic-bg {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 50%, #0d1624 0%, #070B12 85%);
+  background:
+    radial-gradient(circle at center, rgba(7, 11, 18, 0.65) 0%, rgba(7, 11, 18, 0.88) 100%),
+    url('/forensic-lab-bg.png') center/cover no-repeat;
 }
 
 .auth-forensic-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(4, 9, 16, 0.72) 0%, rgba(7, 11, 18, 0.94) 100%);
+  background: radial-gradient(circle at center, transparent 40%, rgba(4, 8, 14, 0.75) 100%);
+  pointer-events: none;
   z-index: 1;
-}
-
-/* Left Side HUD Telemetry & Evidence Pouch */
-.auth-hud-left {
-  position: absolute;
-  left: clamp(1rem, 3.5vw, 4rem);
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  z-index: 0;
-  opacity: 0.32;
-  transition: opacity 0.3s ease;
-}
-
-.auth-hud-kicker {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  color: #E85D04;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.auth-hud-divider {
-  width: 36px;
-  height: 2px;
-  background: #E85D04;
-  opacity: 0.65;
-}
-
-.auth-hud-tags {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.58rem;
-  letter-spacing: 0.14em;
-  color: #A7B0C0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.auth-evidence-pouch {
-  margin-top: 1.25rem;
-  width: 145px;
-  padding: 0.8rem;
-  border: 1px dashed rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.025);
-  backdrop-filter: blur(4px);
-}
-
-.auth-pouch-badge {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.45rem;
-}
-
-.auth-pouch-title {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  color: #F5F7FA;
-}
-
-.auth-pouch-qr {
-  width: 18px;
-  height: 18px;
-  background: repeating-conic-gradient(#fff 0% 25%, transparent 0% 50%) 50% / 6px 6px;
-  opacity: 0.7;
-}
-
-.auth-pouch-barcodes {
-  height: 14px;
-  width: 100%;
-  background: repeating-linear-gradient(90deg, #fff 0px, #fff 2px, transparent 2px, transparent 4px, #fff 4px, #fff 7px, transparent 7px, transparent 9px);
-  opacity: 0.45;
-  margin-bottom: 0.35rem;
-}
-
-.auth-pouch-id {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.52rem;
-  color: #A7B0C0;
-  letter-spacing: 0.08em;
-}
-
-/* Right Side HUD Biometric Fingerprint Scanner */
-.auth-hud-right {
-  position: absolute;
-  right: clamp(1rem, 3.5vw, 4rem);
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  z-index: 0;
-  opacity: 0.32;
-  transition: opacity 0.3s ease;
-}
-
-.auth-fingerprint-hud {
-  position: relative;
-  width: 155px;
-  height: 190px;
-  margin-top: 0.8rem;
-  display: grid;
-  place-items: center;
-}
-
-.auth-fingerprint-svg {
-  width: 100%;
-  height: 100%;
-  color: #E85D04;
-}
-
-.auth-scan-reticle {
-  position: absolute;
-  inset: 0;
-  border: 1px dashed rgba(232, 93, 4, 0.35);
-  border-radius: 12px;
 }
 
 /* Main Forensic Security Authentication Card */
@@ -379,8 +258,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   height: 510px;
   background: #0C1320;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8), 0 0 35px rgba(232, 93, 4, 0.12);
+  border: 1px solid rgba(232, 93, 4, 0.35);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 32px rgba(232, 93, 4, 0.14);
   overflow: hidden;
   z-index: 2;
   box-sizing: border-box;
@@ -395,7 +274,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 2.75rem 3.5rem;
+  padding: 2.25rem 3rem;
   transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease-in-out;
   z-index: 2;
   box-sizing: border-box;
@@ -430,17 +309,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .auth-panel-title {
   font-family: "Space Grotesk", sans-serif;
-  font-size: 2.1rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #F5F7FA;
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.2rem;
   letter-spacing: -0.02em;
 }
 
 .auth-panel-subtitle {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: #A7B0C0;
-  margin: 0 0 1.6rem;
+  margin: 0 0 1.35rem;
 }
 
 .auth-clean-form {
@@ -448,63 +327,78 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   flex-direction: column;
 }
 
-/* Underline inputs */
-.auth-underline-group {
+/* Modern Dark Input Fields */
+.auth-field-box {
   position: relative;
   width: 100%;
-  margin-bottom: 1.45rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.025);
-  border-radius: 4px 4px 0 0;
-  transition: border-color 0.25s ease, background 0.25s ease;
+  margin-bottom: 1rem;
 }
-.auth-underline-group:focus-within {
-  border-bottom-color: #E85D04;
-  background: rgba(232, 93, 4, 0.035);
+
+.auth-field-label {
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #E85D04;
+  margin-bottom: 0.3rem;
 }
-.auth-underline-group input {
+
+.auth-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.auth-input-wrapper input {
   width: 100%;
   height: 42px;
-  background: transparent !important;
-  border: none !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 8px !important;
   outline: none !important;
   color: #F5F7FA !important;
-  font-size: 0.92rem;
-  padding: 0 35px 0 10px;
+  font-size: 0.88rem;
+  padding: 0 38px 0 12px;
   box-sizing: border-box;
   font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
-.auth-underline-group label {
+
+.auth-input-wrapper input:focus {
+  border-color: #E85D04 !important;
+  background: rgba(232, 93, 4, 0.04) !important;
+  box-shadow: 0 0 0 1px rgba(232, 93, 4, 0.4), 0 0 12px rgba(232, 93, 4, 0.14) !important;
+}
+
+.auth-input-wrapper input::placeholder {
+  color: #556072 !important;
+}
+
+/* Chrome / Safari / Edge Autofill Fix - Prevents browser white box overlay */
+.auth-clean-form input:-webkit-autofill,
+.auth-clean-form input:-webkit-autofill:hover,
+.auth-clean-form input:-webkit-autofill:focus,
+.auth-clean-form input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #0E1624 inset !important;
+  -webkit-text-fill-color: #F5F7FA !important;
+  caret-color: #F5F7FA !important;
+  border-radius: 8px !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.auth-field-icon {
   position: absolute;
-  left: 10px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #A7B0C0;
-  font-size: 0.88rem;
+  color: #727D90;
   pointer-events: none;
-  transition: all 0.22s ease;
+  transition: color 0.2s ease;
 }
-.auth-underline-group input:focus ~ label,
-.auth-underline-group input:not(:placeholder-shown) ~ label {
-  top: -9px;
-  left: 0;
-  font-size: 0.68rem;
-  color: #E85D04;
-  font-weight: 700;
-  font-family: "IBM Plex Mono", monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.auth-field-right-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #A7B0C0;
-  pointer-events: none;
-  transition: color 0.25s ease;
-}
-.auth-underline-group:focus-within .auth-field-right-icon {
+
+.auth-input-wrapper:focus-within .auth-field-icon {
   color: #E85D04;
 }
 
@@ -575,14 +469,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 50%;
   height: 100%;
   background: linear-gradient(145deg, #E85D04 0%, #C84605 55%, #8F2F06 100%);
-  clip-path: polygon(28% 0%, 100% 0%, 100% 100%, 0% 100%);
+  clip-path: polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%);
   transition: all 0.7s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 5;
   box-sizing: border-box;
-  padding: 3rem;
+  padding: 0;
   color: #F5F7FA;
   overflow: hidden;
 }
@@ -590,14 +484,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* In active state (Sign Up mode), overlay moves to the left! */
 .auth-forensic-card.active .auth-curved-overlay {
   right: 50%;
-  clip-path: polygon(0% 0%, 100% 0%, 72% 100%, 0% 100%);
+  clip-path: polygon(0% 0%, 100% 0%, 82% 100%, 0% 100%);
 }
 
 /* Watermark Pattern inside orange overlay */
 .auth-overlay-watermark {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.12) 0%, transparent 60%), repeating-radial-gradient(circle at 60% 40%, transparent 0, transparent 8px, rgba(0, 0, 0, 0.08) 9px, transparent 10px);
+  background:
+    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.14) 0%, transparent 60%),
+    repeating-radial-gradient(circle at 60% 40%, transparent 0, transparent 8px, rgba(0, 0, 0, 0.08) 9px, transparent 10px);
   opacity: 0.35;
   pointer-events: none;
 }
@@ -610,36 +506,46 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  max-width: 340px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 360px;
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
+
+/* Login mode: overlay on right, top-left is diagonal clipped -> generous left padding so text never touches or cuts */
 .auth-overlay-info.login-info {
   display: flex;
+  padding: 2.5rem 2rem 2.5rem clamp(4.5rem, 16%, 5.5rem);
 }
 .auth-overlay-info.signup-info {
   display: none;
 }
+
+/* Sign Up mode: overlay on left, bottom-right is diagonal clipped -> generous right padding so text never touches or cuts */
 .auth-forensic-card.active .auth-overlay-info.login-info {
   display: none;
 }
 .auth-forensic-card.active .auth-overlay-info.signup-info {
   display: flex;
+  padding: 2.5rem clamp(4.5rem, 16%, 5.5rem) 2.5rem 2.5rem;
 }
 
 .auth-overlay-brand {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
-  margin-bottom: 1.6rem;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 0.4rem 0.9rem;
+  margin-bottom: 1.4rem;
+  background: rgba(0, 0, 0, 0.32);
+  padding: 0.4rem 0.85rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   text-decoration: none;
 }
+
 .auth-overlay-brand-text {
   text-align: left;
 }
+
 .auth-overlay-brand-title {
   display: block;
   font-size: 0.72rem;
@@ -647,27 +553,33 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   letter-spacing: 0.05em;
   color: #FFFFFF;
 }
+
 .auth-overlay-brand-sub {
   display: block;
-  font-size: 0.55rem;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.54rem;
+  color: rgba(255, 255, 255, 0.85);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
 .auth-overlay-heading-hero {
   font-family: "Space Grotesk", sans-serif;
-  font-size: 2.2rem;
+  font-size: 1.95rem;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.02em;
-  margin: 0 0 1rem;
+  margin: 0 0 0.85rem;
   color: #FFFFFF;
+  white-space: normal;
+  word-break: normal;
 }
+
 .auth-overlay-desc {
-  font-size: 0.82rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.90);
   margin: 0;
+  max-width: 290px;
 }
 
 @media (max-width: 768px) {
