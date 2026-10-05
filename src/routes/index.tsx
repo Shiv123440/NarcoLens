@@ -32,10 +32,29 @@ function Dashboard() {
   const sealed = records.filter((record) => record.sealed).length;
   const detected = records.filter((record) => record.verdict === "POSITIVE").length;
   const toConfirm = records.filter((record) => record.verdict !== "NEGATIVE").length;
-  return <AppShell><section className="app-hero">
-    <div className="app-hero-copy"><span className="app-kicker">New test · field ready</span><h1>Start a new test.</h1><p>Capture a presumptive colour response, seal the original evidence, and keep the chain of custody intact — even when you are offline.</p><div className="app-hero-tags"><span className="app-hero-tag">01 Case</span><span className="app-hero-tag">02 Reagents</span><span className="app-hero-tag">03 Photo</span><span className="app-hero-tag">04 Result</span></div><Button asChild size="lg"><Link to="/scan" search={{ substance: undefined }}><ScanLine />Start field test</Link></Button></div>
-    <div className="app-hero-art" aria-label="Three-well field test illustration"><div className="app-wells"><span className="app-well" /><span className="app-well" /><span className="app-well" /></div></div>
-  </section>
+  return <AppShell>
+    <section className="app-hero" aria-label="Start a new test">
+      <div className="app-hero-media">
+        <img
+          src="/hero-banner@2x.png"
+          srcSet="/hero-banner.png 948w, /hero-banner@2x.png 1896w"
+          sizes="(max-width: 1200px) 100vw, 1180px"
+          alt="Start a new test · Field ready. Capture a presumptive colour response, seal original evidence, and keep chain of custody intact."
+          className="app-hero-banner-img"
+          loading="eager"
+          decoding="async"
+        />
+        <Link
+          to="/scan"
+          search={{ substance: undefined }}
+          className="app-hero-cta-hitbox"
+          aria-label="Start field test"
+          title="Start field test"
+        >
+          <span className="sr-only">Start field test</span>
+        </Link>
+      </div>
+    </section>
   <div className="app-section-head"><h2 className="app-title">Testing for</h2><span className="app-kicker">NCB reference kit</span></div>
   <section className="app-grid-substances" aria-label="Substance reference library">{SUBSTANCES.map((substance) => <Link key={substance.id} to="/scan" search={{ substance: substance.id }} className="app-card app-substance"><span className="app-substance-icon"><SectionIcon type={substance.icon} /></span><h3>{substance.name}</h3>{substance.id === "methaqualone" ? <span className="app-pending">Kit mapping pending</span> : <p>{substance.note}</p>}</Link>)}</section>
   <div className="app-section-head"><h2 className="app-title">Evidence overview</h2><Link to="/audit" className="app-link">View all records <ArrowUpRight size={13} className="inline" /></Link></div>
