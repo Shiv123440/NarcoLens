@@ -365,6 +365,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* ==========================================================================
    Hero Banner Section (Cinematic Dark Forensic Field-Testing Banner)
    ========================================================================== */
+.app-hero-perspective-wrapper {
+  perspective: 1200px;
+  width: 100%;
+  margin-bottom: 2.25rem;
+}
+
 .app-hero {
   position: relative;
   width: 100%;
@@ -377,6 +383,44 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   display: flex;
   align-items: stretch;
   min-height: 380px;
+}
+
+.app-hero-3d {
+  margin-bottom: 0 !important;
+  transform: perspective(1200px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) translateY(var(--lift, 0px));
+  transition: transform 0.12s ease-out;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.app-hero-3d[data-hover="false"] {
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.app-hero-3d[data-hover="true"] {
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 24px -4px rgba(255, 138, 29, 0.08);
+}
+
+.app-hero-highlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(
+    circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    rgba(255, 145, 35, 0.10),
+    transparent 45%
+  );
+  opacity: var(--highlight-opacity, 0);
+  transition: opacity 0.4s ease;
+  mix-blend-mode: screen;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-hero-3d {
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 @media (min-width: 1024px) {

@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell, SectionIcon } from "@/components/app-shell";
+import { FloatingHeroCard } from "@/components/floating-hero-card";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 import { formatRecordTime, SUBSTANCES, type AuditRecord } from "@/lib/app-data";
 import { useQuery } from "@tanstack/react-query";
 import { recordsQuery } from "@/lib/evidence";
@@ -277,7 +279,7 @@ function Dashboard() {
   const detected = records.filter((record) => record.verdict === "POSITIVE").length;
   const toConfirm = records.filter((record) => record.verdict !== "NEGATIVE").length;
   return <AppShell>
-    <section className="app-hero" aria-label="Start a new test">
+    <FloatingHeroCard>
       <div className="app-hero-content">
         <div className="app-hero-eyebrow">
           <span>NEW TEST</span>
@@ -317,16 +319,18 @@ function Dashboard() {
         </div>
 
         <div className="app-hero-action">
-          <Link
-            to="/scan"
-            search={{ substance: undefined }}
-            className="app-hero-cta"
-            aria-label="Start field test"
-          >
-            <Scan className="app-hero-cta-icon" aria-hidden="true" />
-            <span className="app-hero-cta-text">Start field test</span>
-            <ArrowRight className="app-hero-cta-arrow" aria-hidden="true" />
-          </Link>
+          <MagneticButton strength={0.35} maxDistance={8}>
+            <Link
+              to="/scan"
+              search={{ substance: undefined }}
+              className="app-hero-cta"
+              aria-label="Start field test"
+            >
+              <Scan className="app-hero-cta-icon" aria-hidden="true" />
+              <span className="app-hero-cta-text">Start field test</span>
+              <ArrowRight className="app-hero-cta-arrow" aria-hidden="true" />
+            </Link>
+          </MagneticButton>
         </div>
       </div>
 
@@ -340,7 +344,7 @@ function Dashboard() {
         />
         <div className="app-hero-visual-gradient" />
       </div>
-    </section>
+    </FloatingHeroCard>
   <div className="app-section-head app-substance-head">
     <div className="app-substance-title-group">
       <h2 className="app-title">Testing for</h2>
