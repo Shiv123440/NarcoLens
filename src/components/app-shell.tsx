@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/profile-window";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { InteractiveRippleGrid } from "@/components/ui/background-ripple-effect";
+import { ForensicLiquidBackground } from "@/components/forensic-liquid-background";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -612,18 +613,34 @@ export function PrahariWidget() {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const isAuth = location.pathname === "/auth";
-  useEffect(() => { document.title = isAuth ? "Officer access · NarcoLens" : "NarcoLens · Narcotics Control Bureau"; }, [isAuth]);
+  const isDashboard = location.pathname === "/";
+  const isScan = location.pathname.startsWith("/scan");
+
+  useEffect(() => {
+    document.title = isAuth
+      ? "Officer access · NarcoLens"
+      : "NarcoLens · Narcotics Control Bureau";
+  }, [isAuth]);
+
   if (isAuth) return <>{children}</>;
+
+  const bgIntensity = isDashboard ? "full" : isScan ? "subtle" : "minimal";
+
   return (
     <div className="app-page">
+      {/* Cinematic Liquid-Glass Forensic Background Layer */}
+      <ForensicLiquidBackground intensity={bgIntensity} showGrid={true} />
+
       <div className="app-aurora-bg" aria-hidden="true">
-        <AuroraBackground
-          className="!h-full !min-h-screen !w-full !p-0 !bg-transparent dark:!bg-transparent"
-          showRadialGradient={true}
-        />
         <InteractiveRippleGrid cellSize={64} />
       </div>
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 rounded bg-background px-3 py-2 text-sm">Skip to content</a>
+
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 rounded bg-background px-3 py-2 text-sm text-white border border-white/20"
+      >
+        Skip to content
+      </a>
       <AppHeader />
       <main id="main" className="app-main">{children}</main>
       <AppFooter />

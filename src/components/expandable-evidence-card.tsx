@@ -90,28 +90,28 @@ export function ExpandableEvidenceCard({
               role="dialog"
               aria-modal="true"
               aria-labelledby={`evidence-title-${record.id}`}
-              className="relative w-full max-w-[580px] bg-white rounded-2xl shadow-2xl border border-[rgba(226,220,212,0.95)] overflow-hidden flex flex-col my-auto"
+              className="relative w-full max-w-[580px] bg-[#10151D]/95 backdrop-blur-xl rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.85)] border border-white/10 overflow-hidden flex flex-col my-auto text-[#F5F7FA]"
             >
               {/* Top Header Bar */}
-              <div className="relative px-6 pt-5 pb-4 border-b border-[rgba(226,220,212,0.7)] bg-[#FAF8F5] flex items-start justify-between gap-4">
+              <div className="relative px-6 pt-5 pb-4 border-b border-white/10 bg-[#171C24]/80 flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="app-kicker text-[0.68rem] text-[#E85D04] tracking-wider uppercase font-bold font-mono">
+                    <span className="app-kicker text-[0.68rem] text-[#F97316] tracking-wider uppercase font-bold font-mono">
                       Field Test Preview
                     </span>
-                    <span className="text-zinc-400">·</span>
-                    <span className="font-mono text-xs text-zinc-500 font-medium">
+                    <span className="text-white/30">·</span>
+                    <span className="font-mono text-xs text-[#A6AFBD] font-medium">
                       {record.id}
                     </span>
                   </div>
                   <motion.h3
                     layoutId={`evidence-title-${record.id}`}
                     id={`evidence-title-${record.id}`}
-                    className="text-xl sm:text-2xl font-bold text-[#14171A] tracking-tight"
+                    className="text-xl sm:text-2xl font-bold text-[#F5F7FA] tracking-tight"
                   >
                     {record.substance || "Presumptive Test"}
                   </motion.h3>
-                  <p className="text-xs text-zinc-500 font-mono mt-0.5">
+                  <p className="text-xs text-[#A6AFBD] font-mono mt-0.5">
                     Case: {record.caseNumber}
                   </p>
                 </div>
@@ -119,7 +119,7 @@ export function ExpandableEvidenceCard({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200/60 transition-colors"
+                  className="rounded-full p-1.5 text-[#A6AFBD] hover:text-[#F5F7FA] hover:bg-white/10 transition-colors"
                   aria-label="Close preview"
                 >
                   <X className="w-5 h-5" />
@@ -127,21 +127,29 @@ export function ExpandableEvidenceCard({
               </div>
 
               {/* Main Card Body */}
-              <div className="p-6 space-y-5 text-sm text-[#14171A]">
+              <div className="p-6 space-y-5 text-sm text-[#F5F7FA]">
                 {/* Status & Summary Highlight */}
-                <div className="p-3.5 rounded-xl bg-orange-50/70 border border-orange-200/70 flex items-start gap-3">
+                <div
+                  className={`p-3.5 rounded-xl border flex items-start gap-3 ${
+                    record.verdict === "POSITIVE"
+                      ? "bg-red-500/10 border-red-500/25"
+                      : record.verdict === "INCONCLUSIVE"
+                      ? "bg-amber-500/10 border-amber-500/25"
+                      : "bg-emerald-500/10 border-emerald-500/25"
+                  }`}
+                >
                   <div className="mt-0.5 shrink-0">
                     {record.verdict === "POSITIVE" ? (
-                      <Target className="w-5 h-5 text-red-600" />
+                      <Target className="w-5 h-5 text-red-400" />
                     ) : record.verdict === "INCONCLUSIVE" ? (
-                      <Clock3 className="w-5 h-5 text-amber-600" />
+                      <Clock3 className="w-5 h-5 text-amber-400" />
                     ) : (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="font-semibold text-zinc-900">
+                      <span className="font-semibold text-[#F5F7FA]">
                         {record.verdict === "POSITIVE"
                           ? `Detected: ${record.substance}`
                           : record.verdict === "INCONCLUSIVE"
@@ -149,13 +157,13 @@ export function ExpandableEvidenceCard({
                           : "No Drug Detected"}
                       </span>
                       {record.confidence !== undefined && (
-                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-white border border-orange-200 text-orange-800">
+                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-[#080B10] border border-orange-500/30 text-[#FFB15C]">
                           {record.confidence}% match
                         </span>
                       )}
                     </div>
                     {record.summary && (
-                      <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
+                      <p className="text-xs text-[#A6AFBD] mt-1 leading-relaxed">
                         {record.summary}
                       </p>
                     )}
@@ -165,24 +173,24 @@ export function ExpandableEvidenceCard({
                 {/* Evidence Grid Details */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
                   {/* Reagent */}
-                  <div className="p-3 rounded-lg bg-[#FAF8F5] border border-[rgba(226,220,212,0.7)] flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-md bg-amber-500/10 text-[#E85D04] border border-amber-500/20 grid place-items-center shrink-0">
+                  <div className="p-3 rounded-lg bg-[#171C24]/80 border border-white/5 flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-md bg-orange-500/10 text-[#FFB15C] border border-orange-500/20 grid place-items-center shrink-0">
                       <FlaskConical className="w-4 h-4" />
                     </span>
                     <div className="min-w-0">
-                      <div className="text-[11px] text-zinc-500 font-mono uppercase">Reagent</div>
-                      <div className="font-semibold truncate text-xs sm:text-sm">{record.reagent || "Standard Kit"}</div>
+                      <div className="text-[11px] text-[#A6AFBD] font-mono uppercase">Reagent</div>
+                      <div className="font-semibold truncate text-xs sm:text-sm text-[#F5F7FA]">{record.reagent || "Standard Kit"}</div>
                     </div>
                   </div>
 
                   {/* Date & Time */}
-                  <div className="p-3 rounded-lg bg-[#FAF8F5] border border-[rgba(226,220,212,0.7)] flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-md bg-amber-500/10 text-[#E85D04] border border-amber-500/20 grid place-items-center shrink-0">
+                  <div className="p-3 rounded-lg bg-[#171C24]/80 border border-white/5 flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-md bg-orange-500/10 text-[#FFB15C] border border-orange-500/20 grid place-items-center shrink-0">
                       <Calendar className="w-4 h-4" />
                     </span>
                     <div className="min-w-0">
-                      <div className="text-[11px] text-zinc-500 font-mono uppercase">Timestamp</div>
-                      <div className="font-semibold truncate text-xs sm:text-sm">
+                      <div className="text-[11px] text-[#A6AFBD] font-mono uppercase">Timestamp</div>
+                      <div className="font-semibold truncate text-xs sm:text-sm text-[#F5F7FA]">
                         {new Date(record.timestamp).toLocaleDateString("en-IN", {
                           day: "2-digit",
                           month: "short",
@@ -194,26 +202,26 @@ export function ExpandableEvidenceCard({
 
                   {/* Location */}
                   {record.location && (
-                    <div className="p-3 rounded-lg bg-[#FAF8F5] border border-[rgba(226,220,212,0.7)] flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-md bg-amber-500/10 text-[#E85D04] border border-amber-500/20 grid place-items-center shrink-0">
+                    <div className="p-3 rounded-lg bg-[#171C24]/80 border border-white/5 flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-md bg-orange-500/10 text-[#FFB15C] border border-orange-500/20 grid place-items-center shrink-0">
                         <MapPin className="w-4 h-4" />
                       </span>
                       <div className="min-w-0">
-                        <div className="text-[11px] text-zinc-500 font-mono uppercase">Location</div>
-                        <div className="font-semibold truncate text-xs sm:text-sm">{record.location}</div>
+                        <div className="text-[11px] text-[#A6AFBD] font-mono uppercase">Location</div>
+                        <div className="font-semibold truncate text-xs sm:text-sm text-[#F5F7FA]">{record.location}</div>
                       </div>
                     </div>
                   )}
 
                   {/* Officer */}
                   {record.officer && (
-                    <div className="p-3 rounded-lg bg-[#FAF8F5] border border-[rgba(226,220,212,0.7)] flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-md bg-amber-500/10 text-[#E85D04] border border-amber-500/20 grid place-items-center shrink-0">
+                    <div className="p-3 rounded-lg bg-[#171C24]/80 border border-white/5 flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-md bg-orange-500/10 text-[#FFB15C] border border-orange-500/20 grid place-items-center shrink-0">
                         <User className="w-4 h-4" />
                       </span>
                       <div className="min-w-0">
-                        <div className="text-[11px] text-zinc-500 font-mono uppercase">Field Officer</div>
-                        <div className="font-semibold truncate text-xs sm:text-sm">{record.officer}</div>
+                        <div className="text-[11px] text-[#A6AFBD] font-mono uppercase">Field Officer</div>
+                        <div className="font-semibold truncate text-xs sm:text-sm text-[#F5F7FA]">{record.officer}</div>
                       </div>
                     </div>
                   )}
@@ -221,18 +229,18 @@ export function ExpandableEvidenceCard({
 
                 {/* Chain of Custody & Security Hash Info */}
                 <div className="space-y-1.5 pt-1 text-xs">
-                  <div className="flex items-center justify-between text-zinc-500 font-mono text-[11px]">
+                  <div className="flex items-center justify-between text-[#A6AFBD] font-mono text-[11px]">
                     <span className="flex items-center gap-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Evidence Seal Status:</span>
                     </span>
-                    <span className="font-semibold text-zinc-700">
+                    <span className="font-semibold text-[#F5F7FA]">
                       {record.sealed ? "Sealed & Tamper-Protected" : "Unsealed Draft"}
                     </span>
                   </div>
                   {record.sha256 && (
-                    <div className="flex items-center gap-1.5 text-zinc-400 font-mono text-[10px] truncate bg-zinc-50 p-2 rounded border border-zinc-200/70">
-                      <Hash className="w-3 h-3 text-zinc-400 shrink-0" />
+                    <div className="flex items-center gap-1.5 text-[#A6AFBD] font-mono text-[10px] truncate bg-[#080B10]/80 p-2 rounded border border-white/5">
+                      <Hash className="w-3 h-3 text-[#56D9E8] shrink-0" />
                       <span className="truncate">{record.sha256}</span>
                     </div>
                   )}
@@ -240,11 +248,11 @@ export function ExpandableEvidenceCard({
               </div>
 
               {/* Action Footer Bar */}
-              <div className="px-6 py-4 bg-[#FAF8F5] border-t border-[rgba(226,220,212,0.7)] flex items-center justify-between gap-3">
+              <div className="px-6 py-4 bg-[#171C24]/80 border-t border-white/10 flex items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-xs sm:text-sm font-medium text-zinc-600 hover:text-zinc-900 rounded-lg hover:bg-zinc-200/50 transition-colors"
+                  className="px-4 py-2 text-xs sm:text-sm font-medium text-[#A6AFBD] hover:text-[#F5F7FA] rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -253,7 +261,7 @@ export function ExpandableEvidenceCard({
                   layoutId={`button-${record.id}`}
                   type="button"
                   onClick={handleOpenDetailedReport}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-[#FF8A1D] hover:bg-[#FF962E] text-black shadow-md shadow-orange-500/20 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-[#F97316] hover:bg-[#FFB15C] text-[#080B10] shadow-md shadow-orange-500/20 transition-all cursor-pointer"
                 >
                   <FileText className="w-4 h-4" />
                   <span>View full audit report</span>
