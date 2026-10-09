@@ -1,0 +1,127 @@
+"use client";
+
+import React, { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
+
+export interface FloatingCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  maxRotateX?: number;
+  maxRotateY?: number;
+  lift?: number;
+  perspective?: number;
+  className?: string;
+  cardClassName?: string;
+  showHighlight?: boolean;
+}
+
+export function FloatingCard({
+  children,
+  maxRotateX = 2.5,
+  maxRotateY = 3,
+  lift = -3.5,
+  perspective = 1200,
+  className = "",
+  cardClassName = "",
+  showHighlight = true,
+  ...props
+}: FloatingCardProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  const handlePointerEnter = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    const card = cardRef.current;
+    if (card) {
+      card.setAttribute("data-hover", "true");
+      card.style.setProperty("--card-lift", `${lift}px`);
+      card.style.setProperty("--card-highlight-opacity", "1");
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    const container = containerRef.current;
+    const card = cardRef.current;
+    if (!container || !card) return;
+
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const nx = Math.max(-1, Math.min(1, (x / rect.width) * 2 - 1));
+      const ny = Math.max(-1, Math.min(1, (y / rect.height) * 2 - 1));
+
+      const px = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      const py = Math.max(0, Math.min(100, (y / rect.height) * 100));
+
+      const rotX = Number((-ny * maxRotateX).toFixed(2));
+      const rotY = Number((-nx * maxRotateY).toFixed(2));
+
+      card.style.setProperty("--card-rotate-x", `${rotX}deg`);
+      card.style.setProperty("--card-rotate-y", `${rotY}deg`);
+      card.style.setProperty("--card-pointer-x", `${px.toFixed(1)}%`);
+      card.style.setProperty("--card-pointer-y", `${py.toFixed(1)}%`);
+    });
+  };
+
+  const handlePointerLeave = () => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    const card = cardRef.current;
+    if (card) {
+      card.setAttribute("data-hover", "false");
+      card.style.setProperty("--card-rotate-x", "0deg");
+      card.style.setProperty("--card-rotate-y", "0deg");
+      card.style.setProperty("--card-lift", "0px");
+      card.style.setProperty("--card-pointer-x", "50%");
+      card.style.setProperty("--card-pointer-y", "50%");
+      card.style.setProperty("--card-highlight-opacity", "0");
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn("app-floating-perspective-wrapper relative", className)}
+      style={{ perspective: `${perspective}px` }}
+      onPointerEnter={handlePointerEnter}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      {...props}
+    >
+      <div
+        ref={cardRef}
+        className={cn("app-floating-card-3d relative w-full h-full", cardClassName)}
+        data-hover="false"
+      >
+        {showHighlight && (
+          <div className="app-floating-card-highlight" aria-hidden="true" />
+        )}
+        {children}
+      </div>
+    </div>
+  );
+}
