@@ -584,6 +584,49 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   }
 }
 
+/* ==========================================================================
+   Reusable 3D Floating Dashboard Card (Substances, Stats & Ledger)
+   ========================================================================== */
+.app-floating-perspective-wrapper {
+  perspective: 1200px;
+  position: relative;
+}
+
+.app-floating-card-3d {
+  position: relative;
+  transform: perspective(1200px) rotateX(var(--card-rotate-x, 0deg)) rotateY(var(--card-rotate-y, 0deg)) translateY(var(--card-lift, 0px));
+  transition: transform 0.12s ease-out;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.app-floating-card-3d[data-hover="false"] {
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.app-floating-card-highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 5;
+  background: radial-gradient(
+    circle at var(--card-pointer-x, 50%) var(--card-pointer-y, 50%),
+    rgba(255, 177, 92, 0.12),
+    transparent 55%
+  );
+  opacity: var(--card-highlight-opacity, 0);
+  transition: opacity 0.35s ease;
+  mix-blend-mode: screen;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-floating-card-3d {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 @media (min-width: 1024px) {
   .app-hero {
     aspect-ratio: 3.15 / 1;

@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AppShell, SectionIcon } from "@/components/app-shell";
 import { FloatingHeroCard } from "@/components/floating-hero-card";
+import { FloatingCard } from "@/components/ui/floating-card";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { ExpandableEvidenceCard } from "@/components/expandable-evidence-card";
 import { formatRecordTime, SUBSTANCES, type AuditRecord } from "@/lib/app-data";
@@ -372,30 +373,37 @@ function Dashboard() {
     </div>
     <div className="app-grid-substances">
       {SUBSTANCES.map((substance) => (
-        <Link
+        <FloatingCard
           key={substance.id}
-          to="/scan"
-          search={{ substance: substance.id }}
-          className="app-card app-substance"
+          maxRotateX={2.5}
+          maxRotateY={3}
+          lift={-3.5}
+          className="h-full"
         >
-          <div className="app-substance-top">
-            <span className="app-substance-icon">
-              <SectionIcon type={substance.icon} />
-            </span>
-            <h3 className="app-substance-name">{substance.name}</h3>
-            {substance.id === "methaqualone" ? (
-              <span className="app-pending">Kit mapping pending</span>
-            ) : (
-              <p className="app-substance-note">{substance.note}</p>
-            )}
-          </div>
-          <div className="app-substance-bottom">
-            <span className="app-substance-arrow" aria-hidden="true">
-              <ArrowRight size={13} strokeWidth={2.4} />
-            </span>
-          </div>
-          <SubstanceWatermark id={substance.id} />
-        </Link>
+          <Link
+            to="/scan"
+            search={{ substance: substance.id }}
+            className="app-card app-substance h-full"
+          >
+            <div className="app-substance-top">
+              <span className="app-substance-icon">
+                <SectionIcon type={substance.icon} />
+              </span>
+              <h3 className="app-substance-name">{substance.name}</h3>
+              {substance.id === "methaqualone" ? (
+                <span className="app-pending">Kit mapping pending</span>
+              ) : (
+                <p className="app-substance-note">{substance.note}</p>
+              )}
+            </div>
+            <div className="app-substance-bottom">
+              <span className="app-substance-arrow" aria-hidden="true">
+                <ArrowRight size={13} strokeWidth={2.4} />
+              </span>
+            </div>
+            <SubstanceWatermark id={substance.id} />
+          </Link>
+        </FloatingCard>
       ))}
     </div>
   </section>
@@ -419,106 +427,114 @@ function Dashboard() {
     </Link>
   </div>
   <section className="app-stats" aria-label="Evidence overview">
-    <div className="app-card app-stat">
-      <span className="app-stat-accent-bar" aria-hidden="true" />
-      <div className="app-stat-icon-wrap app-stat-icon-peach" aria-hidden="true">
-        <Database size={22} strokeWidth={2} />
-      </div>
-      <div className="app-stat-content">
-        <div className="app-stat-label">Sealed records</div>
-        <div className="app-stat-value">{sealed}</div>
-        <div className="app-stat-note">
-          <LockKeyhole size={12} className="inline mr-1 shrink-0 text-slate-500" aria-hidden="true" />
-          <span>SHA-256 verified</span>
+    <FloatingCard maxRotateX={2} maxRotateY={2.5} lift={-3} className="h-full">
+      <div className="app-card app-stat h-full">
+        <span className="app-stat-accent-bar" aria-hidden="true" />
+        <div className="app-stat-icon-wrap app-stat-icon-peach" aria-hidden="true">
+          <Database size={22} strokeWidth={2} />
+        </div>
+        <div className="app-stat-content">
+          <div className="app-stat-label">Sealed records</div>
+          <div className="app-stat-value">{sealed}</div>
+          <div className="app-stat-note">
+            <LockKeyhole size={12} className="inline mr-1 shrink-0 text-slate-500" aria-hidden="true" />
+            <span>SHA-256 verified</span>
+          </div>
+        </div>
+        <div className="app-stat-sparkline-wrap" aria-hidden="true">
+          <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
+            <path
+              d="M 3 22 C 11 25, 17 15, 23 16 C 29 17, 34 23, 41 15 C 46 9, 50 7, 53 6"
+              stroke="#EA580C"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
       </div>
-      <div className="app-stat-sparkline-wrap" aria-hidden="true">
-        <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
-          <path
-            d="M 3 22 C 11 25, 17 15, 23 16 C 29 17, 34 23, 41 15 C 46 9, 50 7, 53 6"
-            stroke="#EA580C"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-    </div>
-    <div className="app-card app-stat">
-      <span className="app-stat-accent-bar" aria-hidden="true" />
-      <div className="app-stat-icon-wrap app-stat-icon-blue" aria-hidden="true">
-        <FlaskConical size={22} strokeWidth={2} />
-      </div>
-      <div className="app-stat-content">
-        <div className="app-stat-label">Tests today</div>
-        <div className="app-stat-value">{today}</div>
-        <div className="app-stat-note">
-          <Calendar size={12} className="inline mr-1 shrink-0 text-slate-500" aria-hidden="true" />
-          <span>IST field activity</span>
+    </FloatingCard>
+    <FloatingCard maxRotateX={2} maxRotateY={2.5} lift={-3} className="h-full">
+      <div className="app-card app-stat h-full">
+        <span className="app-stat-accent-bar" aria-hidden="true" />
+        <div className="app-stat-icon-wrap app-stat-icon-blue" aria-hidden="true">
+          <FlaskConical size={22} strokeWidth={2} />
+        </div>
+        <div className="app-stat-content">
+          <div className="app-stat-label">Tests today</div>
+          <div className="app-stat-value">{today}</div>
+          <div className="app-stat-note">
+            <Calendar size={12} className="inline mr-1 shrink-0 text-slate-500" aria-hidden="true" />
+            <span>IST field activity</span>
+          </div>
+        </div>
+        <div className="app-stat-sparkline-wrap" aria-hidden="true">
+          <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
+            <path
+              d="M 3 20 C 9 22, 16 11, 23 11 C 30 11, 35 19, 42 12 C 46 8, 49 5, 53 4"
+              stroke="#2563EB"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
       </div>
-      <div className="app-stat-sparkline-wrap" aria-hidden="true">
-        <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
-          <path
-            d="M 3 20 C 9 22, 16 11, 23 11 C 30 11, 35 19, 42 12 C 46 8, 49 5, 53 4"
-            stroke="#2563EB"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-    </div>
-    <div className="app-card app-stat">
-      <span className="app-stat-accent-bar" aria-hidden="true" />
-      <div className="app-stat-icon-wrap app-stat-icon-red" aria-hidden="true">
-        <TriangleAlert size={22} strokeWidth={2} />
-      </div>
-      <div className="app-stat-content">
-        <div className="app-stat-label">Detected</div>
-        <div className="app-stat-value">{detected}</div>
-        <div className="app-stat-note">
-          <Target size={12} className="inline mr-1 shrink-0 text-red-500" aria-hidden="true" />
-          <span>Presumptive positive</span>
+    </FloatingCard>
+    <FloatingCard maxRotateX={2} maxRotateY={2.5} lift={-3} className="h-full">
+      <div className="app-card app-stat h-full">
+        <span className="app-stat-accent-bar" aria-hidden="true" />
+        <div className="app-stat-icon-wrap app-stat-icon-red" aria-hidden="true">
+          <TriangleAlert size={22} strokeWidth={2} />
+        </div>
+        <div className="app-stat-content">
+          <div className="app-stat-label">Detected</div>
+          <div className="app-stat-value">{detected}</div>
+          <div className="app-stat-note">
+            <Target size={12} className="inline mr-1 shrink-0 text-red-500" aria-hidden="true" />
+            <span>Presumptive positive</span>
+          </div>
+        </div>
+        <div className="app-stat-sparkline-wrap" aria-hidden="true">
+          <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
+            <path
+              d="M 3 20 C 11 23, 17 9, 25 11 C 33 13, 36 20, 43 11 C 47 6, 50 5, 53 4"
+              stroke="#DC2626"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
       </div>
-      <div className="app-stat-sparkline-wrap" aria-hidden="true">
-        <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
-          <path
-            d="M 3 20 C 11 23, 17 9, 25 11 C 33 13, 36 20, 43 11 C 47 6, 50 5, 53 4"
-            stroke="#DC2626"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-    </div>
-    <div className="app-card app-stat">
-      <span className="app-stat-accent-bar" aria-hidden="true" />
-      <div className="app-stat-icon-wrap app-stat-icon-green" aria-hidden="true">
-        <FileText size={22} strokeWidth={2} />
-      </div>
-      <div className="app-stat-content">
-        <div className="app-stat-label">To confirm</div>
-        <div className="app-stat-value">{toConfirm}</div>
-        <div className="app-stat-note">
-          <FlaskConical size={12} className="inline mr-1 shrink-0 text-emerald-600" aria-hidden="true" />
-          <span>Needs lab confirmation</span>
+    </FloatingCard>
+    <FloatingCard maxRotateX={2} maxRotateY={2.5} lift={-3} className="h-full">
+      <div className="app-card app-stat h-full">
+        <span className="app-stat-accent-bar" aria-hidden="true" />
+        <div className="app-stat-icon-wrap app-stat-icon-green" aria-hidden="true">
+          <FileText size={22} strokeWidth={2} />
+        </div>
+        <div className="app-stat-content">
+          <div className="app-stat-label">To confirm</div>
+          <div className="app-stat-value">{toConfirm}</div>
+          <div className="app-stat-note">
+            <FlaskConical size={12} className="inline mr-1 shrink-0 text-emerald-600" aria-hidden="true" />
+            <span>Needs lab confirmation</span>
+          </div>
+        </div>
+        <div className="app-stat-sparkline-wrap" aria-hidden="true">
+          <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
+            <path
+              d="M 3 22 C 10 24, 16 13, 24 13 C 32 13, 36 19, 43 13 C 47 9, 50 7, 53 5"
+              stroke="#16A34A"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
       </div>
-      <div className="app-stat-sparkline-wrap" aria-hidden="true">
-        <svg viewBox="0 0 56 28" fill="none" className="app-stat-sparkline">
-          <path
-            d="M 3 22 C 10 24, 16 13, 24 13 C 32 13, 36 19, 43 13 C 47 9, 50 7, 53 5"
-            stroke="#16A34A"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-    </div>
+    </FloatingCard>
   </section>
   <div className="app-section-head app-ledger-head">
     <div className="app-ledger-title-group">
@@ -540,113 +556,115 @@ function Dashboard() {
       <span className="app-kicker app-ledger-kicker">Shared ledger</span>
     </div>
   </div>
-  <section className="app-ledger-card" aria-label="Recent field tests ledger">
-    {!officer.signedIn && officer.ready && (
-      <div className="p-4 text-sm text-muted-foreground">
-        Sign in as an officer to view the shared evidence history.{" "}
-        <Link to="/auth" search={{ mode: "login", next: "/" }} className="app-link">
-          Login / Signup
-        </Link>
-      </div>
-    )}
-    {officer.signedIn && recordsQ.isLoading && (
-      <p className="p-4 text-sm text-muted-foreground">Loading shared evidence ledger…</p>
-    )}
-    {officer.signedIn && recordsQ.isError && (
-      <p className="p-4 text-sm text-destructive" role="alert">
-        Could not load records: {recordsQ.error.message}
-      </p>
-    )}
-    {officer.signedIn && recordsQ.isSuccess && records.length === 0 && (
-      <p className="p-4 text-sm text-muted-foreground">
-        No evidence sealed yet. Start a field test to create the first record.
-      </p>
-    )}
-    {records.slice(0, 5).map((record) => {
-      const loc = splitLocation(record.location);
-      const dt = splitRecordTime(record.timestamp);
-      const reagentInfo = getReagentInfo(record.reagent);
+  <FloatingCard maxRotateX={1.2} maxRotateY={1.5} lift={-2} className="w-full">
+    <section className="app-ledger-card mb-0" aria-label="Recent field tests ledger">
+      {!officer.signedIn && officer.ready && (
+        <div className="p-4 text-sm text-muted-foreground">
+          Sign in as an officer to view the shared evidence history.{" "}
+          <Link to="/auth" search={{ mode: "login", next: "/" }} className="app-link">
+            Login / Signup
+          </Link>
+        </div>
+      )}
+      {officer.signedIn && recordsQ.isLoading && (
+        <p className="p-4 text-sm text-muted-foreground">Loading shared evidence ledger…</p>
+      )}
+      {officer.signedIn && recordsQ.isError && (
+        <p className="p-4 text-sm text-destructive" role="alert">
+          Could not load records: {recordsQ.error.message}
+        </p>
+      )}
+      {officer.signedIn && recordsQ.isSuccess && records.length === 0 && (
+        <p className="p-4 text-sm text-muted-foreground">
+          No evidence sealed yet. Start a field test to create the first record.
+        </p>
+      )}
+      {records.slice(0, 5).map((record) => {
+        const loc = splitLocation(record.location);
+        const dt = splitRecordTime(record.timestamp);
+        const reagentInfo = getReagentInfo(record.reagent);
 
-      return (
-        <motion.div
-          layoutId={`evidence-card-${record.id}`}
-          key={record.id}
-          onClick={() => setActiveRecord(record)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setActiveRecord(record);
-            }
-          }}
-          className="app-ledger-row cursor-pointer"
-          aria-label={`Preview record ${record.caseNumber} - ${record.substance}`}
-        >
-          <span className="app-ledger-row-accent" aria-hidden="true" />
+        return (
+          <motion.div
+            layoutId={`evidence-card-${record.id}`}
+            key={record.id}
+            onClick={() => setActiveRecord(record)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setActiveRecord(record);
+              }
+            }}
+            className="app-ledger-row cursor-pointer"
+            aria-label={`Preview record ${record.caseNumber} - ${record.substance}`}
+          >
+            <span className="app-ledger-row-accent" aria-hidden="true" />
 
-          {/* Col 1: Sample & Case */}
-          <div className="app-ledger-col app-ledger-col-sample">
-            <VialSwatch substance={record.substance} verdict={record.verdict} sealed={record.sealed} />
-            <div className="app-ledger-sample-info">
-              <motion.strong
-                layoutId={`evidence-title-${record.id}`}
-                className="app-ledger-sample-name"
+            {/* Col 1: Sample & Case */}
+            <div className="app-ledger-col app-ledger-col-sample">
+              <VialSwatch substance={record.substance} verdict={record.verdict} sealed={record.sealed} />
+              <div className="app-ledger-sample-info">
+                <motion.strong
+                  layoutId={`evidence-title-${record.id}`}
+                  className="app-ledger-sample-name"
+                >
+                  {record.substance || "Unknown sample"}
+                </motion.strong>
+                <span className="app-ledger-case-num">Case: {record.caseNumber}</span>
+              </div>
+            </div>
+
+            {/* Col 2: Location */}
+            <div className="app-ledger-col app-ledger-col-loc">
+              <span className="app-ledger-icon-box app-ledger-icon-loc" aria-hidden="true">
+                <MapPin size={14} strokeWidth={2.2} />
+              </span>
+              <div className="app-ledger-text-duo">
+                <span className="app-ledger-text-primary">{loc.primary}</span>
+                {loc.secondary && <span className="app-ledger-text-secondary">{loc.secondary}</span>}
+              </div>
+            </div>
+
+            {/* Col 3: Reagent */}
+            <div className="app-ledger-col app-ledger-col-reagent">
+              <span className={`app-ledger-icon-box ${reagentInfo.boxClass}`} aria-hidden="true">
+                <FlaskConical size={14} strokeWidth={2.2} />
+              </span>
+              <span className="app-ledger-reagent-name">{reagentInfo.name}</span>
+            </div>
+
+            {/* Col 4: Date & Time */}
+            <div className="app-ledger-col app-ledger-col-time">
+              <span className="app-ledger-icon-box app-ledger-icon-cal" aria-hidden="true">
+                <Calendar size={14} strokeWidth={2.2} />
+              </span>
+              <div className="app-ledger-text-duo">
+                <span className="app-ledger-text-primary">{dt.date}</span>
+                {dt.time && <span className="app-ledger-text-secondary">{dt.time}</span>}
+              </div>
+            </div>
+
+            {/* Col 5: Status Badge */}
+            <div className="app-ledger-col app-ledger-col-status">
+              {renderLedgerBadge(record)}
+            </div>
+
+            {/* Col 6: Action Chevron */}
+            <div className="app-ledger-col app-ledger-col-action" aria-hidden="true">
+              <motion.div
+                layoutId={`button-${record.id}`}
+                className="inline-flex items-center"
               >
-                {record.substance || "Unknown sample"}
-              </motion.strong>
-              <span className="app-ledger-case-num">Case: {record.caseNumber}</span>
+                <ArrowRight size={16} strokeWidth={2.2} className="app-ledger-arrow" />
+              </motion.div>
             </div>
-          </div>
-
-          {/* Col 2: Location */}
-          <div className="app-ledger-col app-ledger-col-loc">
-            <span className="app-ledger-icon-box app-ledger-icon-loc" aria-hidden="true">
-              <MapPin size={14} strokeWidth={2.2} />
-            </span>
-            <div className="app-ledger-text-duo">
-              <span className="app-ledger-text-primary">{loc.primary}</span>
-              {loc.secondary && <span className="app-ledger-text-secondary">{loc.secondary}</span>}
-            </div>
-          </div>
-
-          {/* Col 3: Reagent */}
-          <div className="app-ledger-col app-ledger-col-reagent">
-            <span className={`app-ledger-icon-box ${reagentInfo.boxClass}`} aria-hidden="true">
-              <FlaskConical size={14} strokeWidth={2.2} />
-            </span>
-            <span className="app-ledger-reagent-name">{reagentInfo.name}</span>
-          </div>
-
-          {/* Col 4: Date & Time */}
-          <div className="app-ledger-col app-ledger-col-time">
-            <span className="app-ledger-icon-box app-ledger-icon-cal" aria-hidden="true">
-              <Calendar size={14} strokeWidth={2.2} />
-            </span>
-            <div className="app-ledger-text-duo">
-              <span className="app-ledger-text-primary">{dt.date}</span>
-              {dt.time && <span className="app-ledger-text-secondary">{dt.time}</span>}
-            </div>
-          </div>
-
-          {/* Col 5: Status Badge */}
-          <div className="app-ledger-col app-ledger-col-status">
-            {renderLedgerBadge(record)}
-          </div>
-
-          {/* Col 6: Action Chevron */}
-          <div className="app-ledger-col app-ledger-col-action" aria-hidden="true">
-            <motion.div
-              layoutId={`button-${record.id}`}
-              className="inline-flex items-center"
-            >
-              <ArrowRight size={16} strokeWidth={2.2} className="app-ledger-arrow" />
-            </motion.div>
-          </div>
-        </motion.div>
-      );
-    })}
-  </section>
+          </motion.div>
+        );
+      })}
+    </section>
+  </FloatingCard>
 
   <ExpandableEvidenceCard
     record={activeRecord}
