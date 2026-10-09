@@ -37,6 +37,7 @@ import { ProfileModal } from "@/components/profile-window";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { InteractiveRippleGrid } from "@/components/ui/background-ripple-effect";
 import { ForensicLiquidBackground } from "@/components/forensic-liquid-background";
+import { Vortex } from "@/components/ui/vortex";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -628,6 +629,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-page">
+      {/* Aceternity Vortex Webpage Background Layer */}
+      <div className="app-vortex-bg fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+        <Vortex
+          backgroundColor="transparent"
+          rangeY={800}
+          particleCount={450}
+          baseHue={30}
+          baseSpeed={0.15}
+          rangeSpeed={1.4}
+          baseRadius={1}
+          rangeRadius={2.2}
+          containerClassName="h-full w-full"
+        />
+      </div>
+
       {/* Cinematic Liquid-Glass Forensic Background Layer */}
       <ForensicLiquidBackground intensity={bgIntensity} showGrid={true} />
 

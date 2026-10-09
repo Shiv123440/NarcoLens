@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { User, Lock, Mail, ShieldCheck, ArrowRight } from "lucide-react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { signUpOfficer, signInOfficer, signInWithGoogle, getActiveOfficer, validatePassword, getSavedCredentials, unhashPassword, type SavedCredential } from "@/lib/auth-service";
+import { Vortex } from "@/components/ui/vortex";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -243,7 +244,20 @@ function AuthPage() {
 
   return (
     <main className="auth-forensic-viewport">
-      {/* Background Layer: Forensic Laboratory Ambient Graphics */}
+      {/* Background Layer: Aceternity Vortex & Forensic Ambient Graphics */}
+      <div className="app-vortex-bg fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+        <Vortex
+          backgroundColor="transparent"
+          rangeY={800}
+          particleCount={350}
+          baseHue={30}
+          baseSpeed={0.15}
+          rangeSpeed={1.4}
+          baseRadius={1}
+          rangeRadius={2.2}
+          containerClassName="h-full w-full"
+        />
+      </div>
       <div className="auth-forensic-bg" aria-hidden="true" />
       <div className="auth-forensic-overlay" aria-hidden="true" />
 
