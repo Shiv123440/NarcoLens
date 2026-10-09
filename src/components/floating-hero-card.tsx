@@ -6,15 +6,17 @@ export interface FloatingHeroCardProps extends React.HTMLAttributes<HTMLDivEleme
   children: React.ReactNode;
   maxRotateX?: number;
   maxRotateY?: number;
+  pushZ?: number;
   lift?: number;
 }
 
 export function FloatingHeroCard({
   children,
   className = "",
-  maxRotateX = 5,
-  maxRotateY = 6,
-  lift = -5,
+  maxRotateX = 2.0,
+  maxRotateY = 2.4,
+  pushZ = -8,
+  lift = 0,
   ...props
 }: FloatingHeroCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,6 +39,7 @@ export function FloatingHeroCard({
     const card = cardRef.current;
     if (card) {
       card.setAttribute("data-hover", "true");
+      card.style.setProperty("--push-z", `${pushZ}px`);
       card.style.setProperty("--lift", `${lift}px`);
       card.style.setProperty("--highlight-opacity", "1");
     }
@@ -63,11 +66,17 @@ export function FloatingHeroCard({
       const px = Math.max(0, Math.min(100, (x / rect.width) * 100));
       const py = Math.max(0, Math.min(100, (y / rect.height) * 100));
 
-      const rotX = Number((-ny * maxRotateX).toFixed(2));
+      // Push back: section under cursor tilts gently backward into the depth of the screen
+      const rotX = Number((ny * maxRotateX).toFixed(2));
       const rotY = Number((-nx * maxRotateY).toFixed(2));
+
+      // Gentle depth variation: pushes slightly deeper where the cursor presses
+      const dist = Math.min(1, Math.sqrt(nx * nx + ny * ny));
+      const currentPushZ = Number((pushZ - dist * 3).toFixed(1));
 
       card.style.setProperty("--rotate-x", `${rotX}deg`);
       card.style.setProperty("--rotate-y", `${rotY}deg`);
+      card.style.setProperty("--push-z", `${currentPushZ}px`);
       card.style.setProperty("--pointer-x", `${px.toFixed(1)}%`);
       card.style.setProperty("--pointer-y", `${py.toFixed(1)}%`);
     });
@@ -84,6 +93,7 @@ export function FloatingHeroCard({
       card.setAttribute("data-hover", "false");
       card.style.setProperty("--rotate-x", "0deg");
       card.style.setProperty("--rotate-y", "0deg");
+      card.style.setProperty("--push-z", "0px");
       card.style.setProperty("--lift", "0px");
       card.style.setProperty("--pointer-x", "50%");
       card.style.setProperty("--pointer-y", "50%");

@@ -41,6 +41,9 @@ describe("FloatingHeroCard and MagneticButton", () => {
     fireEvent.pointerEnter(wrapper!, { pointerType: "mouse" });
     expect(hero).toHaveAttribute("data-hover", "true");
 
+    // Trigger pointer move for subtle push back
+    fireEvent.pointerMove(wrapper!, { clientX: 200, clientY: 100, pointerType: "mouse" });
+
     // Trigger pointer leave
     fireEvent.pointerLeave(wrapper!);
     expect(hero).toHaveAttribute("data-hover", "false");
