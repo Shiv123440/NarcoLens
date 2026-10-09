@@ -35,6 +35,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/profile-window";
 import { AuroraBackground } from "@/components/ui/aurora-background";
+import { InteractiveRippleGrid } from "@/components/ui/background-ripple-effect";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -620,6 +621,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           className="!h-full !min-h-screen !w-full !p-0 !bg-transparent dark:!bg-transparent"
           showRadialGradient={true}
         />
+        <InteractiveRippleGrid cellSize={64} />
       </div>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 rounded bg-background px-3 py-2 text-sm">Skip to content</a>
       <AppHeader />
