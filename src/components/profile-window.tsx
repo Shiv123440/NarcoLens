@@ -201,10 +201,12 @@ export function ProfileContent({ onBack, isModal = false }: ProfileViewProps) {
     // If it's Insp. Rajesh Kumar, return RK
     const clean = name.replace(/^insp\.?\s+/i, "").replace(/^si\.?\s+/i, "");
     const parts = clean.split(/[\s@.]+/).filter(Boolean);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+    const first = parts[0];
+    const second = parts[1];
+    if (first && second && first[0] && second[0]) {
+      return (first[0] + second[0]).toUpperCase();
     }
-    return (parts[0]?.[0] || "R").toUpperCase() + "K";
+    return (first?.[0] || "R").toUpperCase() + "K";
   };
 
   // Password validation checklist helpers

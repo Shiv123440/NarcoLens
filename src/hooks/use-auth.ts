@@ -6,23 +6,23 @@ import { getActiveOfficer, type OfficerUser } from "@/lib/auth-service";
 
 export type OfficerProfile = {
   id: string;
-  email?: string;
+  email?: string | undefined;
   full_name: string;
   officer_id: string;
   station: string;
-  phone?: string;
-  department?: string;
-  rank?: string;
-  avatar_url?: string;
-  verified?: boolean;
-  verified_at?: string;
-  verified_by?: string;
-  created_at?: string;
-  badge_id?: string;
-  device_id?: string;
-  district?: string;
-  speak_aloud?: boolean;
-  language?: "en" | "hi";
+  phone?: string | undefined;
+  department?: string | undefined;
+  rank?: string | undefined;
+  avatar_url?: string | undefined;
+  verified?: boolean | undefined;
+  verified_at?: string | undefined;
+  verified_by?: string | undefined;
+  created_at?: string | undefined;
+  badge_id?: string | undefined;
+  device_id?: string | undefined;
+  district?: string | undefined;
+  speak_aloud?: boolean | undefined;
+  language?: ("en" | "hi") | undefined;
 };
 
 export function useSession() {
@@ -110,28 +110,30 @@ export function useOfficer() {
         language: localOfficer.language || "en",
       }
     : profile.data ??
-      (session?.user
-        ? {
-            id: session.user.id,
-            email: session.user.email || "",
-            full_name: (session.user.user_metadata?.full_name as string) || session.user.email || "Insp. Rajesh Kumar",
-            officer_id: (session.user.user_metadata?.officer_id as string) || "NCB-DEL-4082",
-            station: (session.user.user_metadata?.station as string) || "Delhi Zonal Unit",
-            phone: session.user.user_metadata?.phone as string | undefined,
-            department: (session.user.user_metadata?.department as string) || "NCB · Delhi Zonal Unit",
-            rank: (session.user.user_metadata?.rank as string) || "Inspector",
-            avatar_url: session.user.user_metadata?.avatar_url as string | undefined,
-            verified: true,
-            verified_at: "2026-01-15T09:30:00Z",
-            verified_by: "NCB Directorate HQ, New Delhi",
-            created_at: session.user.created_at,
-            badge_id: (session.user.user_metadata?.badge_id as string) || (session.user.user_metadata?.officer_id as string) || "NCB-DEL-4082",
-            device_id: (session.user.user_metadata?.device_id as string) || "FIELD-UNIT-07",
-            district: (session.user.user_metadata?.district as string) || "New Delhi, Delhi",
-            speak_aloud: (session.user.user_metadata?.speak_aloud as boolean) ?? true,
-            language: (session.user.user_metadata?.language as "en" | "hi") || "en",
-          }
-        : null);
+      (() => {
+        if (!session?.user) return null;
+        const meta = session.user.user_metadata as Record<string, any> | undefined;
+        return {
+          id: session.user.id,
+          email: session.user.email || "",
+          full_name: (meta?.["full_name"] as string) || session.user.email || "Insp. Rajesh Kumar",
+          officer_id: (meta?.["officer_id"] as string) || "NCB-DEL-4082",
+          station: (meta?.["station"] as string) || "Delhi Zonal Unit",
+          phone: meta?.["phone"] as string | undefined,
+          department: (meta?.["department"] as string) || "NCB · Delhi Zonal Unit",
+          rank: (meta?.["rank"] as string) || "Inspector",
+          avatar_url: meta?.["avatar_url"] as string | undefined,
+          verified: true,
+          verified_at: "2026-01-15T09:30:00Z",
+          verified_by: "NCB Directorate HQ, New Delhi",
+          created_at: session.user.created_at,
+          badge_id: (meta?.["badge_id"] as string) || (meta?.["officer_id"] as string) || "NCB-DEL-4082",
+          device_id: (meta?.["device_id"] as string) || "FIELD-UNIT-07",
+          district: (meta?.["district"] as string) || "New Delhi, Delhi",
+          speak_aloud: (meta?.["speak_aloud"] as boolean) ?? true,
+          language: (meta?.["language"] as "en" | "hi") || "en",
+        };
+      })();
 
   const signedIn = Boolean(session || localOfficer);
   const displayName = activeProfile?.full_name || session?.user.email || localOfficer?.email || "";

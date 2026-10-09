@@ -183,7 +183,7 @@ export interface ReagentReference {
   targetSubstance: string;
 }
 
-export const REAGENT_REFERENCES: Record<string, ReagentReference> = {
+export const REAGENT_REFERENCES = {
   marquis: {
     id: 'marquis',
     name: 'Marquis Reagent',
@@ -220,7 +220,7 @@ export const REAGENT_REFERENCES: Record<string, ReagentReference> = {
     expectedHex: '#c2410c', // Orange
     targetSubstance: 'Ketamine / Amphetamines',
   },
-};
+} as const satisfies Record<string, ReagentReference>;
 
 export interface ClassificationResult {
   verdict: 'POSITIVE' | 'NEGATIVE' | 'INCONCLUSIVE';

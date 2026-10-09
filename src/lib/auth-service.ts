@@ -45,7 +45,7 @@ export function unhashPassword(encoded: string): string {
 export interface SavedCredential {
   email: string;
   username: string;
-  password?: string;
+  password?: string | undefined;
   lastUsed: string;
 }
 
@@ -66,11 +66,12 @@ export function saveCredentialForSuggestion(email: string, username?: string, ra
   const list = getSavedCredentials();
   const cleanEmail = email.trim();
   const existingIdx = list.findIndex((c) => c.email.toLowerCase() === cleanEmail.toLowerCase());
+  const existing = existingIdx >= 0 ? list[existingIdx] : undefined;
 
   const entry: SavedCredential = {
     email: cleanEmail,
     username: username || cleanEmail.split("@")[0] || "Officer",
-    password: rawPassword ? hashPassword(rawPassword) : (existingIdx >= 0 ? list[existingIdx].password : undefined),
+    password: rawPassword ? hashPassword(rawPassword) : existing?.password,
     lastUsed: new Date().toISOString(),
   };
 
@@ -158,7 +159,7 @@ export async function signUpOfficer({
   // Validate password rules (at least 8 chars, 1 uppercase, 1 lowercase, 1 number)
   const pwCheck = validatePassword(password);
   if (!pwCheck.valid) {
-    return { success: false, error: pwCheck.error };
+    return { success: false, error: pwCheck.error || "Password requirement not met." };
   }
 
   const cleanEmail = email.trim().toLowerCase();
@@ -188,7 +189,7 @@ export async function signUpOfficer({
       email: cleanEmail,
       password,
       options: {
-        emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+        ...(typeof window !== "undefined" ? { emailRedirectTo: window.location.origin } : {}),
         data: {
           full_name: cleanName,
           officer_id: cleanOfficerId,
@@ -233,11 +234,11 @@ export async function signInOfficer({
     });
 
     if (!error && data?.session && data?.user) {
-      // Fetch profile from supabase if possible
+      const meta = data.user.user_metadata as Record<string, any> | undefined;
       let profileData = {
-        full_name: data.user.user_metadata?.full_name || cleanEmail,
-        officer_id: data.user.user_metadata?.officer_id || "OFFICER",
-        station: data.user.user_metadata?.station || "Delhi Zonal Unit",
+        full_name: (meta?.["full_name"] as string) || cleanEmail,
+        officer_id: (meta?.["officer_id"] as string) || "OFFICER",
+        station: (meta?.["station"] as string) || "Delhi Zonal Unit",
       };
 
       try {
@@ -370,13 +371,16 @@ export function updateActiveOfficerProfile(updates: Partial<OfficerUser>): Offic
   const registered = getRegisteredOfficers();
   const idx = registered.findIndex((o) => o.id === updated.id || o.email.toLowerCase() === updated.email.toLowerCase());
   if (idx >= 0) {
-    registered[idx] = {
-      ...registered[idx],
-      ...updated,
-      passwordHash: registered[idx].passwordHash,
-    };
-    if (typeof window !== "undefined") {
-      localStorage.setItem(REGISTERED_OFFICERS_KEY, JSON.stringify(registered));
+    const existing = registered[idx];
+    if (existing) {
+      registered[idx] = {
+        ...existing,
+        ...updated,
+        passwordHash: existing.passwordHash,
+      };
+      if (typeof window !== "undefined") {
+        localStorage.setItem(REGISTERED_OFFICERS_KEY, JSON.stringify(registered));
+      }
     }
   }
 
@@ -404,15 +408,15 @@ export function updateActiveOfficerProfile(updates: Partial<OfficerUser>): Offic
 
 export function changeOfficerPassword(newPassword: string): { success: boolean; error?: string } {
   const pwCheck = validatePassword(newPassword);
-  if (!pwCheck.valid) return { success: false, error: pwCheck.error };
+  if (!pwCheck.valid) return { success: false, error: pwCheck.error || "Invalid password." };
 
   const current = getActiveOfficer();
   if (!current) return { success: false, error: "No active officer found." };
 
   const registered = getRegisteredOfficers();
   const idx = registered.findIndex((o) => o.id === current.id || o.email.toLowerCase() === current.email.toLowerCase());
-  if (idx >= 0) {
-    registered[idx].passwordHash = hashPassword(newPassword);
+  if (idx >= 0 && registered[idx]) {
+    registered[idx]!.passwordHash = hashPassword(newPassword);
     if (typeof window !== "undefined") {
       localStorage.setItem(REGISTERED_OFFICERS_KEY, JSON.stringify(registered));
     }

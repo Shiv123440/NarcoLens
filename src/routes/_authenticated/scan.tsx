@@ -57,12 +57,13 @@ function ScanPage() {
 
   const wellAnalysis = useMemo(() => {
     return reagents.map((reagentName, idx) => {
-      const refKey = Object.keys(REAGENT_REFERENCES).find(
+      const refs = REAGENT_REFERENCES as Record<string, { name: string; expectedHex: string; targetSubstance: string }>;
+      const refKey = Object.keys(refs).find(
         (k) =>
           reagentName.toLowerCase().includes(k) ||
-          REAGENT_REFERENCES[k].name.toLowerCase().includes(reagentName.toLowerCase())
+          refs[k]?.name.toLowerCase().includes(reagentName.toLowerCase())
       );
-      const ref = refKey ? REAGENT_REFERENCES[refKey] : undefined;
+      const ref = refKey ? refs[refKey] : undefined;
       const expectedHex = ref ? ref.expectedHex : "#4a154b";
       // Calibrated sample color simulated based on standard drug reaction response
       const sampleHex = idx === 0 ? expectedHex : idx === 1 ? "#1e40af" : "#f59e0b";

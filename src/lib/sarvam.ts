@@ -62,8 +62,8 @@ export function getSarvamKey(overrideKey?: string): string {
   }
   // Optional environment key for SSR/server/tests
   return (
-    (typeof process !== 'undefined' && process.env?.SARVAM_API_KEY) ||
-    import.meta.env.VITE_SARVAM_API_KEY ||
+    (typeof process !== 'undefined' && process.env?.['SARVAM_API_KEY']) ||
+    (import.meta.env as Record<string, string | undefined>)['VITE_SARVAM_API_KEY'] ||
     ''
   );
 }

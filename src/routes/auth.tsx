@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-r
 import { useEffect, useRef, useState } from "react";
 import { User, Lock, Mail, ShieldCheck, ArrowRight } from "lucide-react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
-import { signUpOfficer, signInOfficer, signInWithGoogle, getActiveOfficer, validatePassword } from "@/lib/auth-service";
+import { signUpOfficer, signInOfficer, signInWithGoogle, getActiveOfficer, validatePassword, getSavedCredentials, unhashPassword, type SavedCredential } from "@/lib/auth-service";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({

@@ -52,10 +52,10 @@ async function handleSarvamProxy(request: Request, env: unknown): Promise<Respon
   // Resolve private server key from environment
   const serverKey =
     (typeof env === "object" && env !== null && "SARVAM_API_KEY" in env
-      ? (env as { SARVAM_API_KEY?: string }).SARVAM_API_KEY
+      ? (env as { SARVAM_API_KEY?: string })["SARVAM_API_KEY"]
       : undefined) ||
-    process.env.SARVAM_API_KEY ||
-    process.env.VITE_SARVAM_API_KEY;
+    process.env["SARVAM_API_KEY"] ||
+    process.env["VITE_SARVAM_API_KEY"];
 
   if (!serverKey) {
     return new Response(JSON.stringify({ error: "Server Sarvam API key not configured" }), {
@@ -78,7 +78,7 @@ async function handleSarvamProxy(request: Request, env: unknown): Promise<Respon
     const res = await fetch(sarvamTargetUrl, {
       method: request.method,
       headers,
-      body: request.method !== "GET" && request.method !== "HEAD" ? await request.arrayBuffer() : undefined,
+      body: request.method !== "GET" && request.method !== "HEAD" ? await request.arrayBuffer() : null,
     });
 
     const responseHeaders = new Headers(res.headers);
