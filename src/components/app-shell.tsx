@@ -37,6 +37,8 @@ import { ProfileModal } from "@/components/profile-window";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { InteractiveRippleGrid } from "@/components/ui/background-ripple-effect";
 import { ForensicLiquidBackground } from "@/components/forensic-liquid-background";
+import { motion, useReducedMotion } from "framer-motion";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -112,8 +114,36 @@ export function AppHeader() {
       ? `${(officer.profile?.officer_id || displayEmail.split("@")[0] || "DOWN").toUpperCase()} · ${officer.profile.station}`
       : `${(displayEmail.split("@")[0] || "DOWN@YAHOO.COM").toUpperCase()} · Delhi Zonal Unit`;
 
+  const isScrolledVisible = useScrollDirection({
+    threshold: 12,
+    topThreshold: 50,
+    resetKey: location.pathname,
+  });
+  const shouldReduceMotion = useReducedMotion();
+
+  // If officer profile modal or mobile menu drawer is open, keep navbar visible
+  const isVisible = isScrolledVisible || profileModalOpen || mobileMenuOpen;
+
   return (
-    <header className="app-header">
+    <motion.header
+      className="app-header"
+      initial={false}
+      animate={
+        shouldReduceMotion
+          ? { opacity: isVisible ? 1 : 0 }
+          : {
+              y: isVisible ? 0 : "-125%",
+              opacity: isVisible ? 1 : 0,
+            }
+      }
+      transition={{
+        duration: isVisible ? 0.3 : 0.22,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      style={{
+        pointerEvents: isVisible ? "auto" : "none",
+      }}
+    >
       <div className="app-header-inner">
         {/* Left Section: Brand Identity */}
         <Link to="/" className="app-brand" aria-label="NarcoLens dashboard">
@@ -321,7 +351,7 @@ export function AppHeader() {
           </div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }
 
