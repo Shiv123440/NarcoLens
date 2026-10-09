@@ -230,7 +230,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-page { min-height: 100dvh; background: var(--canvas); position: relative; color: var(--ink); }
 .app-main { position: relative; z-index: 5; width: min(100% - 2rem, 1180px); margin: 0 auto; padding: 1.25rem 0 7rem; }
 /* ==========================================================================
-   NarcoLens Top Navigation Bar (Dark Charcoal Pill Navbar)
+   NarcoLens Top Navigation Bar (Floating Liquid-Glass Pill Dock)
    ========================================================================== */
 .app-header {
   position: sticky;
@@ -240,23 +240,30 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background: transparent;
   width: 100%;
   box-sizing: border-box;
+  will-change: transform, opacity;
 }
 
 .app-header-inner {
   width: min(100%, 1240px);
-  min-height: 82px;
+  min-height: 80px;
   margin: 0 auto;
-  background: linear-gradient(180deg, #2E3136 0%, #242629 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 24, 33, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 9999px;
-  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.55), 0 4px 12px -2px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.65rem 1.75rem;
   box-sizing: border-box;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.app-header-inner:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 24px 48px -10px rgba(0, 0, 0, 0.85), 0 0 20px rgba(249, 115, 22, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .app-brand {
@@ -313,46 +320,55 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-nav {
   display: flex;
   align-items: center;
-  gap: 2.25rem;
+  gap: 0.85rem;
   margin: 0;
-  padding: 0;
-  background: transparent;
-  border: none;
+  padding: 0.3rem 0.55rem;
+  background: rgba(10, 14, 21, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .app-nav-item {
   position: relative;
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
-  color: #C4C8CE;
+  justify-content: center;
+  gap: 0.45rem;
+  color: #A6AFBD;
   text-decoration: none;
   font-family: "Work Sans", "Inter", sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 500;
-  padding: 0.35rem 0.2rem;
-  transition: color 0.18s ease;
+  padding: 0.45rem 1.1rem;
+  border-radius: 9999px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
 .app-nav-item:hover {
-  color: #FFFFFF;
+  color: #F5F7FA;
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
 }
 
 .app-nav-item-active,
 .app-nav a[data-status="active"] {
-  color: #FFA000 !important;
+  color: #F97316 !important;
   font-weight: 600;
+  background: rgba(249, 115, 22, 0.12);
 }
 
 .app-nav-underline {
   position: absolute;
-  bottom: -4px;
-  left: 0;
-  right: 0;
-  height: 2.5px;
-  background: #FFA000;
-  border-radius: 2px;
+  bottom: 3px;
+  left: 25%;
+  right: 25%;
+  height: 2px;
+  background: #F97316;
+  border-radius: 999px;
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.6);
 }
 
 /* Right Section: User Profile & Actions */
@@ -439,36 +455,41 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   align-items: center;
   gap: 0.5rem;
   padding: 0.55rem 1.15rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9999px;
-  background: transparent;
-  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.03);
+  color: #F5F7FA;
   font-family: "Work Sans", "Inter", sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
 .app-nav-logout:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #EF4444;
+  transform: translateY(-1px);
 }
 
 .app-nav-login-btn {
   border-radius: 9999px;
-  background: #FFA000;
-  color: #000000;
-  font-weight: 600;
+  background: #F97316;
+  color: #080B10;
+  font-weight: 700;
   border: none;
-  padding: 0.5rem 1.15rem;
+  padding: 0.52rem 1.25rem;
   font-size: 0.82rem;
-  box-shadow: 0 4px 14px rgba(255, 160, 0, 0.25);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.28);
+  transition: all 0.2s ease;
 }
 
 .app-nav-login-btn:hover {
-  background: #FFB020;
+  background: #FFB15C;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(249, 115, 22, 0.4);
 }
 
 @media (max-width: 960px) {
