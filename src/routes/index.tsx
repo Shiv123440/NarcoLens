@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -25,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { AppShell, SectionIcon } from "@/components/app-shell";
 import { FloatingHeroCard } from "@/components/floating-hero-card";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { ExpandableEvidenceCard } from "@/components/expandable-evidence-card";
 import { formatRecordTime, SUBSTANCES, type AuditRecord } from "@/lib/app-data";
 import { useQuery } from "@tanstack/react-query";
 import { recordsQuery } from "@/lib/evidence";
@@ -271,6 +274,7 @@ function statusFor(record: AuditRecord) {
 
 function Dashboard() {
   const officer = useOfficer();
+  const [activeRecord, setActiveRecord] = useState<AuditRecord | null>(null);
   const recordsQ = useQuery({ ...recordsQuery, enabled: officer.signedIn });
   const records = officer.signedIn ? recordsQ.data ?? [] : [];
   const todayKey = new Date().toDateString();
@@ -564,11 +568,20 @@ function Dashboard() {
       const reagentInfo = getReagentInfo(record.reagent);
 
       return (
-        <Link
+        <motion.div
+          layoutId={`evidence-card-${record.id}`}
           key={record.id}
-          to="/audit/$recordId"
-          params={{ recordId: record.id }}
-          className="app-ledger-row"
+          onClick={() => setActiveRecord(record)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setActiveRecord(record);
+            }
+          }}
+          className="app-ledger-row cursor-pointer"
+          aria-label={`Preview record ${record.caseNumber} - ${record.substance}`}
         >
           <span className="app-ledger-row-accent" aria-hidden="true" />
 
@@ -576,7 +589,12 @@ function Dashboard() {
           <div className="app-ledger-col app-ledger-col-sample">
             <VialSwatch substance={record.substance} verdict={record.verdict} sealed={record.sealed} />
             <div className="app-ledger-sample-info">
-              <strong className="app-ledger-sample-name">{record.substance || "Unknown sample"}</strong>
+              <motion.strong
+                layoutId={`evidence-title-${record.id}`}
+                className="app-ledger-sample-name"
+              >
+                {record.substance || "Unknown sample"}
+              </motion.strong>
               <span className="app-ledger-case-num">Case: {record.caseNumber}</span>
             </div>
           </div>
@@ -618,11 +636,21 @@ function Dashboard() {
 
           {/* Col 6: Action Chevron */}
           <div className="app-ledger-col app-ledger-col-action" aria-hidden="true">
-            <ArrowRight size={16} strokeWidth={2.2} className="app-ledger-arrow" />
+            <motion.div
+              layoutId={`button-${record.id}`}
+              className="inline-flex items-center"
+            >
+              <ArrowRight size={16} strokeWidth={2.2} className="app-ledger-arrow" />
+            </motion.div>
           </div>
-        </Link>
+        </motion.div>
       );
     })}
   </section>
+
+  <ExpandableEvidenceCard
+    record={activeRecord}
+    onClose={() => setActiveRecord(null)}
+  />
   </AppShell>;
 }
