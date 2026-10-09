@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { appendCustody, sha256Hex, validateImage } from "@/lib/forensics";
-import { ArrowLeft, ArrowRight, Camera, MapPin, Check, FileImage, Hash, Info, LockKeyhole, RefreshCcw, Upload, CheckCircle2, AlertTriangle, XCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Camera, MapPin, Check, FileImage, Hash, Info, LockKeyhole, RefreshCcw, Upload, CheckCircle2, AlertTriangle, XCircle, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell, PageBack } from "@/components/app-shell";
+import { ImageGenerationLoader } from "@/components/ui/image-generation-loader";
 import { REAGENTS, SUBSTANCES, type AuditRecord } from "@/lib/app-data";
 import { createEvidenceRecord, newRecordId } from "@/lib/evidence";
 import { useOfficer } from "@/hooks/use-auth";
@@ -40,6 +41,28 @@ function ScanPage() {
   const [analysisStarted, setAnalysisStarted] = useState(false);
   const [sealed, setSealed] = useState(false);
   const [error, setError] = useState("");
+  const [isAnalysing, setIsAnalysing] = useState(false);
+  const analysingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startAnalysisAnimation = () => {
+    if (isAnalysing || !photo) return;
+    setIsAnalysing(true);
+    if (analysingTimeoutRef.current) {
+      clearTimeout(analysingTimeoutRef.current);
+    }
+    analysingTimeoutRef.current = setTimeout(() => {
+      setIsAnalysing(false);
+      analysingTimeoutRef.current = null;
+    }, 3000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (analysingTimeoutRef.current) {
+        clearTimeout(analysingTimeoutRef.current);
+      }
+    };
+  }, []);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canContinue = step === 0 ? caseNumber.trim().length >= 3 && location.trim().length >= 2 : step === 1 ? reagents.every(Boolean) : step === 2 ? Boolean(photo) : true;
@@ -245,14 +268,245 @@ function ScanPage() {
             {gpsError || gps || "GPS not recorded yet — never fabricated"}
           </span>
         </div>
-      )}{step === 1 && <ReagentStep reagents={reagents} setReagents={setReagents} />}{step === 2 && <PhotoStep photo={photo} fileName={fileName} cameraOn={cameraOn} videoRef={videoRef} onFile={(f) => void handleFile(f)} onCamera={startCamera} onCapture={capture} onStop={stopCamera} onClear={() => { setPhoto(null); setFileName(""); }} />}{step === 3 && <ResultStep started={analysisStarted} sealed={sealed} record={resultRecord} wells={wellAnalysis} onSeal={() => void saveSeal()} onView={() => void navigate({ to: "/audit/$recordId", params: { recordId: resultRecord.id } })} />}{error && <p className="app-form-error mt-3" role="alert"><Info size={14} className="inline mr-1" />{error}</p>}<div className="app-form-actions"><Button type="button" variant="outline" onClick={() => { if (step === 0) void navigate({ to: "/" }); else setStep((value) => value - 1); }}><ArrowLeft />{step === 0 ? "Cancel" : "Back"}</Button>{step < 3 && <Button type="button" onClick={goNext}>Continue <ArrowRight /></Button>}{step === 3 && !sealed && <Button type="button" disabled={!hash || saving} onClick={() => void saveSeal()}><LockKeyhole />{saving ? "Sealing…" : "Save & seal"}</Button>}</div></AppShell>
+      )}
+      {step === 1 && <ReagentStep reagents={reagents} setReagents={setReagents} />}
+      {step === 2 && (
+        <PhotoStep
+          photo={photo}
+          fileName={fileName}
+          cameraOn={cameraOn}
+          videoRef={videoRef}
+          onFile={(f) => void handleFile(f)}
+          onCamera={startCamera}
+          onCapture={capture}
+          onStop={stopCamera}
+          onClear={() => {
+            if (isAnalysing) return;
+            if (analysingTimeoutRef.current) {
+              clearTimeout(analysingTimeoutRef.current);
+              analysingTimeoutRef.current = null;
+            }
+            setIsAnalysing(false);
+            setPhoto(null);
+            setFileName("");
+          }}
+          isAnalysing={isAnalysing}
+          onAnalyse={startAnalysisAnimation}
+        />
+      )}
+      {step === 3 && (
+        <ResultStep
+          started={analysisStarted}
+          sealed={sealed}
+          record={resultRecord}
+          wells={wellAnalysis}
+          onSeal={() => void saveSeal()}
+          onView={() => void navigate({ to: "/audit/$recordId", params: { recordId: resultRecord.id } })}
+        />
+      )}
+      {error && (
+        <p className="app-form-error mt-3" role="alert">
+          <Info size={14} className="inline mr-1" />
+          {error}
+        </p>
+      )}
+      <div className="app-form-actions">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isAnalysing}
+          onClick={() => {
+            if (step === 0) void navigate({ to: "/" });
+            else setStep((value) => value - 1);
+          }}
+        >
+          <ArrowLeft />
+          {step === 0 ? "Cancel" : "Back"}
+        </Button>
+        {step === 2 && (
+          <Button
+            type="button"
+            onClick={startAnalysisAnimation}
+            disabled={!photo || isAnalysing}
+            className="bg-sky-600 hover:bg-sky-500 text-white font-medium"
+          >
+            {isAnalysing ? (
+              <>
+                <Loader2 size={14} className="animate-spin mr-1.5" />
+                Analysing…
+              </>
+            ) : (
+              <>
+                <Sparkles size={14} className="mr-1.5" />
+                Analyse
+              </>
+            )}
+          </Button>
+        )}
+        {step < 3 && (
+          <Button
+            type="button"
+            onClick={goNext}
+            disabled={isAnalysing}
+          >
+            Continue <ArrowRight />
+          </Button>
+        )}
+        {step === 3 && !sealed && (
+          <Button
+            type="button"
+            disabled={!hash || saving}
+            onClick={() => void saveSeal()}
+          >
+            <LockKeyhole />
+            {saving ? "Sealing…" : "Save & seal"}
+          </Button>
+        )}
+      </div>
+    </AppShell>
     );
   }
 
 function CaseStep(props: { caseNumber: string; setCaseNumber: (v: string) => void; firNumber: string; setFirNumber: (v: string) => void; location: string; setLocation: (v: string) => void; kitBatch: string; setKitBatch: (v: string) => void; notes: string; setNotes: (v: string) => void }) { return <section className="app-card app-form-card"><h2>Case details</h2><p>Record the identifiers that travel with the evidence.</p><div className="app-form-grid"><Field label="Case number *" value={props.caseNumber} onChange={props.setCaseNumber} placeholder="NCR/DEL/2026/____" /><Field label="FIR number" value={props.firNumber} onChange={props.setFirNumber} placeholder="FIR / station reference" /><Field label="Seizure location *" value={props.location} onChange={props.setLocation} placeholder="e.g. Gate 3, New Delhi" /><Field label="Kit batch number" value={props.kitBatch} onChange={props.setKitBatch} placeholder="KIT-2026-____" /><div className="app-field app-field-full"><label htmlFor="scan-notes">Field notes</label><textarea id="scan-notes" value={props.notes} onChange={(event) => props.setNotes(event.target.value)} placeholder="Optional context about the seizure or sample" /></div></div></section>; }
 function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) { const id = label.toLowerCase().replaceAll(" ", "-").replace("*", ""); return <div className="app-field"><label htmlFor={id}>{label}</label><input id={id} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} maxLength={120} /></div>; }
 function ReagentStep({ reagents, setReagents }: { reagents: string[]; setReagents: (value: string[]) => void }) { return <section className="app-card app-form-card"><h2>Assign reagents</h2><p>Choose the reagent in each well before photographing the reference card.</p><div className="app-well-grid">{reagents.map((reagent, index) => <div className="app-card app-well-card" key={index}><header><h3>Well {index + 1}</h3><span className="app-well-index">0{index + 1}</span></header><div className="app-field"><label htmlFor={`reagent-${index}`}>Reagent</label><select id={`reagent-${index}`} value={reagent} onChange={(event) => { const next = [...reagents]; next[index] = event.target.value; setReagents(next); }}>{REAGENTS.map((item) => <option key={item}>{item}</option>)}</select></div></div>)}</div></section>; }
-function PhotoStep({ photo, fileName, cameraOn, videoRef, onFile, onCamera, onCapture, onStop, onClear }: { photo: string | null; fileName: string; cameraOn: boolean; videoRef: React.RefObject<HTMLVideoElement | null>; onFile: (file: File | undefined) => void; onCamera: () => void; onCapture: () => void; onStop: () => void; onClear: () => void }) { const inputRef = useRef<HTMLInputElement>(null); return <section className="app-card app-form-card"><h2>Capture evidence</h2><p>Keep all three wells and the NCB reference card inside the frame. The original bytes are hashed before analysis.</p>{photo ? <div><img className="app-photo-preview" src={photo} alt="Selected evidence preview" /><div className="app-form-actions"><span className="text-xs text-muted-foreground"><FileImage size={14} className="inline mr-1" />{fileName}</span><Button type="button" variant="outline" onClick={onClear}><RefreshCcw />Replace</Button></div></div> : cameraOn ? <div className="app-camera"><video ref={videoRef} aria-label="Live evidence camera" /><span className="app-reticle" /><div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2"><Button type="button" onClick={onCapture}><Camera />Capture</Button><Button type="button" variant="secondary" onClick={onStop}>Stop</Button></div></div> : <div className="app-dropzone"><div><span className="app-dropzone-icon"><Upload /></span><h3>Upload the evidence photo</h3><p>JPG, PNG, or WebP · maximum 10 MB · minimum 640 × 480</p><input ref={inputRef} className="hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => onFile(event.target.files?.[0])} /><div className="flex justify-center gap-2"><Button type="button" onClick={() => inputRef.current?.click()}><Upload />Choose file</Button><Button type="button" variant="outline" onClick={onCamera}><Camera />Enable camera</Button></div></div></div>}</section>; }
+function PhotoStep({
+  photo,
+  fileName,
+  cameraOn,
+  videoRef,
+  onFile,
+  onCamera,
+  onCapture,
+  onStop,
+  onClear,
+  isAnalysing,
+  onAnalyse,
+}: {
+  photo: string | null;
+  fileName: string;
+  cameraOn: boolean;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+  onFile: (file: File | undefined) => void;
+  onCamera: () => void;
+  onCapture: () => void;
+  onStop: () => void;
+  onClear: () => void;
+  isAnalysing: boolean;
+  onAnalyse: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <section className="app-card app-form-card">
+      <h2>Capture evidence</h2>
+      <p>Keep all three wells and the NCB reference card inside the frame. The original bytes are hashed before analysis.</p>
+      {photo ? (
+        <div>
+          <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/80 shadow-xl">
+            <img
+              className="block h-auto w-full max-h-[460px] object-contain mx-auto select-none"
+              src={photo}
+              alt="Selected evidence preview"
+            />
+            {isAnalysing && (
+              <div
+                className="absolute inset-0 z-10 bg-black/55 backdrop-blur-[2px] flex items-center justify-center pointer-events-none"
+                aria-live="polite"
+                aria-busy="true"
+              >
+                <ImageGenerationLoader
+                  effect="scale-wave"
+                  easing="ease-in-out"
+                  text="Analysing Evidence"
+                  cellSize={3}
+                  gap={1}
+                  bandHeight={48}
+                  colors={["#38BDF8", "#1D4ED8"]}
+                />
+              </div>
+            )}
+          </div>
+          <div className="app-form-actions mt-3">
+            <span className="text-xs text-muted-foreground flex items-center">
+              <FileImage size={14} className="inline mr-1" />
+              {fileName}
+            </span>
+            <div className="flex items-center gap-2 ml-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClear}
+                disabled={isAnalysing}
+              >
+                <RefreshCcw size={14} className="mr-1.5" />
+                Replace
+              </Button>
+              <Button
+                type="button"
+                onClick={onAnalyse}
+                disabled={isAnalysing}
+                className="bg-sky-600 hover:bg-sky-500 text-white font-medium shadow-sm"
+              >
+                {isAnalysing ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin mr-1.5" />
+                    Analysing…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={14} className="mr-1.5" />
+                    Analyse
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : cameraOn ? (
+        <div className="app-camera">
+          <video ref={videoRef} aria-label="Live evidence camera" />
+          <span className="app-reticle" />
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+            <Button type="button" onClick={onCapture}>
+              <Camera />
+              Capture
+            </Button>
+            <Button type="button" variant="secondary" onClick={onStop}>
+              Stop
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="app-dropzone">
+          <div>
+            <span className="app-dropzone-icon">
+              <Upload />
+            </span>
+            <h3>Upload the evidence photo</h3>
+            <p>JPG, PNG, or WebP · maximum 10 MB · minimum 640 × 480</p>
+            <input
+              ref={inputRef}
+              className="hidden"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => onFile(event.target.files?.[0])}
+            />
+            <div className="flex justify-center gap-2">
+              <Button type="button" onClick={() => inputRef.current?.click()}>
+                <Upload />
+                Choose file
+              </Button>
+              <Button type="button" variant="outline" onClick={onCamera}>
+                <Camera />
+                Enable camera
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
 
 interface WellItem {
   name: string;
