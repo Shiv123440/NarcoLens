@@ -375,9 +375,9 @@ function Dashboard() {
       {SUBSTANCES.map((substance) => (
         <FloatingCard
           key={substance.id}
-          maxRotateX={2.5}
-          maxRotateY={3}
-          lift={-3.5}
+          maxRotateX={2.0}
+          maxRotateY={2.4}
+          pushZ={-8}
           className="h-full"
         >
           <Link
@@ -427,7 +427,7 @@ function Dashboard() {
     </Link>
   </div>
   <section className="app-stats" aria-label="Evidence overview">
-    <FloatingCard maxRotateX={2} maxRotateY={2.5} lift={-3} className="h-full">
+    <FloatingCard maxRotateX={2.0} maxRotateY={2.4} pushZ={-8} className="h-full">
       <div className="app-card app-stat h-full">
         <span className="app-stat-accent-bar" aria-hidden="true" />
         <div className="app-stat-icon-wrap app-stat-icon-peach" aria-hidden="true">
@@ -454,7 +454,7 @@ function Dashboard() {
         </div>
       </div>
     </FloatingCard>
-    <FloatingCard maxRotateX={2} maxRotateY={2.5} lift={-3} className="h-full">
+    <FloatingCard maxRotateX={2.0} maxRotateY={2.4} pushZ={-8} className="h-full">
       <div className="app-card app-stat h-full">
         <span className="app-stat-accent-bar" aria-hidden="true" />
         <div className="app-stat-icon-wrap app-stat-icon-blue" aria-hidden="true">
@@ -481,7 +481,7 @@ function Dashboard() {
         </div>
       </div>
     </FloatingCard>
-    <FloatingCard maxRotateX={2} maxRotateY={2.5} lift={-3} className="h-full">
+    <FloatingCard maxRotateX={2.0} maxRotateY={2.4} pushZ={-8} className="h-full">
       <div className="app-card app-stat h-full">
         <span className="app-stat-accent-bar" aria-hidden="true" />
         <div className="app-stat-icon-wrap app-stat-icon-red" aria-hidden="true">
@@ -508,7 +508,7 @@ function Dashboard() {
         </div>
       </div>
     </FloatingCard>
-    <FloatingCard maxRotateX={2} maxRotateY={2.5} lift={-3} className="h-full">
+    <FloatingCard maxRotateX={2.0} maxRotateY={2.4} pushZ={-8} className="h-full">
       <div className="app-card app-stat h-full">
         <span className="app-stat-accent-bar" aria-hidden="true" />
         <div className="app-stat-icon-wrap app-stat-icon-green" aria-hidden="true">
@@ -556,7 +556,7 @@ function Dashboard() {
       <span className="app-kicker app-ledger-kicker">Shared ledger</span>
     </div>
   </div>
-  <FloatingCard maxRotateX={1.2} maxRotateY={1.5} lift={-2} className="w-full">
+  <FloatingCard maxRotateX={1.5} maxRotateY={1.8} pushZ={-8} className="w-full">
     <section className="app-ledger-card mb-0" aria-label="Recent field tests ledger">
       {!officer.signedIn && officer.ready && (
         <div className="p-4 text-sm text-muted-foreground">

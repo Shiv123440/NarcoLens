@@ -588,20 +588,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    Reusable 3D Floating Dashboard Card (Substances, Stats & Ledger)
    ========================================================================== */
 .app-floating-perspective-wrapper {
-  perspective: 1200px;
+  perspective: 2000px;
   position: relative;
 }
 
 .app-floating-card-3d {
   position: relative;
-  transform: perspective(1200px) rotateX(var(--card-rotate-x, 0deg)) rotateY(var(--card-rotate-y, 0deg)) translateY(var(--card-lift, 0px));
-  transition: transform 0.12s ease-out;
+  transform-origin: center center;
+  transform: rotateX(var(--card-rotate-x, 0deg)) rotateY(var(--card-rotate-y, 0deg)) translateZ(var(--card-push-z, 0px)) translateY(var(--card-lift, 0px));
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
   will-change: transform;
   transform-style: preserve-3d;
 }
 
 .app-floating-card-3d[data-hover="false"] {
-  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease;
+}
+
+.app-floating-card-3d[data-hover="true"] {
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.8), 0 2px 10px -4px rgba(0, 0, 0, 0.5), 0 0 18px -4px rgba(255, 138, 29, 0.07);
 }
 
 .app-floating-card-highlight {
@@ -612,13 +617,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   z-index: 5;
   background: radial-gradient(
     circle at var(--card-pointer-x, 50%) var(--card-pointer-y, 50%),
-    rgba(255, 177, 92, 0.12),
-    transparent 55%
+    rgba(255, 145, 35, 0.08),
+    transparent 45%
   );
   opacity: var(--card-highlight-opacity, 0);
-  transition: opacity 0.35s ease;
+  transition: opacity 0.3s ease;
   mix-blend-mode: screen;
 }
+
 
 @media (prefers-reduced-motion: reduce) {
   .app-floating-card-3d {

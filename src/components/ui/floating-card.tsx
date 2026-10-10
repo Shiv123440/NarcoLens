@@ -7,6 +7,7 @@ export interface FloatingCardProps extends React.HTMLAttributes<HTMLDivElement> 
   children: React.ReactNode;
   maxRotateX?: number;
   maxRotateY?: number;
+  pushZ?: number;
   lift?: number;
   perspective?: number;
   className?: string;
@@ -16,10 +17,11 @@ export interface FloatingCardProps extends React.HTMLAttributes<HTMLDivElement> 
 
 export function FloatingCard({
   children,
-  maxRotateX = 2.5,
-  maxRotateY = 3,
-  lift = -3.5,
-  perspective = 1200,
+  maxRotateX = 2.0,
+  maxRotateY = 2.4,
+  pushZ = -8,
+  lift = 0,
+  perspective = 2000,
   className = "",
   cardClassName = "",
   showHighlight = true,
@@ -46,6 +48,7 @@ export function FloatingCard({
     const card = cardRef.current;
     if (card) {
       card.setAttribute("data-hover", "true");
+      card.style.setProperty("--card-push-z", `${pushZ}px`);
       card.style.setProperty("--card-lift", `${lift}px`);
       card.style.setProperty("--card-highlight-opacity", "1");
     }
@@ -75,11 +78,18 @@ export function FloatingCard({
       const px = Math.max(0, Math.min(100, (x / rect.width) * 100));
       const py = Math.max(0, Math.min(100, (y / rect.height) * 100));
 
-      const rotX = Number((-ny * maxRotateX).toFixed(2));
+      // Push back: section under cursor tilts gently backward into the depth of the screen
+      const rotX = Number((ny * maxRotateX).toFixed(2));
       const rotY = Number((-nx * maxRotateY).toFixed(2));
+
+      // Depth variation: pushes slightly deeper where the cursor presses
+      const dist = Math.min(1, Math.sqrt(nx * nx + ny * ny));
+      const currentPushZ = Number((pushZ - dist * 3).toFixed(1));
 
       card.style.setProperty("--card-rotate-x", `${rotX}deg`);
       card.style.setProperty("--card-rotate-y", `${rotY}deg`);
+      card.style.setProperty("--card-push-z", `${currentPushZ}px`);
+      card.style.setProperty("--card-lift", `${lift}px`);
       card.style.setProperty("--card-pointer-x", `${px.toFixed(1)}%`);
       card.style.setProperty("--card-pointer-y", `${py.toFixed(1)}%`);
     });
@@ -95,6 +105,7 @@ export function FloatingCard({
       card.setAttribute("data-hover", "false");
       card.style.setProperty("--card-rotate-x", "0deg");
       card.style.setProperty("--card-rotate-y", "0deg");
+      card.style.setProperty("--card-push-z", "0px");
       card.style.setProperty("--card-lift", "0px");
       card.style.setProperty("--card-pointer-x", "50%");
       card.style.setProperty("--card-pointer-y", "50%");

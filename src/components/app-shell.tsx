@@ -659,27 +659,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-page">
-      {/* Aceternity Vortex Webpage Background Layer */}
-      <div className="app-vortex-bg fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-        <Vortex
-          backgroundColor="transparent"
-          rangeY={800}
-          particleCount={450}
-          baseHue={30}
-          baseSpeed={0.15}
-          rangeSpeed={1.4}
-          baseRadius={1}
-          rangeRadius={2.2}
-          containerClassName="h-full w-full"
-        />
-      </div>
-
-      {/* Cinematic Liquid-Glass Forensic Background Layer */}
-      <ForensicLiquidBackground intensity={bgIntensity} showGrid={true} />
-
-      <div className="app-aurora-bg" aria-hidden="true">
-        <InteractiveRippleGrid cellSize={64} />
-      </div>
+      {/* Forensic Dark Liquid Surface with Interactive Ripples */}
+      <ForensicLiquidBackground intensity={bgIntensity} />
 
       <a
         href="#main"

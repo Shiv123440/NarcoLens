@@ -19,12 +19,13 @@ interface FluidRipple {
   age: number;
   maxAge: number;
   maxRadius: number;
+  isClick?: boolean;
 }
 
 export function ForensicLiquidBackground({
   className = "",
   intensity = "full",
-  showGrid = true,
+  // showGrid is preserved in props for backwards compatibility but not rendered
 }: ForensicLiquidBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -64,8 +65,8 @@ export function ForensicLiquidBackground({
     const intensityMultiplier =
       intensity === "full" ? 1 : intensity === "subtle" ? 0.6 : 0.35;
 
+    // Track pointer movement for directional wake ripples
     const handlePointerMove = (e: PointerEvent) => {
-      // Ignore touch moves to prevent unwanted performance hits on low-power devices
       if (e.pointerType === "touch") return;
 
       const now = performance.now();
@@ -78,8 +79,8 @@ export function ForensicLiquidBackground({
         const dist = Math.hypot(dx, dy);
         const dt = Math.max(16, now - lastPointerPos.time);
 
-        // Spawn a ripple disturbance if movement exceeds distance threshold (~16px)
-        if (dist > 16) {
+        // Spawn a ripple disturbance if movement exceeds distance threshold (~14px)
+        if (dist > 14) {
           const speed = Math.min(dist / dt, 12);
           const angle = Math.atan2(dy, dx);
 
@@ -91,12 +92,13 @@ export function ForensicLiquidBackground({
             angle,
             speed,
             age: 0,
-            maxAge: Math.floor(45 + speed * 4), // 45 to 80 frames (~0.8s to 1.3s)
-            maxRadius: Math.floor((35 + speed * 6) * dpr),
+            maxAge: Math.floor(50 + speed * 4), // 50 to 95 frames (~0.8s to 1.5s)
+            maxRadius: Math.floor((38 + speed * 7) * dpr),
+            isClick: false,
           });
 
-          // Prevent excessive ripples during fast continuous motion
-          if (ripples.length > 28) {
+          // Prevent excessive ripples during rapid continuous motion
+          if (ripples.length > 32) {
             ripples.shift();
           }
 
@@ -107,7 +109,49 @@ export function ForensicLiquidBackground({
       }
     };
 
+    // Track clicks/taps for concentric expanding liquid ripples
+    const handlePointerDown = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+
+      const currentX = e.clientX;
+      const currentY = e.clientY;
+
+      // Primary wave crest
+      ripples.push({
+        x: currentX * dpr,
+        y: currentY * dpr,
+        vx: 0,
+        vy: 0,
+        angle: 0,
+        speed: 4,
+        age: 0,
+        maxAge: 70,
+        maxRadius: Math.floor(100 * dpr),
+        isClick: true,
+      });
+
+      // Secondary echo wave crest
+      ripples.push({
+        x: currentX * dpr,
+        y: currentY * dpr,
+        vx: 0,
+        vy: 0,
+        angle: Math.PI / 4,
+        speed: 3,
+        age: -8, // slight delay for wave echo
+        maxAge: 65,
+        maxRadius: Math.floor(75 * dpr),
+        isClick: true,
+      });
+
+      // Limit array size
+      if (ripples.length > 32) {
+        ripples.shift();
+      }
+    };
+
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerdown", handlePointerDown, { passive: true });
 
     // Fluid render loop
     const render = () => {
@@ -119,6 +163,9 @@ export function ForensicLiquidBackground({
           if (!r) continue;
           r.age++;
 
+          // Skip if still in negative delay
+          if (r.age < 0) continue;
+
           if (r.age >= r.maxAge) {
             ripples.splice(i, 1);
             continue;
@@ -128,7 +175,7 @@ export function ForensicLiquidBackground({
           const currentRadius = r.maxRadius * Math.sin((progress * Math.PI) / 2);
           // Ease-out alpha
           const alpha =
-            (1 - progress) * (1 - progress) * 0.45 * intensityMultiplier;
+            (1 - progress) * (1 - progress) * 0.5 * intensityMultiplier;
 
           if (alpha <= 0.005) continue;
 
@@ -136,43 +183,66 @@ export function ForensicLiquidBackground({
           ctx.translate(r.x, r.y);
           ctx.rotate(r.angle);
 
-          // Outer amber liquid disturbance wave
-          ctx.beginPath();
-          // Elongate slightly along the direction of motion
-          ctx.ellipse(0, 0, currentRadius * 1.15, currentRadius * 0.85, 0, 0, Math.PI * 2);
-          ctx.lineWidth = Math.max(1, (2.5 * (1 - progress)) * dpr);
-          ctx.strokeStyle = `rgba(249, 115, 22, ${alpha * 0.75})`;
-          ctx.stroke();
+          if (r.isClick) {
+            // Concentric circular droplet waves for click
+            ctx.beginPath();
+            ctx.arc(0, 0, currentRadius, 0, Math.PI * 2);
+            ctx.lineWidth = Math.max(1, (2.6 * (1 - progress)) * dpr);
+            ctx.strokeStyle = `rgba(249, 115, 22, ${alpha * 0.8})`;
+            ctx.stroke();
 
-          // Subtle cyan refractive highlight on the trailing edge
-          ctx.beginPath();
-          ctx.ellipse(
-            -currentRadius * 0.2,
-            0,
-            currentRadius * 0.9,
-            currentRadius * 0.65,
-            0,
-            Math.PI * 0.6,
-            Math.PI * 1.4
-          );
-          ctx.lineWidth = Math.max(1, (1.8 * (1 - progress)) * dpr);
-          ctx.strokeStyle = `rgba(86, 217, 232, ${alpha * 0.65})`;
-          ctx.stroke();
+            // Inner cyan refraction ring
+            if (currentRadius > 8 * dpr) {
+              ctx.beginPath();
+              ctx.arc(0, 0, currentRadius * 0.78, 0, Math.PI * 2);
+              ctx.lineWidth = Math.max(1, (1.6 * (1 - progress)) * dpr);
+              ctx.strokeStyle = `rgba(86, 217, 232, ${alpha * 0.65})`;
+              ctx.stroke();
+            }
 
-          // Soft inner amber glow center
-          const glowGrad = ctx.createRadialGradient(
-            0,
-            0,
-            0,
-            0,
-            0,
-            Math.max(1, currentRadius * 0.6)
-          );
-          glowGrad.addColorStop(0, `rgba(255, 177, 92, ${alpha * 0.25})`);
-          glowGrad.addColorStop(1, "rgba(255, 177, 92, 0)");
+            // Subtle center droplet glow
+            const centerGlow = ctx.createRadialGradient(
+              0, 0, 0,
+              0, 0, Math.max(1, currentRadius * 0.5)
+            );
+            centerGlow.addColorStop(0, `rgba(255, 177, 92, ${alpha * 0.3})`);
+            centerGlow.addColorStop(1, "rgba(255, 177, 92, 0)");
+            ctx.fillStyle = centerGlow;
+            ctx.fill();
+          } else {
+            // Elongated directional wake ripple along motion angle
+            ctx.beginPath();
+            ctx.ellipse(0, 0, currentRadius * 1.18, currentRadius * 0.82, 0, 0, Math.PI * 2);
+            ctx.lineWidth = Math.max(1, (2.4 * (1 - progress)) * dpr);
+            ctx.strokeStyle = `rgba(249, 115, 22, ${alpha * 0.75})`;
+            ctx.stroke();
 
-          ctx.fillStyle = glowGrad;
-          ctx.fill();
+            // Subtle cyan refractive highlight on the trailing edge
+            ctx.beginPath();
+            ctx.ellipse(
+              -currentRadius * 0.22,
+              0,
+              currentRadius * 0.9,
+              currentRadius * 0.62,
+              0,
+              Math.PI * 0.6,
+              Math.PI * 1.4
+            );
+            ctx.lineWidth = Math.max(1, (1.8 * (1 - progress)) * dpr);
+            ctx.strokeStyle = `rgba(86, 217, 232, ${alpha * 0.65})`;
+            ctx.stroke();
+
+            // Soft inner amber glow center
+            const glowGrad = ctx.createRadialGradient(
+              0, 0, 0,
+              0, 0, Math.max(1, currentRadius * 0.55)
+            );
+            glowGrad.addColorStop(0, `rgba(255, 177, 92, ${alpha * 0.25})`);
+            glowGrad.addColorStop(1, "rgba(255, 177, 92, 0)");
+
+            ctx.fillStyle = glowGrad;
+            ctx.fill();
+          }
 
           ctx.restore();
         }
@@ -187,6 +257,7 @@ export function ForensicLiquidBackground({
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [intensity]);
 
@@ -204,7 +275,7 @@ export function ForensicLiquidBackground({
       {/* Primary Organic Flowing Amber Liquid Ribbons */}
       <div
         className={cn(
-          "forensic-blob-amber absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] rounded-full filter blur-[90px] mix-blend-screen opacity-25",
+          "forensic-blob-amber absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] rounded-full filter blur-[95px] mix-blend-screen opacity-25",
           intensity === "subtle" && "opacity-15",
           intensity === "minimal" && "opacity-10"
         )}
@@ -213,7 +284,7 @@ export function ForensicLiquidBackground({
       {/* Secondary Laboratory Cyan Refraction */}
       <div
         className={cn(
-          "forensic-blob-cyan absolute top-[25%] -right-[15%] w-[60vw] h-[60vw] rounded-full filter blur-[100px] mix-blend-screen opacity-20",
+          "forensic-blob-cyan absolute top-[25%] -right-[15%] w-[60vw] h-[60vw] rounded-full filter blur-[105px] mix-blend-screen opacity-20",
           intensity === "subtle" && "opacity-10",
           intensity === "minimal" && "opacity-5"
         )}
@@ -222,45 +293,14 @@ export function ForensicLiquidBackground({
       {/* Deep Liquid Graphite Flow at Bottom Center */}
       <div
         className={cn(
-          "forensic-blob-graphite absolute -bottom-[20%] left-[20%] w-[65vw] h-[65vw] rounded-full filter blur-[110px] opacity-35",
+          "forensic-blob-graphite absolute -bottom-[20%] left-[20%] w-[65vw] h-[65vw] rounded-full filter blur-[115px] opacity-35",
           intensity === "subtle" && "opacity-20",
           intensity === "minimal" && "opacity-15"
         )}
       />
 
-      {/* Faint Concentric Scientific Reticle Rings & Crosshairs */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] text-white">
-        <svg viewBox="0 0 800 800" className="w-[85vw] h-[85vw] max-w-[1100px] max-h-[1100px]" fill="none">
-          <circle cx="400" cy="400" r="380" stroke="currentColor" strokeWidth="1" strokeDasharray="6 6" />
-          <circle cx="400" cy="400" r="280" stroke="currentColor" strokeWidth="1" />
-          <circle cx="400" cy="400" r="180" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" />
-          <circle cx="400" cy="400" r="80" stroke="currentColor" strokeWidth="1" />
-          <line x1="20" y1="400" x2="780" y2="400" stroke="currentColor" strokeWidth="0.8" strokeDasharray="8 8" />
-          <line x1="400" y1="20" x2="400" y2="780" stroke="currentColor" strokeWidth="0.8" strokeDasharray="8 8" />
-        </svg>
-      </div>
-
-      {/* Faint Molecular Hex Lattice Overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.025] text-amber-500">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="forensic-molecular-hex" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(1)">
-              <path
-                d="M28 0 L56 16.2 L56 48.5 L28 64.7 L0 48.5 L0 16.2 Z M28 97 L56 80.8 L56 48.5 L28 64.7 L0 48.5 L0 80.8 Z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#forensic-molecular-hex)" />
-        </svg>
-      </div>
-
-      {/* Subtle Scientific Measurement Reticle / Coordinate Grid */}
-      {showGrid && (
-        <div className="forensic-grid-overlay absolute inset-0 opacity-[0.035]" />
-      )}
+      {/* Surface Liquid Sheen Layer */}
+      <div className="forensic-liquid-sheen absolute inset-0 opacity-[0.04] pointer-events-none" />
 
       {/* Canvas Layer for Cursor-driven Fluid Ripples & Disturbances */}
       <canvas
@@ -270,7 +310,7 @@ export function ForensicLiquidBackground({
       />
 
       {/* Glass Surface Vignette */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(8,11,16,0.75)_100%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(8,11,16,0.78)_100%)] pointer-events-none" />
     </div>
   );
 }

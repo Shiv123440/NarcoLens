@@ -19,6 +19,7 @@ describe("ForensicLiquidBackground Component", () => {
       translate: vi.fn(),
       rotate: vi.fn(),
       beginPath: vi.fn(),
+      arc: vi.fn(),
       ellipse: vi.fn(),
       stroke: vi.fn(),
       fill: vi.fn(),
@@ -32,18 +33,20 @@ describe("ForensicLiquidBackground Component", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders liquid background base layers, reticle, and canvas", () => {
-    const { container } = render(<ForensicLiquidBackground intensity="full" showGrid={true} />);
+  it("renders pure liquid background base layers, fluid ribbons, sheen, and ripple canvas without grid overlay", () => {
+    const { container } = render(<ForensicLiquidBackground intensity="full" />);
 
     expect(container.querySelector(".forensic-liquid-bg")).toBeInTheDocument();
     expect(container.querySelector(".forensic-blob-amber")).toBeInTheDocument();
     expect(container.querySelector(".forensic-blob-cyan")).toBeInTheDocument();
     expect(container.querySelector(".forensic-blob-graphite")).toBeInTheDocument();
-    expect(container.querySelector(".forensic-grid-overlay")).toBeInTheDocument();
+    expect(container.querySelector(".forensic-liquid-sheen")).toBeInTheDocument();
     expect(container.querySelector("canvas")).toBeInTheDocument();
+    // Verify no grid overlay is present
+    expect(container.querySelector(".forensic-grid-overlay")).toBeNull();
   });
 
-  it("reacts to pointer movement across the window without throwing", () => {
+  it("reacts to pointer movement and click ripples across the window without throwing", () => {
     const { container } = render(<ForensicLiquidBackground intensity="full" />);
     const canvas = container.querySelector("canvas");
     expect(canvas).toBeInTheDocument();
@@ -58,6 +61,13 @@ describe("ForensicLiquidBackground Component", () => {
     fireEvent.pointerMove(window, {
       clientX: 250,
       clientY: 190,
+      pointerType: "mouse",
+    });
+
+    // Trigger window pointerdown (click ripple)
+    fireEvent.pointerDown(window, {
+      clientX: 300,
+      clientY: 220,
       pointerType: "mouse",
     });
 
