@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { NarcoLensSplash } from "@/components/NarcoLensSplash";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -104,6 +105,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <Toaster richColors position="top-right" />
       {showSplash && (
         <NarcoLensSplash onComplete={handleSplashComplete} />
       )}

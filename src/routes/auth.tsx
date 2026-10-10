@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { User, Lock, Mail, ShieldCheck, ArrowRight } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { User, Lock, Mail, ShieldCheck, ArrowRight, KeyRound } from "lucide-react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { toast } from "sonner";
 import { signUpOfficer, signInOfficer, signInWithGoogle, getActiveOfficer, validatePassword, getSavedCredentials, unhashPassword, type SavedCredential } from "@/lib/auth-service";
 import { Vortex } from "@/components/ui/vortex";
 
@@ -105,7 +106,11 @@ function AuthPage() {
   const [signupError, setSignupError] = useState("");
 
   const [notice, setNotice] = useState("");
-  const [busy, setBusy] = useState(false);
+  // Granular loading states so one action doesn't disable or lock the other
+  const [loginSubmitting, setLoginSubmitting] = useState(false);
+  const [signupSubmitting, setSignupSubmitting] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
+  const [googleDisabledNotice, setGoogleDisabledNotice] = useState(false);
 
   const next = (["/", "/scan", "/audit"].includes(search.next) ? search.next : "/") as "/" | "/scan" | "/audit";
 
@@ -116,6 +121,25 @@ function AuthPage() {
       void navigate({ to: next, replace: true });
     }
   }, [navigate, next]);
+
+  // Automatically unlock all buttons if returning via browser back button, bfcache, or window refocus
+  useEffect(() => {
+    const unlockAllSubmitting = () => {
+      setLoginSubmitting(false);
+      setSignupSubmitting(false);
+      setGoogleSubmitting(false);
+    };
+
+    window.addEventListener("pageshow", unlockAllSubmitting);
+    window.addEventListener("focus", unlockAllSubmitting);
+    document.addEventListener("visibilitychange", unlockAllSubmitting);
+
+    return () => {
+      window.removeEventListener("pageshow", unlockAllSubmitting);
+      window.removeEventListener("focus", unlockAllSubmitting);
+      document.removeEventListener("visibilitychange", unlockAllSubmitting);
+    };
+  }, []);
 
   // Real-time password requirement checkers
   const hasMinLength = signupPassword.length >= 8;
@@ -136,7 +160,7 @@ function AuthPage() {
       return;
     }
 
-    setBusy(true);
+    setLoginSubmitting(true);
     try {
       const res = await signInOfficer({
         email: loginIdentifier.trim(),
@@ -148,11 +172,12 @@ function AuthPage() {
         return;
       }
 
+      toast.success("Authenticated successfully!");
       void navigate({ to: next, replace: true });
     } catch (err: unknown) {
       setLoginError((err as Error)?.message || "Authentication error. Please try again.");
     } finally {
-      setBusy(false);
+      setLoginSubmitting(false);
     }
   };
 
@@ -176,7 +201,7 @@ function AuthPage() {
       return;
     }
 
-    setBusy(true);
+    setSignupSubmitting(true);
     try {
       const res = await signUpOfficer({
         fullName: signupUsername.trim(),
@@ -198,10 +223,11 @@ function AuthPage() {
       setLoginPassword("");
       setNotice("Account registered successfully! Please enter your password to sign in.");
       setSignupError("");
+      toast.success("Officer registration completed. Please log in.");
     } catch (err: unknown) {
       setSignupError((err as Error)?.message || "Registration error. Please try again.");
     } finally {
-      setBusy(false);
+      setSignupSubmitting(false);
     }
   };
 
@@ -225,13 +251,37 @@ function AuthPage() {
     setShowSuggestions(false);
   };
 
+  const handleFillDemoOfficer = () => {
+    setLoginIdentifier("officer@ncb.gov.in");
+    setLoginPassword("Officer@123");
+    setLoginError("");
+    setShowSuggestions(false);
+    toast.success("Loaded Demo Officer: Insp. Rajesh Kumar (officer@ncb.gov.in)");
+  };
+
   const handleGoogleSignIn = async () => {
     setLoginError("");
-    setBusy(true);
-    const res = await signInWithGoogle(next);
-    if (!res.success) {
-      setLoginError(res.error || "Failed to initialize Google Sign In.");
-      setBusy(false);
+    setNotice("");
+    setGoogleDisabledNotice(false);
+    setGoogleSubmitting(true);
+
+    try {
+      const res = await signInWithGoogle(next);
+      if (!res.success) {
+        setLoginError(res.error || "Failed to initialize Google Sign In.");
+        if (res.providerDisabled) {
+          setGoogleDisabledNotice(true);
+          toast.error("Google Sign-In is not enabled on this Supabase project.");
+        } else {
+          toast.error(res.error || "Google Sign-In failed.");
+        }
+      }
+    } catch (err: unknown) {
+      const msg = (err as Error)?.message || "Google Sign-In error. Please try again.";
+      setLoginError(msg);
+      toast.error(msg);
+    } finally {
+      setGoogleSubmitting(false);
     }
   };
 
@@ -279,30 +329,60 @@ function AuthPage() {
             <button
               type="button"
               onClick={() => void handleGoogleSignIn()}
-              disabled={busy}
+              disabled={googleSubmitting || loginSubmitting}
               className="auth-google-btn"
               aria-label="Sign in with Google"
             >
-              <svg className="auth-google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                />
-              </svg>
-              <span>Sign in with Google</span>
+              {googleSubmitting ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-[#F97316]" />
+                  <span>Connecting to Google…</span>
+                </div>
+              ) : (
+                <>
+                  <svg className="auth-google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                  <span>Sign in with Google</span>
+                </>
+              )}
             </button>
+
+            {/* Informative fallback banner when Google OAuth is disabled in Supabase */}
+            {googleDisabledNotice && (
+              <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 space-y-1.5 text-left">
+                <div className="flex items-center gap-1.5 font-semibold text-amber-300">
+                  <ShieldCheck size={14} className="shrink-0 text-amber-400" />
+                  <span>Google Provider Disabled in Supabase</span>
+                </div>
+                <p className="text-[11px] text-zinc-300 leading-relaxed">
+                  Google OAuth is currently not enabled in your Supabase backend project. To enable it, navigate to Supabase Dashboard &gt; Authentication &gt; Providers &gt; Google. In the meantime, you can sign in with your officer credentials or use the demo account below.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleFillDemoOfficer}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-400 hover:text-amber-300 underline cursor-pointer pt-0.5"
+                >
+                  <KeyRound size={12} />
+                  <span>Fill Demo Officer Credentials (officer@ncb.gov.in)</span>
+                </button>
+              </div>
+            )}
 
             <div className="auth-divider">
               <span className="auth-divider-line" />
@@ -315,15 +395,24 @@ function AuthPage() {
             <div className="auth-field-box">
               <div className="flex items-center justify-between">
                 <label htmlFor="login-username" className="auth-field-label">Username / Gmail</label>
-                {savedCreds.length > 0 && !showSuggestions && (
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setShowSuggestions(true)}
-                    className="text-[10px] text-amber-400 hover:text-amber-300 font-mono tracking-wider cursor-pointer"
+                    onClick={handleFillDemoOfficer}
+                    className="text-[10px] text-zinc-400 hover:text-amber-400 font-mono tracking-wider cursor-pointer"
                   >
-                    Saved Accounts ({savedCreds.length})
+                    Demo Officer
                   </button>
-                )}
+                  {savedCreds.length > 0 && !showSuggestions && (
+                    <button
+                      type="button"
+                      onClick={() => setShowSuggestions(true)}
+                      className="text-[10px] text-amber-400 hover:text-amber-300 font-mono tracking-wider cursor-pointer"
+                    >
+                      Saved ({savedCreds.length})
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="auth-input-wrapper">
                 <input
@@ -407,8 +496,8 @@ function AuthPage() {
               </p>
             )}
 
-            <button type="submit" disabled={busy} className="auth-cta-btn">
-              <span>{busy ? "Signing in…" : "Login"}</span>
+            <button type="submit" disabled={loginSubmitting} className="auth-cta-btn">
+              <span>{loginSubmitting ? "Signing in…" : "Login"}</span>
               <ArrowRight size={16} />
             </button>
 
@@ -531,8 +620,8 @@ function AuthPage() {
               </p>
             )}
 
-            <button type="submit" disabled={busy} className="auth-cta-btn">
-              <span>{busy ? "Registering…" : "Register"}</span>
+            <button type="submit" disabled={signupSubmitting} className="auth-cta-btn">
+              <span>{signupSubmitting ? "Registering…" : "Register"}</span>
               <ArrowRight size={16} />
             </button>
 

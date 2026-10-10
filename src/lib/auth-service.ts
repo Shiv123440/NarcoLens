@@ -51,6 +51,23 @@ export interface SavedCredential {
 
 const SAVED_CREDENTIALS_KEY = "narcolens_saved_credentials";
 
+export const DEFAULT_DEMO_CREDENTIAL: SavedCredential = {
+  email: "officer@ncb.gov.in",
+  username: "Insp. Rajesh Kumar",
+  password: hashPassword("Officer@123"),
+  lastUsed: "2026-01-15T09:30:00.000Z",
+};
+
+export const DEFAULT_DEMO_OFFICER: StoredOfficer = {
+  id: "off_demo_rajesh",
+  email: "officer@ncb.gov.in",
+  full_name: "Insp. Rajesh Kumar",
+  officer_id: "NCB-DEL-4082",
+  station: "Delhi Zonal Unit",
+  created_at: "2026-01-15T09:30:00Z",
+  passwordHash: hashPassword("Officer@123"),
+};
+
 export function getSavedCredentials(): SavedCredential[] {
   if (typeof window === "undefined") return [];
   try {
@@ -63,7 +80,7 @@ export function getSavedCredentials(): SavedCredential[] {
 
 export function saveCredentialForSuggestion(email: string, username?: string, rawPassword?: string): void {
   if (typeof window === "undefined" || !email) return;
-  const list = getSavedCredentials();
+  const list = getSavedCredentials().filter((c) => c.email !== DEFAULT_DEMO_CREDENTIAL.email);
   const cleanEmail = email.trim();
   const existingIdx = list.findIndex((c) => c.email.toLowerCase() === cleanEmail.toLowerCase());
   const existing = existingIdx >= 0 ? list[existingIdx] : undefined;
@@ -278,7 +295,11 @@ export async function signInOfficer({
 
   // 2. Fallback to registered officer store (supports email, username, or officer ID)
   const officers = getRegisteredOfficers();
-  const matched = officers.find(
+  const allOfficers = officers.some((o) => o.email.toLowerCase() === DEFAULT_DEMO_OFFICER.email.toLowerCase())
+    ? officers
+    : [...officers, DEFAULT_DEMO_OFFICER];
+
+  const matched = allOfficers.find(
     (o) =>
       o.email.toLowerCase() === cleanEmail ||
       o.full_name.toLowerCase() === cleanEmail ||
@@ -302,14 +323,23 @@ export async function signInOfficer({
   return { success: false, error: "Username/Email or password is incorrect." };
 }
 
-export async function signInWithGoogle(redirectTo?: string): Promise<{ success: boolean; error?: string }> {
+export interface GoogleAuthResult {
+  success: boolean;
+  error?: string;
+  providerDisabled?: boolean;
+}
+
+export async function signInWithGoogle(redirectTo?: string): Promise<GoogleAuthResult> {
   try {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const redirectUrl = redirectTo ? `${origin}${redirectTo}` : `${origin}/`;
-    const { error } = await supabase.auth.signInWithOAuth({
+
+    // 1. Request authorization URL with skipBrowserRedirect so we can safely check provider status
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: redirectUrl,
+        skipBrowserRedirect: true,
         queryParams: {
           access_type: "offline",
           prompt: "consent",
@@ -318,12 +348,88 @@ export async function signInWithGoogle(redirectTo?: string): Promise<{ success: 
     });
 
     if (error) {
-      return { success: false, error: error.message };
+      const msg = error.message || "";
+      const isNotEnabled =
+        msg.toLowerCase().includes("not enabled") ||
+        msg.toLowerCase().includes("unsupported provider") ||
+        msg.toLowerCase().includes("validation_failed");
+      return {
+        success: false,
+        error: isNotEnabled
+          ? "Google Sign-In is not enabled on this Supabase project. To enable it, navigate to Supabase Dashboard > Authentication > Providers > Google. You can sign in using your officer credentials below."
+          : msg,
+        providerDisabled: isNotEnabled,
+      };
+    }
+
+    if (!data?.url) {
+      return { success: false, error: "Failed to initialize Google Sign In URL." };
+    }
+
+    // 2. Pre-flight check the authorization endpoint to verify provider is enabled before redirecting
+    try {
+      const checkRes = await fetch(data.url, {
+        method: "GET",
+        redirect: "manual",
+      });
+
+      if (checkRes.status === 400) {
+        const errorData = await checkRes.json().catch(() => null);
+        if (
+          errorData?.error_code === "validation_failed" ||
+          (typeof errorData?.msg === "string" &&
+            (errorData.msg.toLowerCase().includes("not enabled") ||
+              errorData.msg.toLowerCase().includes("unsupported provider")))
+        ) {
+          return {
+            success: false,
+            error: "Google Sign-In is not enabled on this Supabase project. To enable it, navigate to Supabase Dashboard > Authentication > Providers > Google. You can sign in using your officer credentials below.",
+            providerDisabled: true,
+          };
+        }
+      }
+    } catch (checkErr) {
+      console.warn("Could not pre-flight check Google OAuth provider status:", checkErr);
+    }
+
+    // 3. Provider is valid or reachable, proceed to redirect
+    if (typeof window !== "undefined") {
+      window.location.assign(data.url);
     }
     return { success: true };
   } catch (err: unknown) {
-    return { success: false, error: (err as Error)?.message || "Failed to initialize Google Sign In" };
+    return {
+      success: false,
+      error: (err as Error)?.message || "Failed to initialize Google Sign In",
+    };
   }
+}
+
+// Background session synchronization for Supabase Auth
+if (typeof window !== "undefined") {
+  try {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
+        const user = session.user;
+        const meta = (user.user_metadata || {}) as Record<string, any>;
+        const existing = getActiveOfficer();
+        if (!existing || existing.id !== user.id) {
+          const officer: OfficerUser = {
+            id: user.id,
+            email: user.email || (meta["email"] as string) || "officer@ncb.gov.in",
+            full_name: (meta["full_name"] as string) || (meta["name"] as string) || user.email?.split("@")[0] || "Field Officer",
+            officer_id: (meta["officer_id"] as string) || "NCB-DEL-4082",
+            station: (meta["station"] as string) || "Delhi Zonal Unit",
+            created_at: user.created_at || new Date().toISOString(),
+            avatar_url: (meta["avatar_url"] as string) || (meta["picture"] as string),
+          };
+          setActiveOfficer(officer);
+        }
+      } else if (event === "SIGNED_OUT") {
+        setActiveOfficer(null);
+      }
+    });
+  } catch {}
 }
 
 export async function signOutOfficer(): Promise<void> {
