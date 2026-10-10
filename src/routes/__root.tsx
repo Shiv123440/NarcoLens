@@ -8,11 +8,12 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, useCallback, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { NarcoLensSplash } from "@/components/NarcoLensSplash";
 
 function NotFoundComponent() {
   return (
@@ -85,6 +86,12 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const [showSplash, setShowSplash] = useState(true);
+
+  const handleSplashComplete = useCallback(() => {
+    setShowSplash(false);
+  }, []);
+
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
@@ -93,5 +100,14 @@ function RootComponent() {
     });
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
-  return <QueryClientProvider client={queryClient}><Outlet /></QueryClientProvider>;
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Outlet />
+      {showSplash && (
+        <NarcoLensSplash onComplete={handleSplashComplete} />
+      )}
+    </QueryClientProvider>
+  );
 }
+
