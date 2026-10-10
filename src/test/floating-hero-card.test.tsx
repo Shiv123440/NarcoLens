@@ -67,4 +67,42 @@ describe("FloatingHeroCard and MagneticButton", () => {
     // Mouse leave resets
     fireEvent.mouseLeave(outerWrapper);
   });
+
+  it("coordinates FloatingHeroCard and nested MagneticButton simultaneously without transform conflicts", () => {
+    const { container } = render(
+      <FloatingHeroCard>
+        <div>
+          <span>Field Test Step</span>
+          <MagneticButton strength={0.35} maxDistance={8}>
+            <button type="button">Start Field Test</button>
+          </MagneticButton>
+        </div>
+      </FloatingHeroCard>
+    );
+
+    const cardWrapper = container.querySelector(".app-hero-perspective-wrapper") as HTMLElement;
+    const heroCard = container.querySelector(".app-hero-3d") as HTMLElement;
+    const button = screen.getByRole("button", { name: "Start Field Test" });
+
+    // Pointer enters card
+    fireEvent.pointerEnter(cardWrapper, { pointerType: "mouse" });
+    expect(heroCard).toHaveAttribute("data-hover", "true");
+
+    // Pointer moves across card
+    fireEvent.pointerMove(cardWrapper, { clientX: 100, clientY: 100, pointerType: "mouse" });
+    expect(heroCard).toHaveAttribute("data-hover", "true");
+
+    // Magnetic button is interactive and receives events within the floating card
+    const magneticWrapper = button.parentElement?.parentElement as HTMLElement;
+    fireEvent.mouseMove(magneticWrapper, { clientX: 120, clientY: 110 });
+    expect(button).toBeInTheDocument();
+
+    // Card maintains hover state while button interacts
+    expect(heroCard).toHaveAttribute("data-hover", "true");
+
+    // Pointer leaves card
+    fireEvent.pointerLeave(cardWrapper);
+    expect(heroCard).toHaveAttribute("data-hover", "false");
+  });
 });
+
